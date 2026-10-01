@@ -14,6 +14,7 @@ dev = ["pytest"]
 
 [project.scripts]
 trpg = "trpg.__main__:main"
+trpg-pack = "trpg.tools.pack:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

@@ -19,6 +19,7 @@ ASCII アートで表現する、ターミナル用の RPG エンジンです。
 | FirstQuest `scenarios/FirstQuest/` | 1章「出会いと旅立ち」すべて遊べる（v0.2.0：1 章完成版） |
 | フィールドメニュー（どうぐ・スキル・そうび・つよさ・いらい・システム） `scenes/menu.py` | 実装済み |
 | セーブ / ロード（3 スロット・暗号化・改ざん検知・つづきから・全滅時「セーブから」） `src/trpg/save/` `scenes/saveload.py` | 実装済み |
+| パッケージツール（検証してから zip にする） `src/trpg/tools/pack.py` | 実装済み |
 
 ## 動作環境
 
@@ -82,6 +83,18 @@ python -m trpg --list                           # 起動フォルダと scenario
 @if と @endif の対応・使われていないラベル・一度も立てていないフラグ）を、ファイル名と行番号つきで表示します。
 シナリオに誤りがあるとゲームは起動せず、同じ内容を表示します。zip はフォルダごと圧縮した形（`FirstQuest/manifest.toml`）でも読めます。
 
+## シナリオの zip 化（パッケージツール）
+
+```sh
+python -m trpg.tools.pack scenarios/FirstQuest              # → FirstQuest-<版>.zip を今のフォルダに作る
+python -m trpg.tools.pack scenarios/FirstQuest -o dist/FirstQuest.zip
+python -m trpg.tools.pack scenarios/FirstQuest --dry-run    # 入れるファイルを表示するだけ
+```
+先に `--check` と同じ検証を行い、エラーがあれば zip を作りません（`--strict` なら警告でも中断）。
+隠しファイル・`__pycache__`・バックアップ（`*~` `*.bak`）・Python ファイル・zip は入れません。
+manifest.toml が zip の直下に来る形で作り、できた zip をもう一度検証します。zip 内の日時は固定なので、同じ中身からは同じ zip ができます。
+同じ名前の zip があるときは `--force` で上書きします。pip でインストールした場合は `trpg-pack` でも起動できます。
+
 セーブデータは起動フォルダの `saves/<シナリオID>/slot1〜3.sav` に保存されます（環境変数 `TRPG_SAVE_DIR` で変更可）。
 暗号化と改ざん検知をしているため、書き換えたファイルや別シナリオのファイルは読み込みません。
 
@@ -127,6 +140,8 @@ python -m pytest
 | `package/source.py` | zip / フォルダの読み出し、パストラバーサル・zip bomb 対策、Shift_JIS ファイル名の救済 |
 | `package/manifest.py` | manifest.toml の検証、対応エンジン版の判定 |
 | `package/__init__.py` | パッケージを開く・探す（`open_package` / `discover`） |
+| `package/check.py` | パッケージの検証（`--check` とパッケージツールで共用） |
+| `tools/pack.py` | パッケージツール（検証 → zip 化 → 作った zip の再検証） |
 | `data/reader.py` | 型チェックつきの値取り出し、未知の項目の警告 |
 | `data/models.py` | 職業・キャラ・敵・アイテム・マップ・クエスト等のデータクラス |
 | `data/loader.py` | 各 .data の読み込みと相互参照チェック |

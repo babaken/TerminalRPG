@@ -26,6 +26,11 @@ jobs:
         env:
           PYTHONPATH: src
           PYTHONIOENCODING: utf-8
+      - name: Pack sample scenario
+        run: python -m trpg.tools.pack scenarios/FirstQuest -o FirstQuest.zip --strict
+        env:
+          PYTHONPATH: src
+          PYTHONIOENCODING: utf-8
       - name: Test
         run: python -m pytest -q
         env:
