@@ -446,6 +446,16 @@ x = 21
 y = 2
 talk = "ch1_guard_talk"
 
+[[map.npc]]                 # 広場を見回る兵士（道順どおりに往復）
+id = "patrol"
+glyph = "兵"
+color = "white"
+x = 22
+y = 12
+move = "route"
+route = ["right", "right", "right", "wait", "left", "left", "left", "wait"]
+talk = "ch1_patrol_talk"
+
 [[map.npc]]
 id = "bread_girl"
 glyph = "娘"

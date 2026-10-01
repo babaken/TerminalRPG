@@ -188,7 +188,10 @@ class VM:
                 if cid not in self.gd.characters:
                     raise ScriptError(ins, f"キャラクター「{cid}」が定義されていません")
                 if st.member(cid) is None:
+                    from ..world.growth import raise_to_level, resolve_level
+                    target = resolve_level(st, kw.get("lv", ""))     # 加入する本人を含めず、いまのパーティで計算
                     m = Member.from_data(self.gd, cid)
+                    raise_to_level(m, self.gd, target)
                     st.party.append(m)
             else:
                 st.party = [m for m in st.party if m.id != cid]

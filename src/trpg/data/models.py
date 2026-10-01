@@ -14,6 +14,20 @@ AI_TYPES = ("attack_only", "random", "pattern")
 EVENT_TRIGGERS = ("touch", "check", "auto")
 NPC_MOVES = ("fixed", "random", "route")
 QUEST_GOALS = ("deliver", "defeat", "reach", "flag")
+SKILL_ANIMS = ("flash", "shake", "blink")   # スキルの anim（"flash:red,shake" のようにカンマで重ねられる）
+
+
+def parse_anim(text: str) -> list[tuple[str, str]]:
+    """"flash:red,shake:2" → [("flash", "red"), ("shake", "2")]"""
+    out = []
+    for part in text.split(","):
+        part = part.strip()
+        if part:
+            name, _, arg = part.partition(":")
+            out.append((name.strip(), arg.strip()))
+    return out
+
+
 USE_EFFECTS = ("heal", "heal_mp", "cure", "revive", "script", "skill")
 
 # エンジン組み込みのスキル（データに書かなくても使える）
@@ -174,6 +188,10 @@ class Npc:
     move: str = "fixed"
     talk: str = ""
     when: str = ""
+    route: list[str] = field(default_factory=list)   # move = "route" の道順（up/down/left/right/wait を繰り返す）
+
+
+ROUTE_STEPS = ("up", "down", "left", "right", "wait")
 
 
 @dataclass
@@ -230,8 +248,16 @@ class GameData:
     maps: dict[str, GameMap] = field(default_factory=dict)
     quests: dict[str, Quest] = field(default_factory=dict)
     aa: dict[str, list[str]] = field(default_factory=dict)  # AA ファイル（パス → 行）
+    aa_color: dict[str, list[str]] = field(default_factory=dict)  # AA の色（AA のパス → 色コードの行）
     # スクリプトのラベルを参照している箇所（label, file, line）。scenario.sco 読込後に照合する
     label_refs: list[tuple[str, str, Optional[int]]] = field(default_factory=list)
+
+    def colors_for(self, lines: list[str]) -> Optional[list[str]]:
+        """gd.aa から取り出した AA の行リストに対応する色（.color がなければ None）。"""
+        for path, art in self.aa.items():
+            if art is lines:
+                return self.aa_color.get(path)
+        return None
 
     def face_path(self, ident: str, exists) -> Optional[str]:
         """@face の ID から顔 AA のファイルを決める。

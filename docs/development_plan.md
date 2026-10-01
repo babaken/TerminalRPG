@@ -76,7 +76,7 @@
 |---|---|---|---|
 | 2-1 | 残りのエフェクト：move / wipe / blink / aa_show / aa_hide / scroll_text / tint invert | M | **完了** |
 | 2-2 | 顔 AA（@face）、本文の制御コード（\w \c \s）、タイトル背景エフェクト | M | **完了** |
-| 2-3 | スキルの anim、NPC の route 移動、`@party add lv=avg`、AA の .color | M | |
+| 2-3 | スキルの anim、NPC の route 移動、`@party add lv=avg`、AA の .color | M | **完了** |
 
 ### M3 ツール（v0.4.0）
 | # | 作業 | 規模 |

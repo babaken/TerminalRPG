@@ -452,8 +452,10 @@ class GuildScene(Overlay):
 
 # ====================================================================== 仲間選択
 class RecruitScene(Overlay):
-    def __init__(self, field: "FieldScene", candidates: list[str], pick: int = 1):
+    def __init__(self, field: "FieldScene", candidates: list[str], pick: int = 1, lv: str = ""):
         super().__init__(field)
+        from ..world.growth import resolve_level
+        self.target_lv = resolve_level(self.st, lv)      # 選び始めた時点のパーティで決める
         self.cands = [c for c in candidates if c in self.gd.characters and self.st.member(c) is None]
         self.left = min(pick, len(self.cands), max(0, self.field.game.manifest.party_max - len(self.st.party)))
         self.list = ListWindow([])
@@ -463,12 +465,16 @@ class RecruitScene(Overlay):
         else:
             self.say(f"一緒に旅をする仲間を {self.left} 人選んでください。")
 
+    def _join_lv(self, c) -> int:
+        """加入するときのレベル（lv= 指定があればそこまで上がる）。"""
+        return max(c.lv, self.target_lv or 0)
+
     def _refresh(self) -> None:
         rows = []
         for cid in self.cands:
             c = self.gd.characters[cid]
             job = self.gd.jobs.get(c.job)
-            rows.append((f"{pad(c.name, 10)}{job.name if job else ''}", f"Lv {c.lv}", True))
+            rows.append((f"{pad(c.name, 10)}{job.name if job else ''}", f"Lv {self._join_lv(c)}", True))
         self.list.rows = rows
         self.list.index = min(self.list.index, max(0, len(rows) - 1))
 
@@ -486,7 +492,10 @@ class RecruitScene(Overlay):
             def yes(i: int) -> None:
                 if i != 0:
                     return
-                self.st.party.append(Member.from_data(self.gd, cid))
+                from ..world.growth import raise_to_level
+                m = Member.from_data(self.gd, cid)
+                raise_to_level(m, self.gd, self.target_lv)
+                self.st.party.append(m)
                 self.cands.remove(cid)
                 self.left -= 1
                 self._refresh()
@@ -506,7 +515,8 @@ class RecruitScene(Overlay):
         job = self.gd.jobs.get(c.job)
         s = c.stats
         lines = [
-            (f"{job.name if job else c.job}  Lv {c.lv}", HEAD_ST),
+            (f"{job.name if job else c.job}  Lv {self._join_lv(c)}"
+             + ("（能力は Lv {} のとき）".format(c.lv) if self._join_lv(c) != c.lv else ""), HEAD_ST),
             (f"HP {s.get('hp', 0):>3}  MP {s.get('mp', 0):>3}", TEXT),
             (f"攻撃 {s.get('atk', 0):>3}  防御 {s.get('def', 0):>3}", TEXT),
             (f"魔力 {s.get('mag', 0):>3}  素早 {s.get('agi', 0):>3}", TEXT),

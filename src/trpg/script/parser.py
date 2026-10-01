@@ -82,7 +82,7 @@ SPECS: dict[str, tuple[tuple[str, ...], Optional[set[str]]]] = {
     "gold": (("add|remove", "int"), set()),
     "party": (("add|remove", "id"), {"lv"}),
     "equip": (("id", "id"), set()),          # @equip キャラID アイテムID（袋から装備）
-    "recruit": (("*",), {"pick", "exclude_party"}),
+    "recruit": (("*",), {"pick", "exclude_party", "lv"}),
     "heal": (("all",), set()),
     "quest": (("give|done|fail", "id"), set()),
     "chapter": (("int", "?str"), set()),
@@ -307,7 +307,7 @@ class Parser:
                 return bad("gameover は retry_from_save / title / choose のどれかです")
             if "escape" in kw and kw["escape"] not in ("true", "false"):
                 return bad("escape は true / false です")
-        if name == "party" and "lv" in kw and not (kw["lv"] == "avg" or _is_int(kw["lv"])):
+        if name in ("party", "recruit") and "lv" in kw and not (kw["lv"] == "avg" or _is_int(kw["lv"])):
             return bad("lv は整数か avg です")
         if name == "recruit":
             if not pos:

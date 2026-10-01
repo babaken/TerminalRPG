@@ -10,6 +10,7 @@ from ..game import Game, load_game
 from ..package import Candidate, PackageError
 from ..term import Action, Buffer, Key, KeyEvent, Rect, Style, text_width, truncate, wrap
 from ..term.buffer import BOX_SINGLE
+from ..ui.aa import draw_aa
 from ..ui.widgets import CURSOR, DIM_TEXT, FRAME, TEXT
 from ..world.state import GameState
 
@@ -103,7 +104,8 @@ class TitleScene(Scene):
         top = max(1, buf.height // 2 - 10)
         if aa:
             w = max(text_width(l) for l in aa)
-            buf.put_lines((buf.width - w) // 2, top, aa, Style.of("bright_yellow", bold=True))
+            draw_aa(buf, (buf.width - w) // 2, top, aa, Style.of("bright_yellow", bold=True),
+                    self.game.data.aa_color.get(m.title_aa), transparent=False)
             y = top + len(aa) + 2
         else:
             buf.put_center(top + 2, m.title, Style.of("bright_yellow", bold=True))
