@@ -81,16 +81,18 @@ class WinInput:
         import ctypes
         from ctypes import wintypes
 
+        # Windows の KEY_EVENT_RECORD（16 バイト）/ INPUT_RECORD（20 バイト）と同じ並び。
+        # 型は固定幅で書く（uChar は UTF-16 の 1 単位なので uint16 で受けて chr() する）
         class KEY_EVENT_RECORD(ctypes.Structure):
-            _fields_ = [("bKeyDown", wintypes.BOOL), ("wRepeatCount", wintypes.WORD),
-                        ("wVirtualKeyCode", wintypes.WORD), ("wVirtualScanCode", wintypes.WORD),
-                        ("uChar", wintypes.WCHAR), ("dwControlKeyState", wintypes.DWORD)]
+            _fields_ = [("bKeyDown", ctypes.c_int32), ("wRepeatCount", ctypes.c_uint16),
+                        ("wVirtualKeyCode", ctypes.c_uint16), ("wVirtualScanCode", ctypes.c_uint16),
+                        ("uChar", ctypes.c_uint16), ("dwControlKeyState", ctypes.c_uint32)]
 
         class _EVENT(ctypes.Union):
             _fields_ = [("KeyEvent", KEY_EVENT_RECORD), ("_pad", ctypes.c_byte * 16)]
 
         class INPUT_RECORD(ctypes.Structure):
-            _fields_ = [("EventType", wintypes.WORD), ("Event", _EVENT)]
+            _fields_ = [("EventType", ctypes.c_uint16), ("Event", _EVENT)]
 
         self._ct = ctypes
         self._INPUT_RECORD = INPUT_RECORD
@@ -126,13 +128,12 @@ class WinInput:
         recs: list[KeyRecord] = []
         for i in range(read.value):
             r = self._buf[i]
-            if r.EventType != KEY_EVENT:
+            if r.EventType != KEY_EVENT:  # マウス・サイズ変更・フォーカス・メニュー
                 debuglog.log(f"rec  type={r.EventType}")
                 continue
             k = r.Event.KeyEvent
-            ch = k.uChar or ""
-            rec = KeyRecord(bool(k.bKeyDown), k.wVirtualKeyCode, ch if ch != "\x00" else "",
-                            k.wRepeatCount, k.dwControlKeyState)
+            ch = chr(k.uChar) if k.uChar else ""
+            rec = KeyRecord(bool(k.bKeyDown), k.wVirtualKeyCode, ch, k.wRepeatCount, k.dwControlKeyState)
             if debuglog.enabled():
                 debuglog.log(f"rec  {'down' if rec.down else 'up  '} vk={rec.vk:#04x} "
                              f"ch={('U+%04X' % ord(rec.char)) if rec.char else '-'} rep={rec.repeat} "

@@ -226,9 +226,14 @@ def test_system_menu_back_to_title(game):
     d.key("ENTER")
     d.settle()
     d.key("ESC")
+    assert "メニュー" in d.screen() and "システム" in d.screen()
+    for _ in range(5):
+        d.key("DOWN")
+    d.key("ENTER")                       # システム
     assert "タイトルにもどる" in d.screen()
     d.key("DOWN")
-    d.key("ENTER")
+    d.key("ENTER")                       # タイトルにもどる
+    d.key("ENTER")                       # はい
     assert isinstance(d.scene, TitleScene)
 
 

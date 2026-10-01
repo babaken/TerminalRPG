@@ -395,6 +395,10 @@ class FieldScene(Scene):
                 self.run_event(ev)
                 return
 
+    def open_menu(self) -> None:
+        from .menu import MenuScene
+        self.app.push(MenuScene(self))
+
     def open_system_menu(self) -> None:
         self.msg.open([("", "どうしますか？")])
         self.msg.shown = 10 ** 6
@@ -460,7 +464,7 @@ class FieldScene(Scene):
         if Action.OK in actions:
             self.check_front()
         elif Action.CANCEL in actions or Action.MENU in actions:
-            self.open_system_menu()
+            self.open_menu()
 
     # ============================================================ 更新
     def update(self, dt: float) -> None:
