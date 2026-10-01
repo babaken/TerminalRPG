@@ -69,7 +69,7 @@ TRPG/
 | `--ambiguous-width 1/2` `--no-color` `--fps N` | 【済】 | 表示オプション |
 | `python -m trpg.tools.pack DIR [-o ZIP] [--strict] [--force] [--dry-run]` | 【済】 | 検証してから zip にする（T-03）。エラーで中断、zip 内の日時固定、作った zip を再検証 |
 | `python -m trpg.tools.aa_convert IMAGE... [-w N] [-o TXT / -d DIR] [--charset ascii/wide] [--chars S] [--invert] [--edges] [--outline] [--color] [--preview]` | 【済】 | 画像 → AA（T-01、Pillow）。明るさを文字の濃さに、透明は半角空白、輪郭は 1 マスを 4×4 に分けて調べた向きで - / \| \\、色は HSV から 15 色（黒以外）へ |
-| `python -m trpg.tools.map_editor DIR [--map ID]` | 【一部】 | マップエディタ（T-02）。タイルの塗り・スポイト・ペン・元に戻す・マップ切替・保存【済】。NPC・ワープ・イベントの配置、新規作成・サイズ変更、範囲の塗り・コピー【未】。保存は該当マップの rows だけを書き換え（コメント・書式を保つ）、初回に Map.data.bak、保存後に検証 |
+| `python -m trpg.tools.map_editor DIR [--map ID]` | 【一部】 | マップエディタ（T-02）。タイルの塗り・スポイト・ペン・元に戻す・マップ切替・保存【済】。NPC・ワープ・イベントの追加（入力フォーム）・編集・移動・削除【済】。新規作成・サイズ変更、範囲の塗り・コピー【未】。保存は変えた項目だけを書き換え（コメント・書式を保つ）、初回に Map.data.bak、保存後に検証 |
 
 - 開発モードでの F5 スクリプト再読込は【未】。
 - シナリオにエラーがあるとゲームは起動せず、端末を初期化する前に検証結果を表示する。
