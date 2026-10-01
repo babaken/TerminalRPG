@@ -137,7 +137,7 @@
 
 *ch1_reunion
 @npc kai show
-@npc kai move 3 -5
+@npc kai move 4 -4
 カイ「{hero}！！　よかった、どこ行ってたんだよ！」
 カイ「途中で振り返ったらいなくてさ…マジで焦ったんだぞ！」
 @choice

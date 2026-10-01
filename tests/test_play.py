@@ -288,3 +288,39 @@ def test_rain_not_drawn_indoors(game):
     d.tick(0.5)
     assert "／" in d.screen()
     assert f.st.effects.get("rain") == "1"
+
+
+def test_scripted_move_avoids_trees(game):
+    """剣を抜いたあとのカイは木を避けて歩き、主人公のすぐ下で止まる。"""
+    d = Driver(game)
+    for _ in range(4):
+        d.key("ENTER")
+    d.settle()
+    f = d.field
+    f.change_map("forest_1", 20, 2, "up")
+    f.pending_auto = False
+    f.st.npc("forest_1", "kai").update(hidden=True, x=16, y=7)   # 森に入ったあと走り去った位置
+    kai = f._find_npc("kai")
+    f.start_script("ch1_reunion")
+    seen = []
+    for _ in range(200):
+        pos = f._npc_pos(kai)
+        if not seen or seen[-1] != pos:
+            seen.append(pos)
+        if f.msg.active:
+            break
+        d.tick(1 / 30)
+    assert seen[-1] == (20, 3)
+    assert all(f.passable(*p) for p in seen), seen
+    assert all(abs(a[0] - b[0]) + abs(a[1] - b[1]) == 1 for a, b in zip(seen, seen[1:]))
+
+
+def test_find_path_falls_back_when_unreachable(game):
+    d = Driver(game)
+    for _ in range(4):
+        d.key("ENTER")
+    d.settle()
+    f = d.field
+    f.change_map("forest_1", 20, 2, "up")
+    assert f.find_path((16, 7), (19, 2)) is None          # 目的地が木
+    assert f.find_path((16, 7), (16, 7)) == []

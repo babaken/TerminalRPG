@@ -438,7 +438,7 @@ on_complete = "ch1_quest_done"   # 達成報告のあとに実行するラベル
 | `@quest give/done/fail ID` | 【済】 | 依頼の状態を直接変更 |
 | `@chapter n "タイトル"` | 【済】 | 章（右パネルに表示） |
 | `@map ID x y [dir=] [transition=fade]` | 【済】 | マップ移動 |
-| `@npc ID show/hide/move dx dy/face 向き` `@hero move dx dy/face 向き` | 【済】 | 演出移動（1 マス 0.15 秒） |
+| `@npc ID show/hide/move dx dy/face 向き` `@hero move dx dy/face 向き` | 【済】 | 演出移動（1 マス 0.15 秒）。目的地（現在地＋dx,dy）まで木・壁・ほかの人を避けた最短経路で歩く（NPC は主人公のマスも避ける）。目的地が通れないか着けないときは横→縦にまっすぐ進む |
 | `@aa show ファイル x y [name=]` `@aa hide 名前` | 【済】 | AA を重ねて表示 |
 | `@effect 名前 引数… [wait=false]` | 【一部】 | 11 章 |
 | `@shop ID` `@inn 価格` `@guild` `@recruit 候補… pick=n` | 【済】 | 施設画面（閉じると続きを実行） |
