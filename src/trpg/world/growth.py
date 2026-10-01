@@ -49,6 +49,31 @@ def level_up(m: Member, gd: GameData, rng: Optional[random.Random] = None) -> li
     return msgs
 
 
+def party_avg_level(st: GameState) -> int:
+    """パーティの平均レベル（四捨五入、最低 1）。"""
+    if not st.party:
+        return 1
+    return max(1, round(sum(m.lv for m in st.party) / len(st.party)))
+
+
+def resolve_level(st: GameState, spec: str) -> Optional[int]:
+    """lv= の指定（"avg" か数値）を目標レベルにする。空なら None。"""
+    if not spec:
+        return None
+    if spec == "avg":
+        return party_avg_level(st)
+    return max(1, min(MAX_LV, int(spec)))
+
+
+def raise_to_level(m: Member, gd: GameData, target: Optional[int], rng: Optional[random.Random] = None) -> None:
+    """加入時に target までレベルを上げる（職業の成長どおり）。もともと高ければそのまま。HP・MP は満タン。"""
+    if target is not None:
+        while m.lv < min(target, MAX_LV):
+            level_up(m, gd, rng)
+        m.exp = max(m.exp, exp_for_next(m.lv - 1) if m.lv > 1 else 0)
+    m.hp, m.mp = m.stat("hp", gd), m.stat("mp", gd)
+
+
 def gain_exp(st: GameState, gd: GameData, total: int, rng: Optional[random.Random] = None) -> list[str]:
     """生存メンバーで経験値を均等に分ける。レベルアップのメッセージを返す。"""
     alive = [m for m in st.party if m.alive]

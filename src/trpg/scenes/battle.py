@@ -8,6 +8,7 @@ from ..battle.core import Battle, Battler, Command
 from ..data.models import Skill
 from ..term import Action, Buffer, KeyEvent, Rect, Style, pad, text_width, truncate
 from ..term.buffer import BOX_SINGLE
+from ..ui.aa import draw_aa
 from ..ui.widgets import CURSOR, DIM_TEXT, FRAME, TEXT
 
 if TYPE_CHECKING:
@@ -16,6 +17,7 @@ if TYPE_CHECKING:
 MSG_WAIT = 0.55          # メッセージ 1 行ごとの待ち（決定キーで早送り）
 HIT_BLINK = 0.35
 INTRO_FLASH = 0.35
+ANIM_FLASH = 0.3
 PARTY_ROWS = 5
 BOTTOM_ROWS = 8
 CMD_W = 22
@@ -40,6 +42,7 @@ class BattleScene(Scene):
         self.blink: dict[int, float] = {}       # id(battler) → 残り時間
         self.shake = 0.0
         self.flash = INTRO_FLASH
+        self.anim_flash: Optional[tuple[int, float]] = None    # スキル演出の発光（背景色, 残り秒）
         self.t = 0.0
         # イベント再生
         self._gen: Optional[Iterator] = None
@@ -89,6 +92,28 @@ class BattleScene(Scene):
                     self.shake = 0.25
             elif kind == "heal":
                 self.blink[id(val)] = HIT_BLINK
+            elif kind == "anim":
+                self._play_anim(*val)
+
+    # ================================================================ スキルの演出
+    def _play_anim(self, anim: str, targets: list) -> None:
+        """Items.data の skill.anim（"flash:red,shake" など）を再生する。メッセージ送りはその間止める。"""
+        from ..data.models import parse_anim
+        from ..term.style import color as to_color
+        for name, arg in parse_anim(anim):
+            if name == "flash":
+                try:
+                    bg = to_color(arg or "bright_white")
+                except ValueError:
+                    bg = 15
+                self.anim_flash = (bg, ANIM_FLASH)
+            elif name == "shake":
+                power = int(arg) if arg.isdigit() else 1
+                self.shake = max(self.shake, 0.2 * max(1, min(3, power)))
+            elif name == "blink":
+                for t in targets:
+                    self.blink[id(t)] = HIT_BLINK
+        self._wait = max(self._wait, ANIM_FLASH)
 
     # ================================================================ 入力
     def _begin_input(self) -> None:
@@ -264,6 +289,9 @@ class BattleScene(Scene):
             if self.blink[k] <= 0:
                 del self.blink[k]
         self.shake = max(0.0, self.shake - dt)
+        if self.anim_flash is not None:
+            bg, left = self.anim_flash
+            self.anim_flash = (bg, left - dt) if left - dt > 0 else None
         if self.mode == "events":
             self._wait -= dt
             self._step_events()
@@ -294,6 +322,10 @@ class BattleScene(Scene):
             copy = buf.copy()
             buf.clear()
             buf.blit(copy, 2 if int(self.shake * 30) % 2 == 0 else -2, 0)
+        if self.anim_flash is not None:
+            bg, left = self.anim_flash
+            if int(left / 0.075) % 2 == 0:                  # 2 回明滅
+                buf.fill(Rect(0, 0, W, ea_h), " ", Style(None, bg, 0))
 
     def _aa(self, b: Battler, small: bool = False) -> list[str]:
         path = b.enemy.aa
@@ -328,8 +360,10 @@ class BattleScene(Scene):
             if not blink_on and not dead_fade:
                 top = art_bottom - len(art) + 1
                 ax = x + (w - max([text_width(a) for a in art] + [0])) // 2
-                buf.put_lines(ax, max(inner.y, top), art[max(0, inner.y - top):], Style.of("bright_white"),
-                              clip=inner, transparent=True)
+                cut = max(0, inner.y - top)
+                colors = self.gd.colors_for(art)
+                draw_aa(buf, ax, max(inner.y, top), art[cut:], Style.of("bright_white"),
+                        colors[cut:] if colors else None, clip=inner)
             sel = targeting and self.targets[self.target_i] is e
             nst = CURSOR if sel else (DIM_TEXT if dead_fade else TEXT)
             buf.put(x + (w - text_width(e.name)) // 2, name_y, e.name, nst, clip=inner)

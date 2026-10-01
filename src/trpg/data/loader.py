@@ -14,9 +14,11 @@ from typing import TYPE_CHECKING, Iterator, Optional
 
 from ..term.width import text_width
 from .models import (AI_TYPES, BUILTIN_SKILLS, ELEMENTS, EQUIP_SLOTS, EVENT_TRIGGERS, ITEM_TYPES,
-                     NPC_MOVES, QUEST_GOALS, SKILL_KINDS, STAT_KEYS, TARGETS, USE_EFFECTS, Character,
+                     NPC_MOVES, QUEST_GOALS, ROUTE_STEPS, SKILL_KINDS, STAT_KEYS, TARGETS, USE_EFFECTS, Character,
                      Encounter, Enemy, EnemyAction, GameData, GameMap, Group, Item, Job, MapEvent, Npc,
                      Quest, Shop, Skill, StatusDef, Tile, TileSet, Warp)
+from ..term.style import color as to_color
+from .models import SKILL_ANIMS, parse_anim
 from .reader import REQUIRED, Tbl
 from .report import DataError, Report, find_id_line, find_table_line, toml_error
 
@@ -216,6 +218,16 @@ def _load_items(f: _File, gd: GameData) -> None:
                    power=t.int("power", 0, min=0), status=t.str("status", ""),
                    status_rate=t.num("status_rate", 1.0 if t.has("status") else 0.0, min=0.0, max=1.0),
                    anim=t.str("anim", ""), desc=t.str("desc", ""))
+        for aname, aarg in parse_anim(sk.anim):
+            if aname not in SKILL_ANIMS:
+                t._err("anim", f"演出「{aname}」はありません（{', '.join(SKILL_ANIMS)}）")
+            elif aname == "flash" and aarg:
+                try:
+                    to_color(aarg)
+                except ValueError:
+                    t._err("anim", f"flash の色「{aarg}」が不正です")
+            elif aname == "shake" and aarg and not aarg.isdigit():
+                t._err("anim", f"shake の強さ「{aarg}」は 1〜3 の数字です")
         if sk.id in BUILTIN_SKILLS:
             t._err("id", f"「{sk.id}」はエンジン組み込みのスキル名なので使えません")
         t.done()
@@ -291,7 +303,15 @@ def _load_maps(f: _File, gd: GameData) -> None:
         for n in t.table_list("npc", []):
             npcs.append(Npc(id=n.id(), glyph=n.str("glyph"), x=n.int("x", min=0), y=n.int("y", min=0),
                             color=n.str("color", ""), move=n.str("move", "fixed", choices=NPC_MOVES),
-                            talk=n.str("talk", ""), when=n.str("when", "")))
+                            talk=n.str("talk", ""), when=n.str("when", ""), route=n.strlist("route", [])))
+            npc = npcs[-1]
+            bad = [r for r in npc.route if r not in ROUTE_STEPS]
+            if bad:
+                n._err("route", f"道順に使えるのは {' / '.join(ROUTE_STEPS)} です（「{bad[0]}」）")
+            if npc.move == "route" and not npc.route:
+                n._err("route", "move = \"route\" のときは route に道順を書いてください")
+            elif npc.route and npc.move != "route":
+                n._warn("route", "move が \"route\" でないので route は使われません")
             gw = text_width(npcs[-1].glyph)
             if gw != 2:
                 n._err("glyph", f"「{npcs[-1].glyph}」の表示幅が {gw} です。幅 2 にしてください")
@@ -344,6 +364,25 @@ def _load_aa(pkg: "Package", gd: GameData, rep: Report, refs: list[tuple[str, st
         if lines and lines[0].startswith(";;"):
             lines = lines[1:]  # メタ行（配置基準など）は後工程で解釈
         gd.aa[path] = [ln.rstrip("\r") for ln in lines]
+    # 色ファイル（aa/xxx.color）。AA と同じ行・文字位置に色コード
+    from ..ui.aa import VALID_CODES
+    for cpath in sorted(p for p in pkg.files() if p.startswith("aa/") and p.endswith(".color")):
+        apath = cpath[:-6] + ".txt"
+        crow = [ln.rstrip("\r") for ln in (pkg.read_text(cpath) or "").rstrip("\n").split("\n")]
+        if apath not in gd.aa:
+            rep.warning(cpath, None, f"対応する AA ファイル「{apath}」がありません")
+            continue
+        art = gd.aa[apath]
+        if len(crow) > len(art):
+            rep.warning(cpath, len(art) + 1, f"AA（{len(art)} 行）より行が多くなっています")
+        for i, row in enumerate(crow):
+            bad = sorted({c for c in row if c not in VALID_CODES})
+            if bad:
+                rep.error(cpath, i + 1, f"色コード {' '.join(repr(b) for b in bad)} は使えません"
+                          "（k r g y b m c w と大文字、. か空白）")
+            if i < len(art) and len(row) > len(art[i]):
+                rep.warning(cpath, i + 1, f"AA の行（{len(art[i])} 文字）より長くなっています")
+        gd.aa_color[apath] = crow
 
 
 # ====================================================================== 相互参照
@@ -441,6 +480,21 @@ def _cross_check(gd: GameData, manifest, rep: Report) -> None:
                 rep.warning(MAP, ln(m), f"マップ {m.id}: NPC {n.id} が通行できないタイルの上にいます")
             if n.talk:
                 gd.label_refs.append((n.talk, MAP, ln(m)))
+            if n.move == "route" and n.route and m.in_bounds(n.x, n.y):
+                # 道順をたどって壁にぶつからないか・元の位置に戻るかを確かめる
+                x, y = n.x, n.y
+                vec = {"up": (0, -1), "down": (0, 1), "left": (-1, 0), "right": (1, 0)}
+                for i, step in enumerate(n.route):
+                    if step not in vec:
+                        continue
+                    x, y = x + vec[step][0], y + vec[step][1]
+                    if not m.in_bounds(x, y) or not passable(m, x, y):
+                        rep.error(MAP, ln(m), f"マップ {m.id}: NPC {n.id} の道順 {i + 1} 歩目 ({x}, {y}) が通れないマスです")
+                        break
+                else:
+                    if (x, y) != (n.x, n.y):
+                        rep.warning(MAP, ln(m), f"マップ {m.id}: NPC {n.id} の道順が元の位置に戻りません"
+                                                f"（1 周で ({x - n.x:+d}, {y - n.y:+d}) ずれていきます）")
 
     for q in gd.quests.values():
         g = q.goal

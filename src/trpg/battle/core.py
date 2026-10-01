@@ -414,6 +414,8 @@ class Battle:
         if not targets:
             yield ("msg", "しかし、相手がいなかった。")
             return
+        if sk.anim:
+            yield ("anim", (sk.anim, targets))
         for t in targets:
             if sk.kind == "physical":
                 dmg, _, miss = self.physical_damage(a, t, sk.power)

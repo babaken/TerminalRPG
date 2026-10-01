@@ -303,7 +303,7 @@ element = "fire"                  # fire | ice | thunder | holy | dark
 power = 20
 status = ""                       # 付与する状態異常
 status_rate = 0.0                 # status 指定時の既定は 1.0
-anim = "flash:red"                # 【未】戦闘中の演出
+anim = "flash:red"                # 戦闘中の演出：flash[:色]（敵の表示領域が 2 回光る）/ shake[:1〜3] / blink（対象が点滅）。カンマで重ねられる
 
 [[status]]
 id = "poison"
@@ -365,12 +365,14 @@ glyph = "友"                      # 表示幅 2
 color = "cyan"
 x = 16
 y = 13
-move = "fixed"                    # fixed | random（初期位置から ±3 マス）| route【未】
+move = "fixed"                    # fixed | random（初期位置から ±3 マス）| route（道順どおり）
+route = ["right", "right", "wait", "left", "left", "wait"]   # move = "route" の道順（up/down/left/right/wait を繰り返す。0.6 秒に 1 歩）
 talk = "ch1_kai_talk"
 when = "!flag.ch1_forest_done"    # 条件を満たすときだけ出現（@npc show/hide が優先）
 ```
 - タイルの glyph は表示幅 2。全角文字（East Asian Width が F/W）を使う。曖昧幅の文字は警告（端末でずれるため）。
 - ワープ先が通行できないタイル、NPC が壁の上、などは警告。マップ外の座標はエラー。
+- 道順（route）の NPC は、ふさがれていると空くまで待つ（何歩目かはセーブされる）。道順が壁にぶつかればエラー、1 周で元の位置に戻らなければ警告。
 
 ---
 
@@ -438,7 +440,7 @@ on_complete = "ch1_quest_done"   # 達成報告のあとに実行するラベル
 | `@wait ms` `@keywait` | 【済】 | 待ち |
 | `@flag set/clear 名前` `@var 名前 = 式`（`+=` `-=`） | 【済】 | 状態 |
 | `@item add/remove ID [数]` `@gold add/remove 数` | 【済】 | 所持品・所持金 |
-| `@party add/remove ID` | 【済】 | 加入・離脱（`lv=avg` は【未】） |
+| `@party add/remove ID [lv=avg|数値]` | 【済】 | 加入・離脱。`lv=avg` でパーティの平均 Lv まで、`lv=5` で Lv5 まで、職業の成長どおりに上げて加入（もともと高ければそのまま） |
 | `@equip キャラID アイテムID` | 【済】【変更：追加】 | 袋のアイテムを装備（元の装備は袋へ） |
 | `@heal all` | 【済】 | 全員の HP・MP・状態異常を回復 |
 | `@quest give/done/fail ID` | 【済】 | 依頼の状態を直接変更 |
@@ -447,7 +449,7 @@ on_complete = "ch1_quest_done"   # 達成報告のあとに実行するラベル
 | `@npc ID show/hide/move dx dy/face 向き` `@hero move dx dy/face 向き` | 【済】 | 演出移動（1 マス 0.15 秒）。目的地（現在地＋dx,dy）まで木・壁・ほかの人を避けた最短経路で歩く（NPC は主人公のマスも避ける）。目的地が通れないか着けないときは横→縦にまっすぐ進む |
 | `@aa show ファイル x y [name=]` `@aa hide 名前` | 【済】 | AA を重ねて表示 |
 | `@effect 名前 引数… [wait=false]` | 【一部】 | 11 章 |
-| `@shop ID` `@inn 価格` `@guild` `@recruit 候補… pick=n` | 【済】 | 施設画面（閉じると続きを実行） |
+| `@shop ID` `@inn 価格` `@guild` `@recruit 候補… pick=n [lv=avg|数値]` | 【済】 | 施設画面（閉じると続きを実行）。仲間選択の lv= は @party add と同じ（画面には加入時の Lv を表示） |
 | `@battle group=ID [escape=false] [gameover=] [target_only=ID] [lose=*L]` | 【済】 | イベント戦闘 |
 | `@face ID` / `@face none` | 【済】 | 会話窓の左上に顔 AA を枠つきで出す（枠の見出しは話者名）。ID は Friends.data のキャラクターの face → `aa/face_ID.txt` → ID 自体が .txt のパス の順に探す。スクリプトが終わると消える |
 | `@save_point` | 【済】 | セーブ画面を開く（閉じるとスクリプトの続きを実行） |
@@ -487,10 +489,13 @@ on_complete = "ch1_quest_done"   # 達成報告のあとに実行するラベル
 
 ---
 
-## 12. AA ファイル形式【一部】
+## 12. AA ファイル形式【済】
 - `*.txt`（UTF-8）。1 行目が `;;` で始まればメタ行として読み飛ばす（配置基準などの解釈は【未】）。
-- 戦闘では半角空白を透過として重ねる。
-- `*.color`（1 文字ずつの色）は【未】。
+- マップ上・戦闘では半角空白を透過として重ねる（顔・タイトルは透過しない）。
+- 色ファイル `*.color`（`aa/slime.txt` なら `aa/slime.color`）：AA と同じ行・同じ文字位置に色コードを 1 文字ずつ書く。
+  `k r g y b m c w`（黒 赤 緑 黄 青 紫 水 白）、大文字で明るい色、`.` か空白で既定の色。足りない部分は既定の色。
+  戦闘の敵・@aa / aa_show・顔・タイトルのどれにも使える（`ui/aa.py`）。
+- 検証：対応する AA のない色ファイル（警告）、使えない色コード（エラー）、AA より長い行・多い行（警告）。
 
 ---
 
@@ -542,6 +547,6 @@ on_complete = "ch1_quest_done"   # 達成報告のあとに実行するラベル
 ---
 
 ## 16. テスト【済】
-- `python -m pytest`（現在 156 件）。セーブはテストごとの一時フォルダに書く。端末を使わずにシーンへキーを送り、画面バッファを文字列で確かめる。
+- `python -m pytest`（現在 168 件）。セーブはテストごとの一時フォルダに書く。端末を使わずにシーンへキーを送り、画面バッファを文字列で確かめる。
 - `tests/test_chapter1.py`：1 章を最初から「第1章 完」まで自動プレイ（戦闘は自動で戦う）。30 種の乱数で完走を確認済み。
 - Windows 実機の確認は手動（キー入力の調査は `--keylog`）。

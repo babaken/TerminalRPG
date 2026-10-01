@@ -14,6 +14,7 @@ from ..script.vm import VM, ChoiceReq, KeyWaitReq, MessageReq, ScriptError, Wait
 from ..term import Action, Buffer, Key, KeyEvent, Rect, Style, pad, truncate, wrap
 from ..term.buffer import BOX_SINGLE
 from ..ui import markup
+from ..ui.aa import draw_aa
 from ..ui.widgets import FRAME, ChoiceWindow, MessageWindow
 from ..world import quests as Q
 from ..world.state import GameState, format_text
@@ -23,6 +24,7 @@ ACTION_DIR = {Action.UP: "up", Action.DOWN: "down", Action.LEFT: "left", Action.
 HERO_GLYPH = "＠"
 DARK_RADIUS = 3
 NPC_STEP_INTERVAL = (1.2, 3.0)
+ROUTE_STEP_INTERVAL = 0.6        # 道順で歩く NPC の 1 歩の間隔（秒）
 
 
 def straight_steps(dx: int, dy: int) -> list[tuple[int, int]]:
@@ -208,7 +210,7 @@ class FieldScene(Scene):
         elif name == "guild":
             ov = GuildScene(self)
         else:
-            ov = RecruitScene(self, pos, int(kw.get("pick", 1)))
+            ov = RecruitScene(self, pos, int(kw.get("pick", 1)), lv=kw.get("lv", ""))
         self.app.push(ov)
         return ov
 
@@ -689,6 +691,9 @@ class FieldScene(Scene):
 
     def _move_npcs(self, dt: float) -> None:
         for n in self.map.npcs:
+            if n.move == "route" and n.route and self.npc_visible(n):
+                self._route_step(n, dt)
+                continue
             if n.move != "random" or not self.npc_visible(n):
                 continue
             t = self._npc_timer.get(n.id)
@@ -706,6 +711,25 @@ class FieldScene(Scene):
                         and not any((w.x, w.y) == (nx, ny) for w in self.map.warps)):
                     self.st.npc(self.st.map_id, n.id).update(x=nx, y=ny)
             self._npc_timer[n.id] = t
+
+    def _route_step(self, n: Npc, dt: float) -> None:
+        """道順（route）どおりに 1 歩ずつ歩く。ふさがれていたら空くまで待つ。何歩目かは状態に保存する。"""
+        t = self._npc_timer.get(n.id, ROUTE_STEP_INTERVAL) - dt
+        if t > 0:
+            self._npc_timer[n.id] = t
+            return
+        self._npc_timer[n.id] = ROUTE_STEP_INTERVAL
+        s = self.st.npc(self.st.map_id, n.id)
+        i = s.get("route_i", 0) % len(n.route)
+        step = n.route[i]
+        if step != "wait":
+            dx, dy = DIR_VEC[step]
+            x, y = self._npc_pos(n)
+            nx, ny = x + dx, y + dy
+            if not self.passable(nx, ny) or self.npc_at(nx, ny) or (nx, ny) == (self.st.x, self.st.y):
+                return                              # ふさがれている → 次の機会にもう一度
+            s.update(x=nx, y=ny, dir=step)
+        s["route_i"] = (i + 1) % len(n.route)
 
     # ============================================================ 描画
     def draw(self, buf: Buffer, overlay: bool = False) -> None:
@@ -754,7 +778,8 @@ class FieldScene(Scene):
         h = min(len(lines) + 2, msg_rect.y)
         rect = Rect(msg_rect.x, msg_rect.y - h, w, h)
         inner = buf.box(rect, FRAME, title=self.msg.speaker, chars=BOX_SINGLE)
-        buf.put_lines(inner.x + 1, inner.y, lines, Style.of("bright_white"), clip=inner)
+        draw_aa(buf, inner.x + 1, inner.y, lines, Style.of("bright_white"), self.gd.colors_for(lines),
+                clip=inner, transparent=False)
 
     def _draw_map(self, buf: Buffer, area: Rect) -> None:
         m = self.map
@@ -795,7 +820,7 @@ class FieldScene(Scene):
         for key, (lines, x, y) in self.overlays.items():
             if self.effects.hidden(key):
                 continue
-            buf.put_lines(area.x + x, area.y + y, lines, Style.of("bright_white"), clip=area, transparent=True)
+            draw_aa(buf, area.x + x, area.y + y, lines, Style.of("bright_white"), self.gd.colors_for(lines), clip=area)
 
     def _draw_panel(self, buf: Buffer, area: Rect) -> None:
         y = area.y

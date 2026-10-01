@@ -127,6 +127,7 @@ mp = 2
 target = "enemy_one"
 kind = "physical"
 power = 8
+anim = "shake:2"
 
 [[skill]]
 id = "fire"
@@ -145,6 +146,7 @@ mp = 3
 target = "ally_one"
 kind = "heal"
 power = 25
+anim = "flash:bright_green"
 
 [[skill]]
 id = "bite"
