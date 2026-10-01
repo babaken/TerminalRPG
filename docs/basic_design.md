@@ -39,7 +39,7 @@ TRPG/
 │  │  ├─ term_demo.py     【済】 描画・入力デモ
 │  │  ├─ menu.py          【済】 フィールドメニュー（どうぐ・スキル・そうび・つよさ・いらい・システム）
 │  │  └─ saveload.py      【済】 セーブ／ロード画面（3 スロット）
-│  ├─ package/         【済】 zip・フォルダ読込、安全チェック、manifest 検証、パッケージ探索
+│  ├─ package/         【済】 zip・フォルダ読込、安全チェック、manifest 検証、パッケージ探索、検証（check.py）
 │  ├─ data/            【済】 .data（TOML）の読込・型検証・相互参照チェック、データクラス
 │  ├─ script/          【済】 条件式（expr）・構文解析（parser）・実行（vm）・検証（lint）
 │  ├─ effects/         【一部】 画面エフェクト（11 章）
@@ -50,8 +50,8 @@ TRPG/
 │  │  ├─ growth.py        【済】 経験値・レベルアップ・習得スキル
 │  │  └─ items.py         【済】 フィールドでのアイテム・スキルの使用
 │  ├─ save/            【済】 直列化・暗号化・スロット管理
-│  └─ i18n/            【未】 UI 文言（ja / en）
-├─ tools/              【未】 aa_convert / map_editor / pack（lint は本体の --check に統合【変更】）
+│  ├─ i18n/            【未】 UI 文言（ja / en）
+│  └─ tools/           【一部】 pack【済】 / aa_convert【未】 / map_editor【未】（pip でも入るよう trpg パッケージ内に置く【変更】。lint は本体の --check に統合【変更】）
 ├─ scenarios/FirstQuest/  サンプルシナリオ（展開形式）
 └─ tests/              【済】 pytest（端末なしで画面にキーを送る通しプレイを含む）
 ```
@@ -67,7 +67,8 @@ TRPG/
 | `python -m trpg --term-demo` | 【済】 | 描画・入力デモ |
 | `python -m trpg --keylog` | 【済】 | 受け取ったキー・画面状態・例外を `trpg_debug.log` に記録 |
 | `--ambiguous-width 1/2` `--no-color` `--fps N` | 【済】 | 表示オプション |
-| `python -m tools.aa_convert` ほか | 【未】 | 8 章のツール |
+| `python -m trpg.tools.pack DIR [-o ZIP] [--strict] [--force] [--dry-run]` | 【済】 | 検証してから zip にする（T-03）。エラーで中断、zip 内の日時固定、作った zip を再検証 |
+| `python -m trpg.tools.aa_convert` ほか | 【未】 | 要件 8 章の残りのツール |
 
 - 開発モードでの F5 スクリプト再読込は【未】。
 - シナリオにエラーがあるとゲームは起動せず、端末を初期化する前に検証結果を表示する。

@@ -27,29 +27,10 @@ def _stdout_utf8() -> None:
 
 
 def cmd_check(path: str) -> int:
-    from .data import DataError, Report, load_game_data
-    from .package import PackageError, open_package
-    from .script.lint import lint_script
-    from .script.parser import parse_script
+    from .package.check import check_package
 
-    rep = Report()
     print(f"検証: {path}")
-    try:
-        pkg = open_package(path, rep)
-    except PackageError as e:
-        print(f"エラー  {e}")
-        return 1
-    except DataError as e:
-        print(e.report.format())
-        return 1
-    with pkg:
-        m = pkg.manifest
-        print(f"タイトル: {m.title}（ID: {m.id} / 版: {m.version}）")
-        gd = load_game_data(pkg, rep)
-        print(f"読込: {gd.summary()}")
-        script = parse_script(pkg.read_text("scenario.sco") or "", rep, "scenario.sco", loader=pkg.read_text)
-        lint_script(script, gd, rep, pkg, m.start_label)
-        print(f"スクリプト: ラベル {len(script.labels)} / 命令 {len(script.instrs)}")
+    rep, _ = check_package(path)
     print(rep.format() if rep.issues else "問題は見つかりませんでした。")
     return 0 if rep.ok else 1
 
