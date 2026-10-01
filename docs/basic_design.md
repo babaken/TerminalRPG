@@ -463,14 +463,21 @@ on_complete = "ch1_quest_done"   # 達成報告のあとに実行するラベル
 | `flash` | 【済】 | `色` `count=1` `interval=80` |
 | `fade_out` / `fade_in` | 【済】 | `ms`（fade_out 後は fade_in まで黒のまま。セーブ対象） |
 | `shake` | 【済】 | `h|v` `power(1〜3)` `ms` |
-| `tint` | 【済】 | `night|sepia|red|none`（継続・セーブ対象）。`invert` は【未】 |
+| `tint` | 【済】 | `night|sepia|red|invert|none`（継続・セーブ対象）。invert は文字色と背景色を入れ替える |
 | `typewriter` | 【済】 | `"文字"` `speed=80`。表示後「Enter / Z で続ける」でキー待ち |
 | `wait` | 【済】 | `ms` |
 | `rain` / `snow` | 【済】【変更】 | `on|off` `density=1〜3`。継続・セーブ対象。全角の ／・＊ をタイルの区切りに合わせて描く |
 | `starfall` | 【済】 | `count=8` `ms=2000`。右上から左下へ流れ星 |
-| `move` `wipe` `blink` `aa_show` `aa_hide` `scroll_text` | 【未】 | 呼ばれても何もしない |
+| `wipe` | 【済】 | `left|right|up|down`（境目が進む向き、既定 right）`ms`（既定 400）。既定は黒から開く。`out` を付けると覆い、覆い終わると fade_out と同じく黒のまま |
+| `blink` | 【済】 | `対象` `count=3` `interval=120`。対象は NPC ID・`hero`・AA の名前 |
+| `move` | 【済】 | `対象 dx dy` `ms=150`（1 マスあたり）。NPC・hero はマス単位で、木や壁を避けて歩く。AA（@aa show / aa_show の名前）はセル単位でなめらかに動く |
+| `aa_show` | 【済】 | `ファイル x y` `name=` `from=left|right|top|bottom`（指定するとマップ表示領域の外から滑り込む）`ms` |
+| `aa_hide` | 【済】 | `名前` `to=left|right|top|bottom`（指定すると外へ滑り出てから消える）`ms` |
+| `scroll_text` | 【済】 | `file=テキストファイル`（{hero} などの置き換え可）または表示する文字（`\n` で改行）、`speed=2`（行/秒）。全画面で下から上へ流す。決定キーで最後まで飛ばす |
 
-- 描画順：マップ → 天気 → 色調 → 暗転 → 会話窓 → 発光・中央文字・流れ星。
+- `move` `aa_show` `aa_hide` は `wait=false` で待たずに次の行へ進める（演出と会話を同時に進める）。
+- 描画順：マップ → 天気 → 色調 → 暗転（fade・wipe）→ 会話窓 → 発光・中央文字・流れ星・スタッフロール。
+- 検証（--check）：move・blink の対象（NPC・hero・表示する AA の名前）、aa_show・scroll_text のファイル、tint・wipe・from・to の値。
 - 色が使えない端末（`--no-color`）では色指定を無視する。
 
 ---
@@ -530,6 +537,6 @@ on_complete = "ch1_quest_done"   # 達成報告のあとに実行するラベル
 ---
 
 ## 16. テスト【済】
-- `python -m pytest`（現在 129 件）。セーブはテストごとの一時フォルダに書く。端末を使わずにシーンへキーを送り、画面バッファを文字列で確かめる。
+- `python -m pytest`（現在 146 件）。セーブはテストごとの一時フォルダに書く。端末を使わずにシーンへキーを送り、画面バッファを文字列で確かめる。
 - `tests/test_chapter1.py`：1 章を最初から「第1章 完」まで自動プレイ（戦闘は自動で戦う）。30 種の乱数で完走を確認済み。
 - Windows 実機の確認は手動（キー入力の調査は `--keylog`）。

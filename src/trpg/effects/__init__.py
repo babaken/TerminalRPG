@@ -2,19 +2,22 @@
 
 描画済みの画面バッファに後から効果を重ねる方式。時間で終わるもの（flash / fade / shake / typewriter）と、
 解除するまで続くもの（tint）がある。
-実装済み: flash / fade_in / fade_out / shake / tint / typewriter / wait / rain / snow / starfall
-未実装（何もしない）: move / wipe / blink / aa_show / aa_hide / scroll_text
+ここで実装: flash / fade_in / fade_out / shake / tint（night・sepia・red・invert）/ typewriter / wait /
+            rain / snow / starfall / wipe / blink / scroll_text
+フィールド側で実装（マップ上の人や AA を動かすため）: move / aa_show / aa_hide
 """
 from __future__ import annotations
 
 import random
 from typing import Optional
 
-from ..term import DIM, Buffer, Rect, Style, text_width
+from ..term import DIM, REVERSE, Buffer, Rect, Style, text_width
 from ..term.style import color as to_color
 
 TINT_FG = {"night": 4, "sepia": 3, "red": 1}
-IMPLEMENTED = ("flash", "fade_in", "fade_out", "shake", "tint", "typewriter", "wait", "rain", "snow", "starfall")
+IMPLEMENTED = ("flash", "fade_in", "fade_out", "shake", "tint", "typewriter", "wait", "rain", "snow", "starfall",
+               "wipe", "blink", "scroll_text", "move", "aa_show", "aa_hide")
+WIPE_DIRS = ("left", "right", "up", "down")
 
 
 def _int(kw: dict, key: str, default: int) -> int:
@@ -191,6 +194,90 @@ class Starfall(Effect):
                     buf.put(x, y, ch, st)
 
 
+class Wipe(Effect):
+    """画面を端から順に開く（既定）／覆う（out）切り替え。dir は境目が進む向き。
+
+    覆い終わると fade_out と同じく黒のまま（fade_in か wipe で戻る）。
+    """
+
+    def __init__(self, direction: str = "right", ms: int = 400, out: bool = False):
+        super().__init__()
+        self.dir = direction if direction in WIPE_DIRS else "right"
+        self.dur = max(50, ms) / 1000
+        self.out = out
+
+    def update(self, dt: float) -> None:
+        super().update(dt)
+        if self.t >= self.dur:
+            self.done = True
+
+    def covered(self, buf: Buffer) -> Rect:
+        """いま黒く覆われている範囲。"""
+        p = min(1.0, self.t / self.dur)
+        frac = p if self.out else 1.0 - p
+        W, H = buf.width, buf.height
+        if self.dir in ("right", "left"):
+            n = int(round(W * frac))
+            # out: 進む向きの手前から覆う / in: 進む向きの手前から開く（残りが覆われている）
+            from_start = (self.dir == "right") == self.out
+            return Rect(0, 0, n, H) if from_start else Rect(W - n, 0, n, H)
+        n = int(round(H * frac))
+        from_start = (self.dir == "down") == self.out
+        return Rect(0, 0, W, n) if from_start else Rect(0, H - n, W, n)
+
+    def apply(self, buf: Buffer) -> None:
+        buf.fill(self.covered(buf), " ")
+
+
+class Blink(Effect):
+    """マップ上の人（NPC ID・hero）や AA（名前）を点滅させる。描く側が hidden() を見て消す。"""
+
+    blocking = True
+
+    def __init__(self, target: str, count: int = 3, interval: int = 120):
+        super().__init__()
+        self.target = target
+        self.count = max(1, count)
+        self.interval = max(30, interval) / 1000
+
+    def update(self, dt: float) -> None:
+        super().update(dt)
+        if self.t >= self.count * self.interval * 2:
+            self.done = True
+
+    def hidden(self) -> bool:
+        return int(self.t / self.interval) % 2 == 0
+
+
+class ScrollText(Effect):
+    """スタッフロール風に文字を下から上へ流す（全画面）。決定キーで最後まで飛ばす。"""
+
+    needs_key = True
+
+    def __init__(self, lines: list[str], speed: float = 2.0):
+        super().__init__()
+        self.lines = lines
+        self.speed = max(0.5, speed)        # 行/秒
+        self.height = 30
+
+    def update(self, dt: float) -> None:
+        super().update(dt)
+        if self.t * self.speed >= self.height + len(self.lines):
+            self.done = True
+
+    def key(self) -> None:
+        self.done = True
+
+    def apply(self, buf: Buffer) -> None:
+        self.height = buf.height
+        buf.clear()
+        top = buf.height - int(self.t * self.speed)
+        for i, line in enumerate(self.lines):
+            y = top + i
+            if 0 <= y < buf.height:
+                buf.put_center(y, line, Style.of("bright_white"))
+
+
 class Weather:
     """雨・雪（解除するまで続く。マップ表示領域にだけ降らせる）。"""
 
@@ -284,6 +371,19 @@ class EffectManager:
             return None
         elif name == "starfall":
             eff = Starfall(_int(kw, "count", 8), _int(kw, "ms", 2000))
+        elif name == "wipe":
+            d = kw.get("dir", next((p for p in pos if p in WIPE_DIRS), "right"))
+            nums = [int(p) for p in pos if p.isdigit()]
+            out = "out" in pos or kw.get("out") == "true"
+            eff = Wipe(d, _int(kw, "ms", nums[0] if nums else 400), out)
+            self.persist["fade"] = "out" if out else "in"
+        elif name == "blink":
+            target = kw.get("target", pos[0] if pos else "hero")
+            nums = [int(p) for p in pos[1:] if p.isdigit()]
+            eff = Blink(target, _int(kw, "count", nums[0] if nums else 3), _int(kw, "interval", 120))
+        elif name == "scroll_text":
+            lines = kw.get("_lines") or (pos[0].split("\\n") if pos else [])
+            eff = ScrollText(lines, float(kw.get("speed", 2)))
         else:
             return None   # 未実装のエフェクトは何もしない
         self.active.append(eff)
@@ -306,6 +406,10 @@ class EffectManager:
                 return True
         return False
 
+    def hidden(self, target: str) -> bool:
+        """点滅中で、いま消えているか（NPC ID・hero・AA の名前）。"""
+        return any(isinstance(e, Blink) and e.target == target and e.hidden() for e in self.active)
+
     def offset(self) -> tuple[int, int]:
         dx = dy = 0
         for e in self.active:
@@ -322,7 +426,9 @@ class EffectManager:
         fg = TINT_FG.get(tint)
         if fg is not None:
             buf.map_styles(lambda st: st._replace(fg=fg))
-        fading = [e for e in self.active if isinstance(e, Fade)]
+        elif tint == "invert":
+            buf.map_styles(lambda st: st._replace(attrs=st.attrs ^ REVERSE))
+        fading = [e for e in self.active if isinstance(e, (Fade, Wipe))]
         if fading:
             fading[-1].apply(buf)
         elif self.faded:
@@ -331,5 +437,5 @@ class EffectManager:
     def apply_overlay(self, buf: Buffer) -> None:
         """画面全体にかける効果（発光・中央文字）。会話窓を描いた後に呼ぶ。"""
         for e in self.active:
-            if not isinstance(e, Fade):
+            if not isinstance(e, (Fade, Wipe)):
                 e.apply(buf)

@@ -12,7 +12,7 @@ ASCII アートで表現する、ターミナル用の RPG エンジンです。
 | データ読込・検証（.data → データ） `src/trpg/data/` | 実装済み |
 | スクリプト（構文解析・実行・検証） `src/trpg/script/` | 実装済み |
 | タイトル・名前入力・フィールド移動・会話・選択肢 `src/trpg/scenes/` | 実装済み |
-| エフェクト `src/trpg/effects/` | flash / fade_in / fade_out / shake / tint / typewriter / wait / rain / snow / starfall |
+| エフェクト `src/trpg/effects/` | flash / fade_in / fade_out / shake / tint（invert 含む）/ typewriter / wait / rain / snow / starfall / wipe / blink / move / aa_show / aa_hide / scroll_text（全 16 種） |
 | ショップ・宿屋・冒険者協会（依頼）・仲間選択 `src/trpg/scenes/facility.py` | 実装済み |
 | 戦闘（ターン制・スキル・道具・状態異常・逃走・テイム・経験値とレベルアップ） `src/trpg/battle/` `scenes/battle.py` | 実装済み |
 | 全滅時の画面（タイトルへ／セーブから） `scenes/gameover.py` | 実装済み |
