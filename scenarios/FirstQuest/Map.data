@@ -175,6 +175,7 @@ when = "flag.ch1_farewell and !flag.ch1_left_village"
 id = "house_hero"
 name = "{hero}の家"
 tileset = "default"
+indoor = true
 rows = [
   "############",
   "#..........#",
@@ -278,6 +279,7 @@ when = "!flag.ch1_forest_done"
 id = "house_chief"
 name = "村長の家"
 tileset = "default"
+indoor = true
 rows = [
   "############",
   "#..........#",
@@ -310,6 +312,15 @@ color = "white"
 x = 6
 y = 2
 talk = "ch1_chief_home_talk"
+when = "flag.ch1_raid"              # 襲撃の前は外（village_lito の chief）にいる
+
+[[map.npc]]
+id = "chief_wife"
+glyph = "妻"
+color = "magenta"
+x = 9
+y = 5
+talk = "ch1_chief_wife_talk"
 
 [[map]]
 id = "field_road"
@@ -498,6 +509,7 @@ when = "quest.q_lost_cat == active and !flag.found_cat"
 id = "guild_bern"
 name = "冒険者協会ベルン支部"
 tileset = "default"
+indoor = true
 rows = [
   "####################",
   "####################",
@@ -547,6 +559,7 @@ talk = "ch1_adv_b_talk"
 id = "bern_inn"
 name = "宿屋「旅鳥亭」"
 tileset = "default"
+indoor = true
 rows = [
   "##############",
   "#ttt.........#",

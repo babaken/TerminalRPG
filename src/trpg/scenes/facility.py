@@ -334,8 +334,18 @@ class InnScene(Overlay):
     def __init__(self, field: "FieldScene", price: int):
         super().__init__(field)
         self.price = price
+        if self._all_rested():
+            # 全員 HP・MP 満タンで状態異常もない → 泊まっても意味がないので断る（お金も取らない）
+            self.say(["旅人の宿へようこそ。", "……皆さん、とてもお元気そうですね。今はお休みにならなくても大丈夫ですよ。"],
+                     then=self.close)
+            return
         self.ask(f"旅人の宿へようこそ。一晩 {price} G です。お泊まりになりますか？",
                  ["泊まる", "やめる"], self._done, cancel_index=1)
+
+    def _all_rested(self) -> bool:
+        gd = self.gd
+        return all(m.hp >= m.stat("hp", gd) and m.mp >= m.stat("mp", gd) and not m.status
+                   for m in self.st.party)
 
     def _done(self, i: int) -> None:
         if i != 0:
@@ -348,7 +358,7 @@ class InnScene(Overlay):
 
         def rest() -> None:
             for m in self.st.party:
-                m.hp, m.mp = m.max_hp, m.max_mp
+                m.hp, m.mp = m.stat("hp", self.gd), m.stat("mp", self.gd)
                 m.status.clear()
             self.effect("fade_in", 600, lambda: self.say(
                 ["おはようございます。", "ゆっくり休んで、体力と魔力が回復した！"], then=self.close))

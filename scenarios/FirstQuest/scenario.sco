@@ -137,7 +137,7 @@
 
 *ch1_reunion
 @npc kai show
-@npc kai move 3 -5
+@npc kai move 4 -4
 カイ「{hero}！！　よかった、どこ行ってたんだよ！」
 カイ「途中で振り返ったらいなくてさ…マジで焦ったんだぞ！」
 @choice
@@ -263,6 +263,16 @@
 @map house_hero 5 4 dir=up
 @effect fade_in 600
 @goto *ch1_farewell
+
+*ch1_chief_wife_talk
+@if flag.ch1_meeting_done
+  村長の奥さん「……ごめんなさいね。あの人も、本当はつらいのよ」
+@elif flag.ch1_raid
+  村長の奥さん「主人が待っていたわ。奥へどうぞ」
+@else
+  村長の奥さん「あら{hero}ちゃん。主人なら外で村を見回っていますよ」
+@endif
+@end
 
 *ch1_chief_home_talk
 @if flag.ch1_meeting_done

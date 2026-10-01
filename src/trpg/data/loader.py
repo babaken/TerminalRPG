@@ -298,6 +298,7 @@ def _load_maps(f: _File, gd: GameData) -> None:
             n.done()
         m = GameMap(id=t.id(), name=t.str("name"), tileset=t.str("tileset", "default"), rows=rows,
                     encounter=t.str("encounter", ""), dark=t.bool("dark", False),
+                    indoor=t.bool("indoor", False),
                     events=events, warps=warps, npcs=npcs)
         t.raw("bgm")  # 予約項目（音なしのため未使用）
         t.done()

@@ -115,6 +115,7 @@ TRPG/
 - ショップ：かう／うる。説明欄に装備した場合の能力変化（例「ユウ：攻撃 13→18」）と装備できない仲間を表示。購入後「いま装備しますか？」。
 - 冒険者協会：依頼を受ける／報告する／受けている依頼。説明欄に目標（進み具合つき）と報酬。
 - 仲間選択：候補のリストと、職業・Lv・能力・紹介文。
+- 宿屋：全員の HP・MP が満タンで状態異常もないときは泊まれない（「皆さんお元気そうですね」と断り、お金も取らない）。
 
 ### 2.3 戦闘画面【済】
 ```
@@ -338,6 +339,7 @@ name = "囁きの森"                 # {hero} などの置き換え可
 tileset = "default"
 encounter = "forest_1"           # 省略時エンカウントなし
 dark = false
+indoor = false                    # true：屋内。雨・雪を表示しない（天気の状態は保ったまま）
 rows = [ "TTTTT…", … ]            # 1 文字 = 1 タイル。全行同じ長さ
 bgm = ""                          # 予約（音なし）
 
@@ -437,7 +439,7 @@ on_complete = "ch1_quest_done"   # 達成報告のあとに実行するラベル
 | `@quest give/done/fail ID` | 【済】 | 依頼の状態を直接変更 |
 | `@chapter n "タイトル"` | 【済】 | 章（右パネルに表示） |
 | `@map ID x y [dir=] [transition=fade]` | 【済】 | マップ移動 |
-| `@npc ID show/hide/move dx dy/face 向き` `@hero move dx dy/face 向き` | 【済】 | 演出移動（1 マス 0.15 秒） |
+| `@npc ID show/hide/move dx dy/face 向き` `@hero move dx dy/face 向き` | 【済】 | 演出移動（1 マス 0.15 秒）。目的地（現在地＋dx,dy）まで木・壁・ほかの人を避けた最短経路で歩く（NPC は主人公のマスも避ける）。目的地が通れないか着けないときは横→縦にまっすぐ進む |
 | `@aa show ファイル x y [name=]` `@aa hide 名前` | 【済】 | AA を重ねて表示 |
 | `@effect 名前 引数… [wait=false]` | 【一部】 | 11 章 |
 | `@shop ID` `@inn 価格` `@guild` `@recruit 候補… pick=n` | 【済】 | 施設画面（閉じると続きを実行） |

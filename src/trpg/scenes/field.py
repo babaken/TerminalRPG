@@ -24,16 +24,20 @@ DARK_RADIUS = 3
 NPC_STEP_INTERVAL = (1.2, 3.0)
 
 
+def straight_steps(dx: int, dy: int) -> list[tuple[int, int]]:
+    """横→縦の順にまっすぐ進む手順（経路が見つからないときの予備）。"""
+    sx = 1 if dx > 0 else -1
+    sy = 1 if dy > 0 else -1
+    return [(sx, 0)] * abs(dx) + [(0, sy)] * abs(dy)
+
+
 class Mover:
     """NPC・主人公を 1 マスずつ動かす演出（@npc move / @hero move）。"""
 
     def __init__(self, get: Callable[[], tuple[int, int]], put: Callable[[int, int], None],
-                 dx: int, dy: int, step: float = 0.15):
+                 dx: int, dy: int, step: float = 0.15, steps: Optional[list[tuple[int, int]]] = None):
         self.get, self.put = get, put
-        self.steps: list[tuple[int, int]] = []
-        sx = 1 if dx > 0 else -1
-        sy = 1 if dy > 0 else -1
-        self.steps += [(sx, 0)] * abs(dx) + [(0, sy)] * abs(dy)
+        self.steps: list[tuple[int, int]] = list(steps) if steps is not None else straight_steps(dx, dy)
         self.step = step
         self.t = 0.0
 
@@ -152,7 +156,9 @@ class FieldScene(Scene):
             if pos[0] == "face":
                 self.st.dir = pos[1]
                 return None
-            return Mover(lambda: (self.st.x, self.st.y), self._put_hero, int(pos[1]), int(pos[2]))
+            dx, dy = int(pos[1]), int(pos[2])
+            path = self.find_path((self.st.x, self.st.y), (self.st.x + dx, self.st.y + dy))
+            return Mover(lambda: (self.st.x, self.st.y), self._put_hero, dx, dy, steps=path)
         if name == "effect":
             return self.effects.start(pos[0], pos[1:], kw)
         if name == "face":
@@ -253,8 +259,51 @@ class FieldScene(Scene):
         elif act == "face":
             s["dir"] = pos[2]
         elif act == "move":
-            return Mover(lambda: self._npc_pos(npc), lambda x, y: s.update(x=x, y=y), int(pos[2]), int(pos[3]))
+            dx, dy = int(pos[2]), int(pos[3])
+            x, y = self._npc_pos(npc)
+            path = self.find_path((x, y), (x + dx, y + dy), mover=npc)
+            return Mover(lambda: self._npc_pos(npc), lambda x, y: s.update(x=x, y=y), dx, dy, steps=path)
         return None
+
+    def find_path(self, start: tuple[int, int], goal: tuple[int, int],
+                  mover: Optional[Npc] = None) -> Optional[list[tuple[int, int]]]:
+        """木・壁・ほかの人を避けた最短の手順（BFS）。着けなければ None（呼び出し側はまっすぐ進む）。
+
+        mover が NPC なら主人公のいるマスも避ける。動く本人のマスは通ってよい。
+        """
+        if self.map is None or start == goal:
+            return [] if start == goal else None
+        hero = (self.st.x, self.st.y)
+
+        def free(p: tuple[int, int]) -> bool:
+            if not self.passable(*p):
+                return False
+            if mover is not None and p == hero:
+                return False
+            n = self.npc_at(*p)
+            return n is None or n is mover
+
+        if not free(goal):
+            return None
+        prev: dict[tuple[int, int], Optional[tuple[int, int]]] = {start: None}
+        queue = [start]
+        for cur in queue:
+            if cur == goal:
+                break
+            for vx, vy in DIR_VEC.values():
+                nxt = (cur[0] + vx, cur[1] + vy)
+                if nxt not in prev and free(nxt):
+                    prev[nxt] = cur
+                    queue.append(nxt)
+        if goal not in prev:
+            return None
+        steps = []
+        node = goal
+        while prev[node] is not None:
+            p = prev[node]
+            steps.append((node[0] - p[0], node[1] - p[1]))
+            node = p
+        return steps[::-1]
 
     def _put_hero(self, x: int, y: int) -> None:
         self.st.x, self.st.y = x, y
@@ -562,7 +611,9 @@ class FieldScene(Scene):
             copy = buf.copy()
             buf.clear()
             buf.blit(copy, dx, dy)
-        self.effects.apply_world(buf, map_inner)
+        # 屋内のマップでは雨・雪を描かない（外に出ればまた降っている）
+        weather_area = None if self.map is not None and self.map.indoor else map_inner
+        self.effects.apply_world(buf, weather_area)
 
         if overlay:
             buf.box(msg_rect, FRAME, chars=BOX_SINGLE)
