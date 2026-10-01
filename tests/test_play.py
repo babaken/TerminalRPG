@@ -324,3 +324,33 @@ def test_find_path_falls_back_when_unreachable(game):
     f.change_map("forest_1", 20, 2, "up")
     assert f.find_path((16, 7), (19, 2)) is None          # 目的地が木
     assert f.find_path((16, 7), (16, 7)) == []
+
+
+def test_inn_refuses_when_fully_rested(game):
+    """全員 HP・MP 満タンで状態異常もないときは泊まれず、お金も減らない。"""
+    from trpg.scenes.facility import InnScene
+    d = Driver(game)
+    for _ in range(4):
+        d.key("ENTER")
+    d.settle()
+    f = d.field
+    f.st.gold = 100
+    sc = InnScene(f, 10)
+    d.app.push(sc)
+    assert sc.choice is None and "お元気そう" in " ".join(" ".join(p) for p in sc.msg.pages)
+    for _ in range(5):
+        d.key("ENTER")
+    assert sc.closed and f.st.gold == 100
+
+    # 毒なら泊まれる（HP が満タンでも）
+    f.st.hero.status = ["poison"]
+    sc = InnScene(f, 10)
+    d.app.push(sc)
+    assert sc.choice is not None
+    d.key("ENTER")                    # 泊まる
+    for _ in range(30):
+        if sc.closed:
+            break
+        d.key("ENTER")
+        d.tick(0.7)
+    assert sc.closed and f.st.gold == 90 and f.st.hero.status == []
