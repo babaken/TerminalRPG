@@ -3,10 +3,10 @@
     python -m trpg.tools.map_editor scenarios/FirstQuest
     python -m trpg.tools.map_editor scenarios/FirstQuest --map town_bern
 
-3-3a の範囲：マップを開いて表示・スクロール、タイルを塗る、Map.data に保存する。
-NPC・ワープ・イベントは表示だけ（置く・動かすのは 3-3b）。
+3-3a：マップを開いて表示・スクロール、タイルを塗る、Map.data に保存する。
+3-3b：NPC・ワープ・イベントを置く・編集する・動かす・消す。
 
-保存は Map.data のうち編集したマップの ``rows`` だけを書き換える（コメントや書式は残る）。
+保存は Map.data のうち変えたところ（マップの ``rows`` と NPC などの表の項目）だけを書き換える（コメントや書式は残る）。
 最初の保存の前に元のファイルを Map.data.bak に写す。保存後に --check と同じ検証をして件数を出す。
 """
 from __future__ import annotations
@@ -24,7 +24,9 @@ from ..data.models import GameMap, Tile
 from ..package import PackageError, open_package
 from ..package.check import check_package
 from ..term import Buffer, Key, KeyEvent, Rect, Style, set_ambiguous_width, text_width, truncate
-from .mapfile import MapFileError, replace_rows
+from . import mapfile
+from .mapfile import MapFileError, read_objects, replace_rows
+from .objform import KIND_NAMES, ORDER, ObjectForm
 
 MAP_FILE = "Map.data"
 PANEL_W = 34
@@ -48,6 +50,10 @@ HELP = [
     ("i", "カーソルの下のタイルを選ぶ（スポイト）"),
     ("p", "ペン：オンの間は動いた先を塗る"),
     ("u", "元に戻す"),
+    ("n / w / e", "カーソルの位置に NPC / ワープ / イベントを置く"),
+    ("c", "カーソルの位置の NPC などを編集"),
+    ("g", "カーソルの位置の NPC などを動かす（Enter で置く）"),
+    ("x / Delete", "カーソルの位置の NPC などを消す"),
     ("o", "NPC・ワープ・イベントの表示／非表示"),
     ("m", "マップを切り替える"),
     ("s / F2", "保存（編集したマップすべて）"),
@@ -70,15 +76,22 @@ class EditorScene(Scene):
         self.root = Path(root)
         self.gd = gd
         self.rows: dict[str, list[str]] = {mid: list(m.rows) for mid, m in gd.maps.items()}
-        self.undo: dict[str, list[tuple[int, int, str]]] = {mid: [] for mid in gd.maps}
-        self.dirty: set[str] = set()
+        self.saved_rows = {mid: list(r) for mid, r in self.rows.items()}
+        self.text = (self.root / MAP_FILE).read_bytes().decode("utf-8-sig")
+        self.objs = read_objects(self.text)
+        self.saved_objs = read_objects(self.text)
+        self.history: list[tuple] = []          # 元に戻すための記録（("tile", マップ, x, y, 前の文字) / ("text", マップ, x, y, 前の本文)）
         self.map_id = map_id if map_id in gd.maps else next(iter(gd.maps))
         self.x = self.y = 0
         self.ox = self.oy = 0
         self.brush: dict[str, int] = {}         # タイルセットごとの選択中のタイル
         self.pen = False
         self.show_objects = True
-        self.mode = "edit"                      # edit | maps | quit | help
+        self.mode = "edit"                      # edit | maps | quit | help | form | pick | move | delete
+        self.form: Optional[ObjectForm] = None
+        self.picking: list[tuple[str, int]] = []  # 同じマスに複数あるときの候補
+        self.pick_action = ""
+        self.target: Optional[tuple[str, int]] = None   # 動かす・消す対象（種類, 何番目）
         self.list_i = 0
         self.message = ""
         self.message_style = MSG
@@ -115,6 +128,23 @@ class EditorScene(Scene):
         ts = self.gd.tilesets.get(self.map.tileset)
         return ts.tiles.get(self.rows[self.map_id][y][x]) if ts else None
 
+    @property
+    def dirty(self) -> set[str]:
+        """保存していない変更のあるマップ。"""
+        return {mid for mid in self.rows
+                if self.rows[mid] != self.saved_rows[mid] or self.objs.get(mid) != self.saved_objs.get(mid)}
+
+    def objects_at(self, x: int, y: int) -> list[tuple[str, int, dict]]:
+        out = []
+        for kind in mapfile.KINDS:
+            for i, o in enumerate(self.objs.get(self.map_id, {}).get(kind, [])):
+                if (o.get("x"), o.get("y")) == (x, y):
+                    out.append((kind, i, o))
+        return out
+
+    def obj(self, kind: str, index: int) -> dict:
+        return self.objs[self.map_id][kind][index]
+
     def say(self, text: str, style: Style = MSG) -> None:
         self.message = text
         self.message_style = style
@@ -130,24 +160,38 @@ class EditorScene(Scene):
         if old == ch:
             return
         rows[self.y] = rows[self.y][: self.x] + ch + rows[self.y][self.x + 1:]
-        stack = self.undo[self.map_id]
-        stack.append((self.x, self.y, old))
-        del stack[:-UNDO_LIMIT]
-        self.dirty.add(self.map_id)
+        self._record(("tile", self.map_id, self.x, self.y, old))
+
+    def _record(self, entry: tuple) -> None:
+        self.history.append(entry)
+        del self.history[:-UNDO_LIMIT]
+
+    def apply(self, fn, *args) -> bool:
+        """Map.data の本文を書き換える操作（NPC などの追加・編集・移動・削除）。"""
+        try:
+            new = fn(self.text, self.map_id, *args)
+        except MapFileError as e:
+            self.say(f"書き換えられません：{e}", ERR)
+            return False
+        self._record(("text", self.map_id, self.x, self.y, self.text))
+        self.text = new
+        self.objs = read_objects(new)
+        return True
 
     def undo_last(self) -> None:
-        stack = self.undo[self.map_id]
-        if not stack:
+        if not self.history:
             self.say("元に戻す操作はありません")
             return
-        x, y, old = stack.pop()
-        rows = self.rows[self.map_id]
-        rows[y] = rows[y][:x] + old + rows[y][x + 1:]
-        self.x, self.y = x, y
-        if rows == self.map.rows:
-            self.dirty.discard(self.map_id)
+        kind, mid, x, y, old = self.history.pop()
+        if mid != self.map_id:
+            self.open_map(mid)
+        if kind == "tile":
+            rows = self.rows[mid]
+            rows[y] = rows[y][:x] + old + rows[y][x + 1:]
         else:
-            self.dirty.add(self.map_id)
+            self.text = old
+            self.objs = read_objects(old)
+        self.x, self.y = x, y
 
     def pick(self) -> None:
         ch = self.rows[self.map_id][self.y][self.x]
@@ -178,17 +222,19 @@ class EditorScene(Scene):
         self.pen = False
 
     def save(self) -> bool:
-        if not self.dirty:
+        dirty = self.dirty
+        if not dirty:
             self.say("変更はありません")
             return True
         path = self.root / MAP_FILE
         try:
             raw = path.read_bytes()
-            text = raw.decode("utf-8-sig")
-            out = text
-            for mid in sorted(self.dirty):
-                out = replace_rows(out, mid, self.rows[mid])
-        except (OSError, UnicodeDecodeError, MapFileError) as e:
+            out = self.text
+            in_text = {m["id"]: m.get("rows") for m in mapfile.tomllib.loads(out).get("map", [])}
+            for mid in self.rows:
+                if in_text.get(mid) != self.rows[mid]:
+                    out = replace_rows(out, mid, self.rows[mid])
+        except (OSError, MapFileError) as e:
             self.say(f"保存できません：{e}", ERR)
             return False
         if not self.backed_up:
@@ -198,10 +244,11 @@ class EditorScene(Scene):
         tmp = path.with_name(MAP_FILE + ".tmp")
         tmp.write_bytes(data)
         os.replace(tmp, path)
-        for mid in self.dirty:
-            self.gd.maps[mid].rows = list(self.rows[mid])
-        saved = len(self.dirty)
-        self.dirty.clear()
+        self.text = out
+        self.saved_rows = {mid: list(r) for mid, r in self.rows.items()}
+        self.objs = read_objects(out)
+        self.saved_objs = read_objects(out)
+        saved = len(dirty)
         rep, _ = check_package(self.root, lambda s: None)
         first = rep.errors[0].format() if rep.errors else ""
         self.say(f"保存しました（{saved} マップ）。検証：エラー {len(rep.errors)} 件 / 警告 {len(rep.warnings)} 件"
@@ -212,6 +259,27 @@ class EditorScene(Scene):
     def on_key(self, ev: KeyEvent, actions) -> None:
         c = _cmd(ev)
         if self.mode == "help":
+            self.mode = "edit"
+            return
+        if self.mode == "form":
+            self.form.on_key(ev, c)
+            if self.form.closed:
+                self._finish_form()
+            return
+        if self.mode == "pick":
+            self._key_pick(c)
+            return
+        if self.mode == "move":
+            self._key_move(c)
+            return
+        if self.mode == "delete":
+            if c == "y":
+                kind, i = self.target
+                name = self._obj_name(kind, self.obj(kind, i))
+                if self.apply(mapfile.delete_object, kind, i):
+                    self.say(f"{name} を消しました")
+            else:
+                self.say("")
             self.mode = "edit"
             return
         if self.mode == "maps":
@@ -254,6 +322,10 @@ class EditorScene(Scene):
                 self.paint()
         elif c == "u":
             self.undo_last()
+        elif c in ("n", "w", "e"):
+            self.new_object({"n": "npc", "w": "warp", "e": "event"}[c])
+        elif c in ("c", "g", "x", "DELETE"):
+            self.choose_object({"c": "edit", "g": "move", "x": "delete", "DELETE": "delete"}[c])
         elif c == "o":
             self.show_objects = not self.show_objects
         elif c == "m":
@@ -268,6 +340,121 @@ class EditorScene(Scene):
                 self.app.quit()
         elif c in ("?", "F1"):
             self.mode = "help"
+
+    # ---------------------------------------------------------------- NPC・ワープ・イベント
+    def _obj_name(self, kind: str, o: dict) -> str:
+        if kind == "npc":
+            return f"NPC {o.get('id', '')}"
+        if kind == "warp":
+            return f"ワープ（→ {o.get('to', '')}）"
+        return f"イベント {o.get('label', '')}"
+
+    def new_object(self, kind: str) -> None:
+        if not self.height:
+            return
+        base = {"x": self.x, "y": self.y}
+        if kind == "npc":
+            ids = {o.get("id") for o in self.objs[self.map_id]["npc"]}
+            n = 1
+            while f"npc{n}" in ids:
+                n += 1
+            base.update(id=f"npc{n}", glyph="人")
+        elif kind == "warp":
+            others = [m for m in self.gd.maps if m != self.map_id] or [self.map_id]
+            base.update(to=others[0], tx=0, ty=0)
+        self.form = ObjectForm(kind, base, list(self.gd.maps), validate=self._validate)
+        self.form.original = {"x": self.x, "y": self.y}      # 新規：x・y 以外は既定値なら書かない
+        self.mode = "form"
+        self.show_objects = True
+
+    def choose_object(self, action: str) -> None:
+        here = self.objects_at(self.x, self.y) if self.show_objects else []
+        if not here:
+            self.say("カーソルの位置に NPC・ワープ・イベントはありません" if self.show_objects
+                     else "NPC などを表示していません（o で表示）")
+            return
+        if len(here) == 1:
+            self._do(action, here[0][0], here[0][1])
+            return
+        self.picking = [(k, i) for k, i, _ in here]
+        self.pick_action = action
+        self.list_i = 0
+        self.mode = "pick"
+
+    def _do(self, action: str, kind: str, i: int) -> None:
+        self.target = (kind, i)
+        if action == "edit":
+            self.form = ObjectForm(kind, self.obj(kind, i), list(self.gd.maps), index=i, validate=self._validate)
+            self.mode = "form"
+        elif action == "move":
+            self.mode = "move"
+            self.say(f"{self._obj_name(kind, self.obj(kind, i))} を動かします。矢印で移動、Enter で置く、Esc でやめる")
+        else:
+            self.mode = "delete"
+
+    def _key_pick(self, c: str) -> None:
+        if c == "UP":
+            self.list_i = (self.list_i - 1) % len(self.picking)
+        elif c == "DOWN":
+            self.list_i = (self.list_i + 1) % len(self.picking)
+        elif c in ("ENTER", " "):
+            self.mode = "edit"
+            self._do(self.pick_action, *self.picking[self.list_i])
+        elif c in ("ESC", "q"):
+            self.mode = "edit"
+
+    def _key_move(self, c: str) -> None:
+        moves = {"UP": (0, -1), "DOWN": (0, 1), "LEFT": (-1, 0), "RIGHT": (1, 0)}
+        kind, i = self.target
+        o = self.obj(kind, i)
+        if c in moves:
+            dx, dy = moves[c]
+            self.x = min(max(self.x + dx, 0), self.width - 1)
+            self.y = min(max(self.y + dy, 0), self.height - 1)
+        elif c in ("ENTER", " ", "g"):
+            self.mode = "edit"
+            if (self.x, self.y) == (o.get("x"), o.get("y")):
+                self.say("")
+                return
+            name = self._obj_name(kind, o)
+            if self.apply(mapfile.set_object, kind, i, {"x": self.x, "y": self.y}):
+                self.say(f"{name} を ({self.x}, {self.y}) に動かしました")
+        elif c in ("ESC", "q"):
+            self.mode = "edit"
+            self.x, self.y = o.get("x", self.x), o.get("y", self.y)
+            self.say("動かすのをやめました")
+
+    def _validate(self, form: ObjectForm, v: dict) -> str:
+        if form.kind == "npc":
+            for j, o in enumerate(self.objs[self.map_id]["npc"]):
+                if o.get("id") == v["id"] and j != form.index:
+                    return f"ID「{v['id']}」はこのマップで使われています"
+        if form.kind == "warp":
+            rows = self.rows.get(v["to"])
+            if rows is not None and not (v["tx"] < len(rows[0]) and v["ty"] < len(rows)):
+                return f"行き先 ({v['tx']}, {v['ty']}) がマップ {v['to']}（{len(rows[0])}×{len(rows)}）の外です"
+        return ""
+
+    def _finish_form(self) -> None:
+        form = self.form
+        self.form = None
+        self.mode = "edit"
+        if form.result is None:
+            self.say("")
+            return
+        if form.index is None:
+            vals = {"x": form.original["x"], "y": form.original["y"]}
+            vals.update({k: v for k, v in form.result.items() if v is not None})
+            order = ORDER[form.kind]
+            vals = dict(sorted(vals.items(), key=lambda kv: order.index(kv[0]) if kv[0] in order else 99))
+            if self.apply(mapfile.add_object, form.kind, vals):
+                self.say(f"{self._obj_name(form.kind, vals)} を置きました")
+        else:
+            changes = {k: v for k, v in form.result.items() if form.original.get(k) != v}
+            if not changes:
+                self.say("変更はありません")
+            elif self.apply(mapfile.set_object, form.kind, form.index, changes):
+                self.say(f"{self._obj_name(form.kind, self.obj(form.kind, form.index))} を書き換えました")
 
     def _key_maps(self, ev: KeyEvent, c: str) -> None:
         ids = list(self.gd.maps)
@@ -296,6 +483,13 @@ class EditorScene(Scene):
             self._draw_map_list(buf)
         elif self.mode == "help":
             self._draw_help(buf)
+        elif self.mode == "form":
+            self.form.draw(buf, TITLE)
+        elif self.mode == "pick":
+            self._draw_pick(buf)
+        elif self.mode == "delete":
+            kind, i = self.target
+            self._draw_dialog(buf, [f"{self._obj_name(kind, self.obj(kind, i))} を消しますか？", "y：消す　それ以外：やめる"])
         elif self.mode == "quit":
             self._draw_dialog(buf, ["保存していない変更があります。",
                                     "y：保存して終わる　n：保存せずに終わる　Esc：戻る"])
@@ -332,20 +526,24 @@ class EditorScene(Scene):
 
     def _cell(self, grid: list[str], x: int, y: int) -> tuple[str, Style]:
         if self.show_objects:
-            m = self.map
-            for n in m.npcs:
-                if (n.x, n.y) == (x, y):
-                    return n.glyph, Style.of(n.color or "white", bold=True)
-            for w in m.warps:
-                if (w.x, w.y) == (x, y):
-                    return WARP_GLYPH, Style.of("bright_magenta", bold=True)
-            for e in m.events:
-                if (e.x, e.y) == (x, y):
-                    return EVENT_GLYPH, Style.of("bright_cyan", bold=True)
+            moving = self.target if self.mode == "move" else None
+            if moving and (x, y) == (self.x, self.y):
+                return self._glyph(moving[0], self.obj(*moving))
+            for kind, i, o in self.objects_at(x, y):
+                if (kind, i) != moving:
+                    return self._glyph(kind, o)
         tile = self.tile_at(x, y)
         if tile is None:
             return UNKNOWN_GLYPH, Style.of("bright_red")
         return tile.glyph, Style.of(tile.color) if tile.color else Style()
+
+    def _glyph(self, kind: str, o: dict) -> tuple[str, Style]:
+        if kind == "npc":
+            g = o.get("glyph", "")
+            return (g if text_width(g) == 2 else UNKNOWN_GLYPH), Style.of(o.get("color") or "white", bold=True)
+        if kind == "warp":
+            return WARP_GLYPH, Style.of("bright_magenta", bold=True)
+        return EVENT_GLYPH, Style.of("bright_cyan", bold=True)
 
     def _draw_panel(self, buf: Buffer, area: Rect) -> None:
         tiles = self.tiles
@@ -378,16 +576,13 @@ class EditorScene(Scene):
             t = self.tile_at(self.x, self.y)
             out.append((f"位置 ({self.x}, {self.y})", TEXT))
             out.append((f"下のタイル {ch} {t.glyph + ' ' + t.name if t else '（未定義）'}", TEXT if t else ERR))
-            m = self.map
-            for n in m.npcs:
-                if (n.x, n.y) == (self.x, self.y):
-                    out.append((f"NPC {n.id}（{n.move}）", TEXT))
-            for w in m.warps:
-                if (w.x, w.y) == (self.x, self.y):
-                    out.append((f"ワープ → {w.to} ({w.tx}, {w.ty})", TEXT))
-            for e in m.events:
-                if (e.x, e.y) == (self.x, self.y):
-                    out.append((f"イベント {e.label}（{e.trigger}）", TEXT))
+            for kind, _, o in self.objects_at(self.x, self.y):
+                if kind == "npc":
+                    out.append((f"NPC {o.get('id')}（{o.get('move', 'fixed')}）", TEXT))
+                elif kind == "warp":
+                    out.append((f"ワープ → {o.get('to')} ({o.get('tx')}, {o.get('ty')})", TEXT))
+                else:
+                    out.append((f"イベント {o.get('label')}（{o.get('trigger', 'check')}）", TEXT))
         out.append((f"ペン {'オン' if self.pen else 'オフ'}　表示 {'オン' if self.show_objects else 'オフ'}", DIM))
         out.append(("? で操作説明", DIM))
         return out
@@ -397,8 +592,8 @@ class EditorScene(Scene):
             buf.put(1, y, truncate(self.message, w - 2), self.message_style)
         else:
             changed = f"　未保存 {len(self.dirty)} マップ" if self.dirty else ""
-            buf.put(1, y, truncate("矢印：移動  Enter：塗る  [ ]：タイル  i：スポイト  p：ペン  u：戻す  "
-                                   "m：マップ  s：保存  q：終了" + changed, w - 2), DIM)
+            buf.put(1, y, truncate("矢印：移動  Enter：塗る  [ ]：タイル  n/w/e：置く  c：編集  g：動かす  x：消す  "
+                                   "s：保存  ?：説明" + changed, w - 2), DIM)
 
     def _overlay(self, buf: Buffer, w: int, h: int, title: str) -> Rect:
         rect = Rect(max(0, (buf.width - w) // 2), max(0, (buf.height - h) // 2), min(w, buf.width), min(h, buf.height))
@@ -418,6 +613,13 @@ class EditorScene(Scene):
             st = HILITE if i == self.list_i else TEXT
             buf.put(inner.x, inner.y + row, " " * inner.w, st)
             buf.put(inner.x, inner.y + row, truncate(line, inner.w), st, clip=inner)
+
+    def _draw_pick(self, buf: Buffer) -> None:
+        inner = self._overlay(buf, 50, len(self.picking) + 2, "どれにしますか（Enter / Esc）")
+        for row, (kind, i) in enumerate(self.picking):
+            st = HILITE if row == self.list_i else TEXT
+            buf.put(inner.x, inner.y + row, " " * inner.w, st)
+            buf.put(inner.x + 1, inner.y + row, truncate(self._obj_name(kind, self.obj(kind, i)), inner.w - 2), st)
 
     def _draw_help(self, buf: Buffer) -> None:
         inner = self._overlay(buf, 70, len(HELP) + 4, "操作説明（何かキーを押すと戻る）")

@@ -6,6 +6,7 @@ TOML 全体を書き直さないので、手で書いた説明や桁揃えはそ
 from __future__ import annotations
 
 import re
+from typing import Optional
 import tomllib
 
 _HEADER = re.compile(r"^\s*\[")                     # テーブル見出し（[x] / [[x]]）
@@ -114,3 +115,152 @@ def replace_rows(text: str, map_id: str, rows: list[str]) -> str:
     if got != [rows]:
         raise MapFileError(f"マップ {map_id} の rows を正しく書き換えられませんでした")
     return out
+
+
+# ---------------------------------------------------------------- NPC・ワープ・イベント（3-3b）
+KINDS = ("npc", "warp", "event")
+_ANY_HEADER = re.compile(r"^\s*\[\[?\s*([A-Za-z_][\w.\s-]*?)\s*\]\]?\s*(#.*)?$")
+
+
+def toml_value(v) -> str:
+    if isinstance(v, bool):
+        return "true" if v else "false"
+    if isinstance(v, int):
+        return str(v)
+    if isinstance(v, (list, tuple)):
+        return "[" + ", ".join(toml_value(x) for x in v) + "]"
+    return quote(str(v))
+
+
+def read_objects(text: str) -> dict[str, dict[str, list[dict]]]:
+    """マップ ID → {"npc": [...], "warp": [...], "event": [...]}（表示用。TOML の辞書のまま）。"""
+    data = tomllib.loads(text)
+    out = {}
+    for m in data.get("map", []):
+        if isinstance(m, dict) and isinstance(m.get("id"), str):
+            out[m["id"]] = {k: [o for o in m.get(k, []) if isinstance(o, dict)] for k in KINDS}
+    return out
+
+
+def _header_name(line: str) -> Optional[str]:
+    m = _ANY_HEADER.match(line)
+    return re.sub(r"\s+", "", m.group(1)) if m else None
+
+
+def _blocks(text: str, map_id: str) -> tuple[list[str], int, int, dict[str, list[tuple[int, int]]]]:
+    """行の一覧、マップの範囲（見出しの行〜次のマップ・タイルセットの直前）、種類ごとの表の範囲。"""
+    lines = text.splitlines(keepends=True)
+    headers = []                                       # (行番号, 見出し名)。rows など複数行の配列の中は除く
+    i = 0
+    offset = 0
+    offsets = []
+    for ln in lines:
+        offsets.append(offset)
+        offset += len(ln)
+    while i < len(lines):
+        name = _header_name(lines[i])
+        if name:
+            headers.append((i, name))
+        m = _ROWS_KEY.match(lines[i]) or re.match(r"^\s*[\w-]+\s*=\s*(?=\[)", lines[i])
+        if m and m.end() < len(lines[i]) and lines[i][m.end()] == "[":
+            end = _array_end(text, offsets[i] + m.end())
+            while i + 1 < len(lines) and offsets[i + 1] < end:
+                i += 1
+        i += 1
+    for hi, (start, name) in enumerate(headers):
+        if not (name == "map" and lines[start].lstrip().startswith("[[")):
+            continue
+        stop = len(lines)
+        for s2, n2 in headers[hi + 1:]:
+            if not n2.startswith("map."):
+                stop = s2
+                break
+        mid = None
+        body_end = next((s for s, _ in headers if start < s < stop), stop)
+        for ln in lines[start + 1: body_end]:
+            m = re.match(r"^\s*id\s*=\s*(\"[^\"]*\"|'[^']*')", ln)
+            if m:
+                mid = m.group(1)[1:-1]
+        if mid != map_id:
+            continue
+        tables: dict[str, list[tuple[int, int]]] = {k: [] for k in KINDS}
+        subs = [(s, n) for s, n in headers if start < s < stop]
+        for j, (s, n) in enumerate(subs):
+            e = subs[j + 1][0] if j + 1 < len(subs) else stop
+            while e > s + 1 and (not lines[e - 1].strip() or lines[e - 1].lstrip().startswith("#")):
+                e -= 1                                  # 後ろの空行・次の表の説明は含めない
+            kind = n.split(".", 1)[1] if "." in n else ""
+            if kind in tables:
+                tables[kind].append((s, e))
+        return lines, start, stop, tables
+    raise MapFileError(f"Map.data にマップ {map_id} が見つかりません")
+
+
+def _check(out: str, map_id: str, kind: str, expect: list[dict]) -> str:
+    try:
+        got = read_objects(out).get(map_id, {}).get(kind)
+    except tomllib.TOMLDecodeError as e:
+        raise MapFileError(f"書き換え後の Map.data が TOML として読めません: {e}") from None
+    if got != expect:
+        raise MapFileError(f"マップ {map_id} の {kind} を正しく書き換えられませんでした")
+    return out
+
+
+def set_object(text: str, map_id: str, kind: str, index: int, values: dict) -> str:
+    """index 番目の表の項目を書き換える（None の項目は消す）。ほかの行・コメントはそのまま。"""
+    lines, _, _, tables = _blocks(text, map_id)
+    before = read_objects(text)[map_id][kind]
+    if not 0 <= index < len(tables[kind]) or len(tables[kind]) != len(before):
+        raise MapFileError(f"マップ {map_id} の {kind} {index + 1} 番目が見つかりません")
+    s, e = tables[kind][index]
+    newline = "\r\n" if "\r\n" in text else "\n"
+    block = lines[s:e]
+    for key, v in values.items():
+        pat = re.compile(rf"^(\s*{re.escape(key)}\s*=\s*)(\"(?:[^\"\\]|\\.)*\"|'[^']*'|\[[^\]#]*\]|[^#\s]+)(\s*#.*)?(\r?\n)?$")
+        at = next((i for i, ln in enumerate(block) if re.match(rf"^\s*{re.escape(key)}\s*=", ln)), None)
+        if at is None:
+            if v is not None:
+                last = max((i for i, ln in enumerate(block) if re.match(r"^\s*[\w-]+\s*=", ln)), default=0)
+                block.insert(last + 1, f"{key} = {toml_value(v)}{newline}")
+            continue
+        if v is None:
+            del block[at]
+            continue
+        m = pat.match(block[at])
+        if m:
+            block[at] = m.group(1) + toml_value(v) + (m.group(3) or "") + (m.group(4) or "")
+        else:
+            block[at] = f"{key} = {toml_value(v)}{newline}"
+    expect = [dict(o) for o in before]
+    for key, v in values.items():
+        if v is None:
+            expect[index].pop(key, None)
+        else:
+            expect[index][key] = v
+    return _check("".join(lines[:s] + block + lines[e:]), map_id, kind, expect)
+
+
+def delete_object(text: str, map_id: str, kind: str, index: int) -> str:
+    lines, _, _, tables = _blocks(text, map_id)
+    before = read_objects(text)[map_id][kind]
+    if not 0 <= index < len(tables[kind]) or len(tables[kind]) != len(before):
+        raise MapFileError(f"マップ {map_id} の {kind} {index + 1} 番目が見つかりません")
+    s, e = tables[kind][index]
+    while e < len(lines) and not lines[e].strip():      # 後ろの空行も一緒に消す（空行が続かないように）
+        e += 1
+    return _check("".join(lines[:s] + lines[e:]), map_id, kind, before[:index] + before[index + 1:])
+
+
+def add_object(text: str, map_id: str, kind: str, values: dict) -> str:
+    """マップの最後に [[map.<kind>]] を足す。None の項目は書かない。"""
+    lines, _, stop, _ = _blocks(text, map_id)
+    before = read_objects(text)[map_id][kind]
+    newline = "\r\n" if "\r\n" in text else "\n"
+    e = stop
+    while e > 0 and (not lines[e - 1].strip() or (e < len(lines) and lines[e - 1].lstrip().startswith("#"))):
+        e -= 1
+    if e and not lines[e - 1].endswith("\n"):
+        lines[e - 1] += newline
+    vals = {k: v for k, v in values.items() if v is not None}
+    block = [newline, f"[[map.{kind}]]{newline}"] + [f"{k} = {toml_value(v)}{newline}" for k, v in vals.items()]
+    return _check("".join(lines[:e] + block + lines[e:]), map_id, kind, before + [vals])
