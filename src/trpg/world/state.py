@@ -109,6 +109,13 @@ class GameState:
         member.equip[it.slot] = iid
         return old
 
+    def unequip(self, member: "Member", slot: str) -> Optional[str]:
+        """装備を外して袋に戻す。外した ID を返す。"""
+        old = member.equip.pop(slot, None)
+        if old:
+            self.add_item(old)
+        return old
+
     def add_item(self, iid: str, n: int = 1) -> None:
         self.items[iid] = self.items.get(iid, 0) + n
 

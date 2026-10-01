@@ -17,7 +17,8 @@ ASCII アートで表現する、ターミナル用の RPG エンジンです。
 | 戦闘（ターン制・スキル・道具・状態異常・逃走・テイム・経験値とレベルアップ） `src/trpg/battle/` `scenes/battle.py` | 実装済み |
 | 全滅時の画面（タイトルへ／セーブから） `scenes/gameover.py` | 実装済み（「セーブから」はセーブ実装待ち） |
 | FirstQuest `scenarios/FirstQuest/` | 1章「出会いと旅立ち」すべて遊べる |
-| フィールドのメニュー（どうぐ・そうび・つよさ）・セーブ / ロード | 未着手 |
+| フィールドメニュー（どうぐ・スキル・そうび・つよさ・いらい・システム） `scenes/menu.py` | 実装済み |
+| セーブ / ロード | 未着手（M1 で実装） |
 
 ## 動作環境
 
@@ -44,7 +45,7 @@ python -m trpg --keylog     # 不具合調査用: 受け取ったキーと画面
 |---|---|
 | 矢印 / WASD / テンキー | 移動、選択肢のカーソル移動 |
 | Enter / Z / Space | 話す・調べる、会話送り（表示途中なら全文表示）、決定 |
-| Esc / X / M | メニュー（つづける / タイトルにもどる / ゲームをおわる） |
+| Esc / X / M | メニューを開く（どうぐ・スキル・そうび・つよさ・いらい・システム）。メニュー内では Esc でひとつ戻る |
 
 戦闘中の操作
 | キー | 動作 |
@@ -74,6 +75,23 @@ python -m trpg --list                           # 起動フォルダと scenario
 シナリオに誤りがあるとゲームは起動せず、同じ内容を表示します。zip はフォルダごと圧縮した形（`FirstQuest/manifest.toml`）でも読めます。
 
 ウィンドウを 100×30 より小さくすると、警告を出してゲームを一時停止します。大きくすると自動で元に戻ります。
+
+## ドキュメント（`docs/`）
+
+| ファイル | 内容 |
+|---|---|
+| `requirements.md` | 要件定義書 v1.1 |
+| `basic_design.md` | 基本設計書 v0.2（データ仕様・スクリプト構文・計算式。【済】【未】で実装状況を表示） |
+| `development_plan.md` | 開発計画（マイルストーン M1〜M7、GitHub での管理方針） |
+| `scenario/FirstQuest_story.md` | FirstQuest 本文（案A） |
+| `scenario/FirstQuestPlus_story.md` | FirstQuest+ 本文（案C、保留） |
+| `plot_options.md` | 3・4 章のプロット案 |
+
+## 開発
+
+- リポジトリ: https://github.com/babaken/TRPG
+- `main` は常に動く状態に保ち、作業は `feature/<内容>` ブランチ → プルリクエストで取り込む
+- プッシュ・プルリクエストで GitHub Actions が Windows / Linux × Python 3.11 / 3.14 のテストを実行する
 
 ## テスト
 
@@ -118,3 +136,5 @@ python -m pytest
 | `battle/core.py` | 戦闘の進行と計算（画面に依存しない。行動順・ダメージ・会心・回避・属性・状態異常・敵 AI・逃走・テイム・報酬） |
 | `scenes/battle.py` | 戦闘画面（敵の AA 表示・コマンド入力・対象選択・メッセージ） |
 | `scenes/gameover.py` | 全滅時の画面 |
+| `scenes/menu.py` | フィールドメニュー |
+| `world/items.py` | フィールドでのアイテム・スキルの使用 |

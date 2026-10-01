@@ -40,9 +40,7 @@ class _WinConsole:
         if not k32.GetConsoleMode(self._out, self._ctypes.byref(self._mode)):
             raise TerminalError(
                 "Windows コンソールを取得できません。\n"
-                "Windows Terminal / コマンドプロンプト / PowerShell から起動してください。\n"
-                "（MSYS2 / Git Bash の mintty 上では Windows 版 Python のキー入力が使えません。"
-                "mintty で遊ぶ場合は MSYS2 の Python を使うか、`winpty python -m trpg` で起動してください）"
+                "Windows Terminal / コマンドプロンプト / PowerShell から起動してください。"
             )
         self._saved_mode = self._mode.value
         new_mode = self._mode.value | self.ENABLE_PROCESSED_OUTPUT | self.ENABLE_VIRTUAL_TERMINAL_PROCESSING
