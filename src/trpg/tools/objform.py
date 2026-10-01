@@ -18,7 +18,8 @@ from ..data.reader import ID_RE
 from ..term import Buffer, Key, KeyEvent, Rect, Style, text_width, truncate
 from ..term.style import COLORS
 
-KIND_NAMES = {"npc": "NPC", "warp": "ワープ", "event": "イベント"}
+KIND_NAMES = {"npc": "NPC", "warp": "ワープ", "event": "イベント", "map": "マップ", "resize": "マップの大きさ"}
+MAX_SIZE = 200
 COLOR_NAMES = [""] + [c for c in COLORS if c != "grey"]
 DIRS = ["", "up", "down", "left", "right"]
 
@@ -40,7 +41,26 @@ class Field:
     default: Any = ""                 # この値なら（もともと書いていなければ）書かない
 
 
-def fields_for(kind: str, map_ids: list[str]) -> list[Field]:
+def fields_for(kind: str, map_ids: list[str], choices: Optional[dict] = None) -> list[Field]:
+    out = _fields(kind, map_ids)
+    for f in out:
+        if choices and f.key in choices:
+            f.choices = list(choices[f.key])
+    return out
+
+
+def _fields(kind: str, map_ids: list[str]) -> list[Field]:
+    if kind == "map":
+        return [Field("id", "ID", required=True), Field("name", "名前", required=True),
+                Field("tileset", "タイルセット", "choice", required=True),
+                Field("width", f"幅（1〜{MAX_SIZE}）", "int", default=None),
+                Field("height", f"高さ（1〜{MAX_SIZE}）", "int", default=None),
+                Field("fill", "敷きつめるタイル", "choice", required=True),
+                Field("dark", "暗いマップ", "bool", default=False), Field("indoor", "屋内", "bool", default=False)]
+    if kind == "resize":
+        return [Field("width", f"幅（1〜{MAX_SIZE}）", "int", default=None),
+                Field("height", f"高さ（1〜{MAX_SIZE}）", "int", default=None),
+                Field("fill", "広げたところのタイル", "choice", required=True)]
     if kind == "npc":
         return [Field("id", "ID", required=True), Field("glyph", "文字（幅 2）", required=True),
                 Field("color", "色", "choice", COLOR_NAMES), Field("move", "動き", "choice", list(NPC_MOVES), default="fixed"),
@@ -77,11 +97,11 @@ class ObjectForm:
     """1 つの NPC・ワープ・イベントの編集。submit が成功したら done になる。"""
 
     def __init__(self, kind: str, values: dict, map_ids: list[str], *, index: Optional[int] = None,
-                 validate: Optional[Callable[["ObjectForm", dict], str]] = None):
+                 validate: Optional[Callable[["ObjectForm", dict], str]] = None, choices: Optional[dict] = None):
         self.kind = kind
         self.index = index                       # 既存の何番目か（新規は None）
         self.original = dict(values)
-        self.fields = fields_for(kind, map_ids)
+        self.fields = fields_for(kind, map_ids, choices)
         self.values = {f.key: values.get(f.key, f.default) for f in self.fields}
         self.validate = validate
         self.row = 0
@@ -94,6 +114,8 @@ class ObjectForm:
     @property
     def title(self) -> str:
         what = KIND_NAMES[self.kind]
+        if self.kind == "resize":
+            return "マップの大きさを変える"
         return f"{what}を追加" if self.index is None else f"{what}を編集"
 
     @property
@@ -187,6 +209,14 @@ class ObjectForm:
             if v["move"] == "route" and not v["route"]:
                 self.error = "動きが route のときは道順を入力してください"
                 return
+        if self.kind in ("map", "resize"):
+            if self.kind == "map" and not ID_RE.match(v["id"]):
+                self.error = "ID は英小文字で始まり、英小文字・数字・_ だけで書いてください"
+                return
+            for key in ("width", "height"):
+                if not 1 <= v[key] <= MAX_SIZE:
+                    self.error = f"幅と高さは 1〜{MAX_SIZE} にしてください"
+                    return
         if self.kind == "event" and re.search(r"\s", v["label"]):
             self.error = "ラベルに空白は使えません"
             return
@@ -211,7 +241,7 @@ class ObjectForm:
         w = min(buf.width - 4, 64)
         h = self.rows + 3
         rect = Rect((buf.width - w) // 2, max(0, (buf.height - h) // 2), w, h)
-        pos = f"（{self.original.get('x')}, {self.original.get('y')}）"
+        pos = f"（{self.original.get('x')}, {self.original.get('y')}）" if "x" in self.original else ""
         inner = buf.box(rect, Style.of("bright_white"), title=f"{self.title} {pos}", title_style=title_style)
         y = inner.y
         for i, f in enumerate(self.fields):

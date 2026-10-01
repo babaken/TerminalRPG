@@ -264,3 +264,22 @@ def add_object(text: str, map_id: str, kind: str, values: dict) -> str:
     vals = {k: v for k, v in values.items() if v is not None}
     block = [newline, f"[[map.{kind}]]{newline}"] + [f"{k} = {toml_value(v)}{newline}" for k, v in vals.items()]
     return _check("".join(lines[:e] + block + lines[e:]), map_id, kind, before + [vals])
+
+
+# ---------------------------------------------------------------- マップの追加（3-3c）
+def add_map(text: str, values: dict, rows: list[str]) -> str:
+    """ファイルの最後に [[map]] を足す。values は id・name など（None の項目は書かない）、rows は最後に書く。"""
+    newline = "\r\n" if "\r\n" in text else "\n"
+    if any(m.get("id") == values.get("id") for m in tomllib.loads(text).get("map", [])):
+        raise MapFileError(f"マップ {values.get('id')} はすでにあります")
+    body = text.rstrip("\r\n") + newline + newline if text.strip() else ""
+    body += f"[[map]]{newline}"
+    body += "".join(f"{k} = {toml_value(v)}{newline}" for k, v in values.items() if v is not None)
+    body += f"rows = {format_rows(rows, '', newline)}{newline}"
+    try:
+        got = [m for m in tomllib.loads(body).get("map", []) if m.get("id") == values.get("id")]
+    except tomllib.TOMLDecodeError as e:
+        raise MapFileError(f"書き換え後の Map.data が TOML として読めません: {e}") from None
+    if len(got) != 1 or got[0].get("rows") != rows:
+        raise MapFileError(f"マップ {values.get('id')} を正しく追加できませんでした")
+    return body

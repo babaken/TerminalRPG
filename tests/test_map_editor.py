@@ -134,7 +134,7 @@ def test_cursor_stays_in_map_and_scrolls(sample_dir):
 def test_switch_maps_keeps_edits(sample_dir):
     e = Ed(sample_dir)
     e.key("RIGHT", "DOWN", "1", "ENTER", "m")
-    assert "マップ（Enter で開く" in e.screen()
+    assert "a：新しいマップ" in e.screen()
     while list(e.gd.maps)[e.s.list_i] != "forest_1":
         e.key("DOWN")
     e.key("ENTER")
