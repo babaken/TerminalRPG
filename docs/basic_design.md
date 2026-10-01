@@ -338,6 +338,7 @@ name = "囁きの森"                 # {hero} などの置き換え可
 tileset = "default"
 encounter = "forest_1"           # 省略時エンカウントなし
 dark = false
+indoor = false                    # true：屋内。雨・雪を表示しない（天気の状態は保ったまま）
 rows = [ "TTTTT…", … ]            # 1 文字 = 1 タイル。全行同じ長さ
 bgm = ""                          # 予約（音なし）
 

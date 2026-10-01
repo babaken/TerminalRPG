@@ -184,6 +184,7 @@ class GameMap:
     rows: list[str]
     encounter: str = ""
     dark: bool = False
+    indoor: bool = False      # 屋内：雨・雪を表示しない（天気の状態は保ったまま）
     events: list[MapEvent] = field(default_factory=list)
     warps: list[Warp] = field(default_factory=list)
     npcs: list[Npc] = field(default_factory=list)

@@ -270,3 +270,21 @@ def test_chief_is_in_one_place_only(game):
     assert visible("house_chief", "chief_wife")
     f.st.flags.add("ch1_raid")
     assert not visible("village_lito", "chief") and visible("house_chief", "chief_in")
+
+
+def test_rain_not_drawn_indoors(game):
+    """雨は屋内（indoor = true）のマップでは描かず、外に出るとまた降っている。"""
+    d = Driver(game)
+    for _ in range(4):
+        d.key("ENTER")
+    d.settle()
+    f = d.field
+    assert game.data.maps["house_chief"].indoor and not game.data.maps["village_lito"].indoor
+    f.effects.start("rain", ["on"], {})
+    f.change_map("house_chief", 5, 6)
+    d.tick(0.5)
+    assert "／" not in d.screen()
+    f.change_map("village_lito", 14, 5)
+    d.tick(0.5)
+    assert "／" in d.screen()
+    assert f.st.effects.get("rain") == "1"

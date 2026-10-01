@@ -562,7 +562,9 @@ class FieldScene(Scene):
             copy = buf.copy()
             buf.clear()
             buf.blit(copy, dx, dy)
-        self.effects.apply_world(buf, map_inner)
+        # 屋内のマップでは雨・雪を描かない（外に出ればまた降っている）
+        weather_area = None if self.map is not None and self.map.indoor else map_inner
+        self.effects.apply_world(buf, weather_area)
 
         if overlay:
             buf.box(msg_rect, FRAME, chars=BOX_SINGLE)

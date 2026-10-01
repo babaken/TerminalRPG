@@ -175,6 +175,7 @@ when = "flag.ch1_farewell and !flag.ch1_left_village"
 id = "house_hero"
 name = "{hero}の家"
 tileset = "default"
+indoor = true
 rows = [
   "############",
   "#..........#",
@@ -278,6 +279,7 @@ when = "!flag.ch1_forest_done"
 id = "house_chief"
 name = "村長の家"
 tileset = "default"
+indoor = true
 rows = [
   "############",
   "#..........#",
@@ -507,6 +509,7 @@ when = "quest.q_lost_cat == active and !flag.found_cat"
 id = "guild_bern"
 name = "冒険者協会ベルン支部"
 tileset = "default"
+indoor = true
 rows = [
   "####################",
   "####################",
@@ -556,6 +559,7 @@ talk = "ch1_adv_b_talk"
 id = "bern_inn"
 name = "宿屋「旅鳥亭」"
 tileset = "default"
+indoor = true
 rows = [
   "##############",
   "#ttt.........#",
