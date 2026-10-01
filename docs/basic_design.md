@@ -194,7 +194,7 @@ languages = ["ja"]
 
 [title_screen]
 aa = "aa/title.txt"
-effect = "starfall"          # 【未】タイトル背景エフェクトは未表示
+effect = "starfall"          # タイトル背景：starfall（繰り返し降る）| rain | snow | none
 
 [rules]
 gameover = "choose"          # retry_from_save | title | choose
@@ -228,7 +228,7 @@ job = "hero"
 lv = 1
 stats = { hp = 30, mp = 5, atk = 8, def = 6, mag = 3, agi = 6, luk = 5 }   # hp 必須
 equip = { armor = "cloth" }  # weapon / armor / shield / accessory
-face = "aa/face_hero.txt"    # 【未】顔 AA は未表示
+face = "aa/face_hero.txt"    # 顔 AA（@face hero で表示）
 recruit_text = "…"           # 仲間選択画面の紹介文
 ```
 - 職業の `equip` が空なら何でも装備できる。装飾品も category（例 `accessory`）で判定する【変更】。
@@ -409,7 +409,12 @@ on_complete = "ch1_quest_done"   # 達成報告のあとに実行するラベル
 | `@命令 引数…` | 命令（位置引数と `名前=値`。値は数値・識別子・`"文字列"`） |
 
 - 本文中の置き換え【済】：`{hero}` `{party.2}` `{var.名前}` `{item.ID}`（アイテム名）`{gold}`。
-- 本文中の制御コード `\w500` `\c[red]…\c[]` `\s2` は【未】。
+- 本文中の制御コード【済】（`ui/markup.py`）：
+  - `\w500`：ここで 500 ミリ秒待つ
+  - `\c[色名]…\c[]`：文字色（色名は `red` `bright_yellow` など）
+  - `\s2`：文字送りの速さを 2 倍（`\s0.5` で半分、`\s1` で戻す、`\s0` で残りを一気に表示）
+  - `\\`：「\」そのもの
+  - 選択肢では制御コードは取り除いて表示する。誤った制御コード・色名・`\c[]` の閉じ忘れは --check でエラー
 
 ### 10.3 条件式【済】
 | 名前空間 | 内容 |
@@ -444,7 +449,7 @@ on_complete = "ch1_quest_done"   # 達成報告のあとに実行するラベル
 | `@effect 名前 引数… [wait=false]` | 【一部】 | 11 章 |
 | `@shop ID` `@inn 価格` `@guild` `@recruit 候補… pick=n` | 【済】 | 施設画面（閉じると続きを実行） |
 | `@battle group=ID [escape=false] [gameover=] [target_only=ID] [lose=*L]` | 【済】 | イベント戦闘 |
-| `@face ID` | 【未】 | 何もしない |
+| `@face ID` / `@face none` | 【済】 | 会話窓の左上に顔 AA を枠つきで出す（枠の見出しは話者名）。ID は Friends.data のキャラクターの face → `aa/face_ID.txt` → ID 自体が .txt のパス の順に探す。スクリプトが終わると消える |
 | `@save_point` | 【済】 | セーブ画面を開く（閉じるとスクリプトの続きを実行） |
 | `@ending` | 【一部】 | 「おわり」を表示してタイトルへ（スタッフロールは【未】） |
 
@@ -537,6 +542,6 @@ on_complete = "ch1_quest_done"   # 達成報告のあとに実行するラベル
 ---
 
 ## 16. テスト【済】
-- `python -m pytest`（現在 146 件）。セーブはテストごとの一時フォルダに書く。端末を使わずにシーンへキーを送り、画面バッファを文字列で確かめる。
+- `python -m pytest`（現在 156 件）。セーブはテストごとの一時フォルダに書く。端末を使わずにシーンへキーを送り、画面バッファを文字列で確かめる。
 - `tests/test_chapter1.py`：1 章を最初から「第1章 完」まで自動プレイ（戦闘は自動で戦う）。30 種の乱数で完走を確認済み。
 - Windows 実機の確認は手動（キー入力の調査は `--keylog`）。

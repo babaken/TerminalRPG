@@ -35,6 +35,10 @@ class TitleScene(Scene):
         except Exception:
             has_save = False
         self.items = [("はじめから", True), ("つづきから", has_save), ("おわる", True)]
+        # 背景エフェクト（manifest の title_screen.effect）
+        self.bg_kind = game.manifest.title_effect if game.manifest.title_effect not in ("", "none") else ""
+        self.bg = None
+        self._make_bg()
         if has_save:
             self.index = 1
 
@@ -62,6 +66,20 @@ class TitleScene(Scene):
     def debug_state(self) -> str:
         return f"index={self.index} notice={self.notice!r}"
 
+    def _make_bg(self) -> None:
+        from ..effects import Starfall, Weather
+        if self.bg_kind == "starfall":
+            self.bg = Starfall(count=5, ms=3000)
+        elif self.bg_kind in ("rain", "snow"):
+            self.bg = Weather(self.bg_kind, 1)
+
+    def update(self, dt: float) -> None:
+        if self.bg is None:
+            return
+        self.bg.update(dt)
+        if getattr(self.bg, "done", False):        # 流れ星は終わったら次の流れ星を降らせる
+            self._make_bg()
+
     def new_game(self) -> None:
         m = self.game.manifest
         hero = self.game.data.characters[m.start_party[0]]
@@ -75,6 +93,11 @@ class TitleScene(Scene):
         start_field(self.app, self.game, state, new_game=True)
 
     def draw(self, buf: Buffer) -> None:
+        if self.bg is not None:                     # 背景を先に描き、タイトルと選択肢を上に重ねる
+            if self.bg_kind == "starfall":
+                self.bg.apply(buf)
+            else:
+                self.bg.apply(buf, buf.rect)
         m = self.game.manifest
         aa = self.game.data.aa.get(m.title_aa) if m.title_aa else None
         top = max(1, buf.height // 2 - 10)

@@ -233,6 +233,20 @@ class GameData:
     # スクリプトのラベルを参照している箇所（label, file, line）。scenario.sco 読込後に照合する
     label_refs: list[tuple[str, str, Optional[int]]] = field(default_factory=list)
 
+    def face_path(self, ident: str, exists) -> Optional[str]:
+        """@face の ID から顔 AA のファイルを決める。
+
+        1. Friends.data のキャラクターで face が指定されていればそれ
+        2. なければ aa/face_<ID>.txt（NPC など Friends.data にいない人向け）
+        3. ID 自体が .txt のパスならそれ
+        exists(path) で存在を確かめ、見つからなければ None。
+        """
+        c = self.characters.get(ident)
+        for path in ((c.face if c else ""), f"aa/face_{ident}.txt", ident if ident.endswith(".txt") else ""):
+            if path and exists(path):
+                return path
+        return None
+
     def summary(self) -> str:
         parts = [
             ("職業", self.jobs), ("キャラクター", self.characters), ("敵", self.enemies),

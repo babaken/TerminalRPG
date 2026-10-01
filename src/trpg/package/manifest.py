@@ -14,6 +14,7 @@ FILE = "manifest.toml"
 GAMEOVER_MODES = ("retry_from_save", "title", "choose")
 SAVE_MODES = ("anywhere", "save_point_only")
 PARTY_LIMIT = 4
+TITLE_EFFECTS = ("", "none", "starfall", "rain", "snow")   # タイトル画面の背景エフェクト
 
 
 @dataclass
@@ -82,7 +83,7 @@ def parse_manifest(text: str, report: Report) -> Manifest:
 
     ts = root.sub("title_screen", {})
     m.title_aa = ts.str("aa", "")
-    m.title_effect = ts.str("effect", "")
+    m.title_effect = ts.str("effect", "", choices=TITLE_EFFECTS)
     ts.done()
 
     rules = root.sub("rules", {})
