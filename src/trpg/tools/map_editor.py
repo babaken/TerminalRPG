@@ -5,6 +5,7 @@
 
 3-3a：マップを開いて表示・スクロール、タイルを塗る、Map.data に保存する。
 3-3b：NPC・ワープ・イベントを置く・編集する・動かす・消す。
+3-3c：マップの新規作成・大きさの変更、範囲の塗りつぶし・コピー・貼り付け。
 
 保存は Map.data のうち変えたところ（マップの ``rows`` と NPC などの表の項目）だけを書き換える（コメントや書式は残る）。
 最初の保存の前に元のファイルを Map.data.bak に写す。保存後に --check と同じ検証をして件数を出す。
@@ -49,13 +50,16 @@ HELP = [
     ("[ ] / Tab", "タイルを選ぶ（1〜9 で直接）"),
     ("i", "カーソルの下のタイルを選ぶ（スポイト）"),
     ("p", "ペン：オンの間は動いた先を塗る"),
+    ("v", "範囲を選ぶ → f：塗りつぶし　c：コピー　Esc：やめる"),
+    ("b", "コピーした範囲をカーソルの位置に貼り付け"),
+    ("r", "マップの大きさを変える（右・下を増減）"),
     ("u", "元に戻す"),
     ("n / w / e", "カーソルの位置に NPC / ワープ / イベントを置く"),
     ("c", "カーソルの位置の NPC などを編集"),
     ("g", "カーソルの位置の NPC などを動かす（Enter で置く）"),
     ("x / Delete", "カーソルの位置の NPC などを消す"),
     ("o", "NPC・ワープ・イベントの表示／非表示"),
-    ("m", "マップを切り替える"),
+    ("m", "マップを切り替える（一覧で a：新しいマップ）"),
     ("s / F2", "保存（編集したマップすべて）"),
     ("q / Esc", "終わる"),
     ("? / F1", "この説明"),
@@ -92,6 +96,8 @@ class EditorScene(Scene):
         self.picking: list[tuple[str, int]] = []  # 同じマスに複数あるときの候補
         self.pick_action = ""
         self.target: Optional[tuple[str, int]] = None   # 動かす・消す対象（種類, 何番目）
+        self.anchor: Optional[tuple[int, int]] = None   # 範囲選択の始点
+        self.clip: Optional[list[str]] = None            # コピーした範囲
         self.list_i = 0
         self.message = ""
         self.message_style = MSG
@@ -132,7 +138,7 @@ class EditorScene(Scene):
     def dirty(self) -> set[str]:
         """保存していない変更のあるマップ。"""
         return {mid for mid in self.rows
-                if self.rows[mid] != self.saved_rows[mid] or self.objs.get(mid) != self.saved_objs.get(mid)}
+                if self.rows[mid] != self.saved_rows.get(mid) or self.objs.get(mid) != self.saved_objs.get(mid)}
 
     def objects_at(self, x: int, y: int) -> list[tuple[str, int, dict]]:
         out = []
@@ -188,6 +194,16 @@ class EditorScene(Scene):
         if kind == "tile":
             rows = self.rows[mid]
             rows[y] = rows[y][:x] + old + rows[y][x + 1:]
+        elif kind == "rows":
+            self.rows[mid] = old
+        elif kind == "newmap":
+            text, prev = old
+            self.text = text
+            self.objs = read_objects(text)
+            del self.rows[mid], self.gd.maps[mid]
+            self.open_map(prev)
+            self.say(f"マップ {mid} の追加を取り消しました")
+            return
         else:
             self.text = old
             self.objs = read_objects(old)
@@ -220,6 +236,128 @@ class EditorScene(Scene):
         self.y = min(self.y, max(0, self.height - 1))
         self.ox = self.oy = 0
         self.pen = False
+
+    # ---------------------------------------------------------------- 範囲・大きさ・新しいマップ（3-3c）
+    def sel_rect(self) -> tuple[int, int, int, int]:
+        ax, ay = self.anchor if self.anchor else (self.x, self.y)
+        return min(ax, self.x), min(ay, self.y), max(ax, self.x), max(ay, self.y)
+
+    def _set_rows(self, rows: list[str]) -> None:
+        if rows == self.rows[self.map_id]:
+            return
+        self._record(("rows", self.map_id, self.x, self.y, list(self.rows[self.map_id])))
+        self.rows[self.map_id] = rows
+
+    def fill_rect(self) -> None:
+        tiles = self.tiles
+        if not tiles:
+            return
+        ch = tiles[self.brush_i].char
+        x0, y0, x1, y1 = self.sel_rect()
+        rows = list(self.rows[self.map_id])
+        for y in range(y0, y1 + 1):
+            rows[y] = rows[y][:x0] + ch * (x1 - x0 + 1) + rows[y][x1 + 1:]
+        self._set_rows(rows)
+        self.say(f"{x1 - x0 + 1}×{y1 - y0 + 1} を「{tiles[self.brush_i].name or ch}」で塗りつぶしました")
+
+    def copy_rect(self) -> None:
+        x0, y0, x1, y1 = self.sel_rect()
+        self.clip = [r[x0:x1 + 1] for r in self.rows[self.map_id][y0:y1 + 1]]
+        self.say(f"{x1 - x0 + 1}×{y1 - y0 + 1} をコピーしました（b で貼り付け）")
+
+    def paste(self) -> None:
+        if not self.clip:
+            self.say("コピーした範囲がありません（v で範囲を選んで c）")
+            return
+        rows = list(self.rows[self.map_id])
+        w = min(len(self.clip[0]), self.width - self.x)
+        h = min(len(self.clip), self.height - self.y)
+        for i in range(h):
+            y = self.y + i
+            rows[y] = rows[y][:self.x] + self.clip[i][:w] + rows[y][self.x + w:]
+        self._set_rows(rows)
+        cut = "（はみ出た分は切り捨て）" if (w, h) != (len(self.clip[0]), len(self.clip)) else ""
+        self.say(f"{w}×{h} を貼り付けました{cut}")
+
+    def tile_choices(self, tileset: str) -> list[str]:
+        ts = self.gd.tilesets.get(tileset)
+        return list(ts.tiles) if ts else []
+
+    def open_resize(self) -> None:
+        if not self.tiles:
+            self.say("タイルセットがないので大きさを変えられません", ERR)
+            return
+        fill = self.tiles[self.brush_i].char
+        self.form = ObjectForm("resize", {"width": self.width, "height": self.height, "fill": fill},
+                               list(self.gd.maps), validate=self._validate,
+                               choices={"fill": self.tile_choices(self.map.tileset)})
+        self.mode = "form"
+
+    def resize(self, w: int, h: int, fill: str) -> None:
+        rows = [r[:w] + fill * max(0, w - len(r)) for r in self.rows[self.map_id][:h]]
+        rows += [fill * w] * max(0, h - len(rows))
+        old = (self.width, self.height)
+        self._set_rows(rows)
+        self.x, self.y = min(self.x, w - 1), min(self.y, h - 1)
+        self.say(f"大きさを {old[0]}×{old[1]} から {w}×{h} に変えました")
+
+    def open_new_map(self) -> None:
+        tilesets = list(self.gd.tilesets)
+        if not tilesets:
+            self.say("タイルセットがありません", ERR)
+            return
+        ts = self.map.tileset if self.map.tileset in self.gd.tilesets else tilesets[0]
+        chars = self.tile_choices(ts)
+        n = 1
+        while f"map{n}" in self.gd.maps:
+            n += 1
+        self.form = ObjectForm("map", {"id": f"map{n}", "name": "新しいマップ", "tileset": ts, "width": 20,
+                                       "height": 15, "fill": chars[0] if chars else "", "dark": False,
+                                       "indoor": False},
+                               list(self.gd.maps), validate=self._validate,
+                               choices={"tileset": tilesets, "fill": chars})
+        self.mode = "form"
+
+    def add_map(self, v: dict) -> None:
+        if v["fill"] not in self.tile_choices(v["tileset"]):
+            self.say(f"タイル「{v['fill']}」はタイルセット {v['tileset']} にありません", ERR)
+            return
+        rows = [v["fill"] * v["width"]] * v["height"]
+        values = {"id": v["id"], "name": v["name"], "tileset": v["tileset"],
+                  "dark": True if v["dark"] else None, "indoor": True if v["indoor"] else None}
+        try:
+            new = mapfile.add_map(self.text, values, rows)
+        except MapFileError as e:
+            self.say(f"追加できません：{e}", ERR)
+            return
+        self._record(("newmap", v["id"], self.x, self.y, (self.text, self.map_id)))
+        self.text = new
+        self.objs = read_objects(new)
+        self.gd.maps[v["id"]] = GameMap(id=v["id"], name=v["name"], tileset=v["tileset"], rows=list(rows),
+                                        dark=v["dark"], indoor=v["indoor"])
+        self.rows[v["id"]] = list(rows)
+        self.open_map(v["id"])
+        self.x = self.y = 0
+        self.say(f"マップ {v['id']}（{v['width']}×{v['height']}）を作りました。s で保存します")
+
+    def _key_select(self, c: str) -> None:
+        moves = {"UP": (0, -1), "DOWN": (0, 1), "LEFT": (-1, 0), "RIGHT": (1, 0),
+                 "PGUP": (0, -10), "PGDN": (0, 10)}
+        if c in moves:
+            self.move(*moves[c])
+        elif c == "HOME":
+            self.move(-self.x, 0)
+        elif c == "END":
+            self.move(self.width - 1 - self.x, 0)
+        elif c in ("f", "ENTER", " "):
+            self.fill_rect()
+            self.mode, self.anchor = "edit", None
+        elif c in ("c", "y"):
+            self.copy_rect()
+            self.mode, self.anchor = "edit", None
+        elif c in ("ESC", "v", "q"):
+            self.mode, self.anchor = "edit", None
+            self.say("")
 
     def save(self) -> bool:
         dirty = self.dirty
@@ -272,6 +410,9 @@ class EditorScene(Scene):
         if self.mode == "move":
             self._key_move(c)
             return
+        if self.mode == "select":
+            self._key_select(c)
+            return
         if self.mode == "delete":
             if c == "y":
                 kind, i = self.target
@@ -322,6 +463,16 @@ class EditorScene(Scene):
                 self.paint()
         elif c == "u":
             self.undo_last()
+        elif c == "v":
+            if self.height:
+                self.pen = False
+                self.anchor = (self.x, self.y)
+                self.mode = "select"
+                self.say("範囲を選びます：矢印で広げる　f：塗りつぶし　c：コピー　Esc：やめる")
+        elif c == "b":
+            self.paste()
+        elif c == "r":
+            self.open_resize()
         elif c in ("n", "w", "e"):
             self.new_object({"n": "npc", "w": "warp", "e": "event"}[c])
         elif c in ("c", "g", "x", "DELETE"):
@@ -425,6 +576,14 @@ class EditorScene(Scene):
             self.say("動かすのをやめました")
 
     def _validate(self, form: ObjectForm, v: dict) -> str:
+        if form.kind == "map" and v["id"] in self.gd.maps:
+            return f"マップ {v['id']} はすでにあります"
+        if form.kind == "resize":
+            for kind in mapfile.KINDS:
+                for o in self.objs.get(self.map_id, {}).get(kind, []):
+                    if not (o.get("x", 0) < v["width"] and o.get("y", 0) < v["height"]):
+                        return (f"{self._obj_name(kind, o)}（{o.get('x')}, {o.get('y')}）がマップの外に出ます。"
+                                "先に動かすか消してください")
         if form.kind == "npc":
             for j, o in enumerate(self.objs[self.map_id]["npc"]):
                 if o.get("id") == v["id"] and j != form.index:
@@ -441,6 +600,12 @@ class EditorScene(Scene):
         self.mode = "edit"
         if form.result is None:
             self.say("")
+            return
+        if form.kind == "resize":
+            self.resize(form.values["width"], form.values["height"], form.values["fill"])
+            return
+        if form.kind == "map":
+            self.add_map(form.values)
             return
         if form.index is None:
             vals = {"x": form.original["x"], "y": form.original["y"]}
@@ -465,6 +630,8 @@ class EditorScene(Scene):
         elif c in ("ENTER", " "):
             self.open_map(ids[self.list_i])
             self.mode = "edit"
+        elif c == "a":
+            self.open_new_map()
         elif c in ("ESC", "q", "m"):
             self.mode = "edit"
 
@@ -516,10 +683,13 @@ class EditorScene(Scene):
         px = area.x + max(0, (cols - self.width) // 2) * 2
         py = area.y + max(0, (rows - self.height) // 2)
         grid = self.rows[self.map_id]
+        sel = self.sel_rect() if self.mode == "select" else None
         for ty in range(min(rows, self.height - oy)):
             for tx in range(min(cols, self.width - ox)):
                 mx, my = ox + tx, oy + ty
                 glyph, st = self._cell(grid, mx, my)
+                if sel and sel[0] <= mx <= sel[2] and sel[1] <= my <= sel[3]:
+                    st = st._replace(bg=4)                      # 選んだ範囲は青い背景
                 if mx == self.x and my == self.y:
                     st = st._replace(attrs=st.attrs | 8)       # 反転表示
                 buf.put(px + tx * 2, py + ty, glyph, st, clip=area)
@@ -583,6 +753,11 @@ class EditorScene(Scene):
                     out.append((f"ワープ → {o.get('to')} ({o.get('tx')}, {o.get('ty')})", TEXT))
                 else:
                     out.append((f"イベント {o.get('label')}（{o.get('trigger', 'check')}）", TEXT))
+        if self.mode == "select":
+            x0, y0, x1, y1 = self.sel_rect()
+            out.append((f"範囲 ({x0}, {y0})〜({x1}, {y1})  {x1 - x0 + 1}×{y1 - y0 + 1}", MSG))
+        if self.clip:
+            out.append((f"コピー {len(self.clip[0])}×{len(self.clip)}（b で貼り付け）", DIM))
         out.append((f"ペン {'オン' if self.pen else 'オフ'}　表示 {'オン' if self.show_objects else 'オフ'}", DIM))
         out.append(("? で操作説明", DIM))
         return out
@@ -593,7 +768,7 @@ class EditorScene(Scene):
         else:
             changed = f"　未保存 {len(self.dirty)} マップ" if self.dirty else ""
             buf.put(1, y, truncate("矢印：移動  Enter：塗る  [ ]：タイル  n/w/e：置く  c：編集  g：動かす  x：消す  "
-                                   "s：保存  ?：説明" + changed, w - 2), DIM)
+                                   "v：範囲  b：貼付  r：大きさ  s：保存  ?：説明" + changed, w - 2), DIM)
 
     def _overlay(self, buf: Buffer, w: int, h: int, title: str) -> Rect:
         rect = Rect(max(0, (buf.width - w) // 2), max(0, (buf.height - h) // 2), min(w, buf.width), min(h, buf.height))
@@ -602,7 +777,7 @@ class EditorScene(Scene):
     def _draw_map_list(self, buf: Buffer) -> None:
         ids = list(self.gd.maps)
         h = min(len(ids) + 2, buf.height - 4)
-        inner = self._overlay(buf, 60, h, "マップ（Enter で開く / Esc で戻る）")
+        inner = self._overlay(buf, 60, h, "マップ（Enter：開く　a：新しいマップ　Esc：戻る）")
         first = max(0, min(self.list_i - inner.h // 2, len(ids) - inner.h))
         for row, i in enumerate(range(first, min(len(ids), first + inner.h))):
             m = self.gd.maps[ids[i]]
