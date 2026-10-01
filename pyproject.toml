@@ -17,6 +17,7 @@ tools = ["Pillow"]                    # AA 変換ツール
 trpg = "trpg.__main__:main"
 trpg-pack = "trpg.tools.pack:main"
 trpg-aa = "trpg.tools.aa_convert:main"
+trpg-mapedit = "trpg.tools.map_editor:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

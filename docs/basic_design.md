@@ -51,7 +51,7 @@ TRPG/
 │  │  └─ items.py         【済】 フィールドでのアイテム・スキルの使用
 │  ├─ save/            【済】 直列化・暗号化・スロット管理
 │  ├─ i18n/            【未】 UI 文言（ja / en）
-│  └─ tools/           【一部】 pack【済】 / aa_convert【済】 / map_editor【未】（pip でも入るよう trpg パッケージ内に置く【変更】。lint は本体の --check に統合【変更】）
+│  └─ tools/           【一部】 pack【済】 / aa_convert【済】 / map_editor【一部】（pip でも入るよう trpg パッケージ内に置く【変更】。lint は本体の --check に統合【変更】）
 ├─ scenarios/FirstQuest/  サンプルシナリオ（展開形式）
 └─ tests/              【済】 pytest（端末なしで画面にキーを送る通しプレイを含む）
 ```
@@ -69,7 +69,7 @@ TRPG/
 | `--ambiguous-width 1/2` `--no-color` `--fps N` | 【済】 | 表示オプション |
 | `python -m trpg.tools.pack DIR [-o ZIP] [--strict] [--force] [--dry-run]` | 【済】 | 検証してから zip にする（T-03）。エラーで中断、zip 内の日時固定、作った zip を再検証 |
 | `python -m trpg.tools.aa_convert IMAGE... [-w N] [-o TXT / -d DIR] [--charset ascii/wide] [--chars S] [--invert] [--edges] [--outline] [--color] [--preview]` | 【済】 | 画像 → AA（T-01、Pillow）。明るさを文字の濃さに、透明は半角空白、輪郭は 1 マスを 4×4 に分けて調べた向きで - / \| \\、色は HSV から 15 色（黒以外）へ |
-| `python -m trpg.tools.map_editor` | 【未】 | マップエディタ（T-02） |
+| `python -m trpg.tools.map_editor DIR [--map ID]` | 【一部】 | マップエディタ（T-02）。タイルの塗り・スポイト・ペン・元に戻す・マップ切替・保存【済】。NPC・ワープ・イベントの配置、新規作成・サイズ変更、範囲の塗り・コピー【未】。保存は該当マップの rows だけを書き換え（コメント・書式を保つ）、初回に Map.data.bak、保存後に検証 |
 
 - 開発モードでの F5 スクリプト再読込は【未】。
 - シナリオにエラーがあるとゲームは起動せず、端末を初期化する前に検証結果を表示する。
