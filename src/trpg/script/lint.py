@@ -12,6 +12,8 @@ if TYPE_CHECKING:
     from ..package import Package
 
 MAP = "Map.data"
+SLIDE_SIDES = ("left", "right", "top", "bottom")
+TINTS = ("none", "night", "sepia", "red", "invert")
 
 
 def lint_script(script: Script, gd: GameData, rep: Report, pkg: Optional["Package"] = None,
@@ -21,6 +23,7 @@ def lint_script(script: Script, gd: GameData, rep: Report, pkg: Optional["Packag
     flags_set: set[str] = set()
     flags_used: list[tuple[str, str, int]] = []
     npc_ids = {n.id for m in gd.maps.values() for n in m.npcs}
+    targets: list = []
 
     def label_ref(label: str, file: str, line: Optional[int]) -> None:
         referenced.add(label)
@@ -115,6 +118,51 @@ def lint_script(script: Script, gd: GameData, rep: Report, pkg: Optional["Packag
             elif name == "aa" and pos[0] == "show" and pkg is not None:
                 if not pkg.exists(pos[1]):
                     rep.error(ins.file, ins.line, f"AA ファイル「{pos[1]}」が見つかりません")
+            elif name == "effect" and pos:
+                eff, rest = pos[0], pos[1:]
+                if eff == "aa_show":
+                    if len(rest) < 3 or not all(p.lstrip("-").isdigit() for p in rest[1:3]):
+                        rep.error(ins.file, ins.line, "@effect aa_show は「ファイル x y」の形で書いてください")
+                    elif pkg is not None and not pkg.exists(rest[0]):
+                        rep.error(ins.file, ins.line, f"AA ファイル「{rest[0]}」が見つかりません")
+                    if kw.get("from", "left") not in SLIDE_SIDES:
+                        rep.error(ins.file, ins.line, f"@effect aa_show の from は {' / '.join(SLIDE_SIDES)} です")
+                elif eff == "aa_hide" and kw.get("to", "left") not in SLIDE_SIDES:
+                    rep.error(ins.file, ins.line, f"@effect aa_hide の to は {' / '.join(SLIDE_SIDES)} です")
+                elif eff == "scroll_text":
+                    if "file" in kw:
+                        if pkg is not None and not pkg.exists(kw["file"]):
+                            rep.error(ins.file, ins.line, f"ファイル「{kw['file']}」が見つかりません")
+                    elif not rest:
+                        rep.error(ins.file, ins.line, "@effect scroll_text には file= か表示する文字を指定してください")
+                elif eff in ("move", "blink"):
+                    target = kw.get("target", rest[0] if rest else "")
+                    if not target:
+                        rep.error(ins.file, ins.line, f"@effect {eff} には対象（NPC ID・hero・AA の名前）を指定してください")
+                    else:
+                        targets.append((target, eff, ins))
+                    nums = [p for p in (rest[1:] if "target" not in kw else rest) if p.lstrip("-").isdigit()]
+                    if eff == "move" and len(nums) < 2:
+                        rep.error(ins.file, ins.line, "@effect move は「対象 dx dy」の形で書いてください")
+                elif eff == "tint" and rest and rest[0] not in TINTS:
+                    rep.error(ins.file, ins.line, f"tint は {' / '.join(TINTS)} のどれかです")
+                elif eff == "wipe":
+                    d = kw.get("dir", next((p for p in rest if not p.isdigit() and p != "out"), "right"))
+                    if d not in ("left", "right", "up", "down"):
+                        rep.error(ins.file, ins.line, "wipe の向きは left / right / up / down です")
+
+    # move / blink の対象：hero・どこかのマップの NPC・スクリプトで表示する AA の名前
+    aa_names = set()
+    for ins in script.instrs:
+        if ins.op == "cmd":
+            a = ins.args
+            if a["name"] == "aa" and a["pos"] and a["pos"][0] == "show" and len(a["pos"]) > 1:
+                aa_names.add(a["kw"].get("name", a["pos"][1]))
+            if a["name"] == "effect" and a["pos"][:1] == ["aa_show"] and len(a["pos"]) > 1:
+                aa_names.add(a["kw"].get("name", a["pos"][1]))
+    for target, eff, ins in targets:
+        if target != "hero" and target not in npc_ids and target not in aa_names:
+            rep.error(ins.file, ins.line, f"@effect {eff}：対象「{target}」はどのマップの NPC でも、表示する AA の名前でもありません")
 
     for label, (file, line) in script.label_lines.items():
         if label not in referenced and label not in RESERVED_LABELS:

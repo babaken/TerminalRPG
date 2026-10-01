@@ -72,11 +72,11 @@
 | 1-5 | GitHub Actions（Windows・Linux で pytest） | S | **完了**（v0.1.0 登録時から稼働） |
 
 ### M2 演出とスクリプトの仕上げ（v0.3.0）
-| # | 作業 | 規模 |
-|---|---|---|
-| 2-1 | 残りのエフェクト：move / wipe / blink / aa_show / aa_hide / scroll_text / tint invert | M |
-| 2-2 | 顔 AA（@face）、本文の制御コード（\w \c \s）、タイトル背景エフェクト | M |
-| 2-3 | スキルの anim、NPC の route 移動、`@party add lv=avg`、AA の .color | M |
+| # | 作業 | 規模 | 状態 |
+|---|---|---|---|
+| 2-1 | 残りのエフェクト：move / wipe / blink / aa_show / aa_hide / scroll_text / tint invert | M | **完了** |
+| 2-2 | 顔 AA（@face）、本文の制御コード（\w \c \s）、タイトル背景エフェクト | M | |
+| 2-3 | スキルの anim、NPC の route 移動、`@party add lv=avg`、AA の .color | M | |
 
 ### M3 ツール（v0.4.0）
 | # | 作業 | 規模 |

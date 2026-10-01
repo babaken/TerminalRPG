@@ -41,6 +41,8 @@ class Mover:
         self.step = step
         self.t = 0.0
 
+    on_done: Optional[Callable[[], None]] = None
+
     @property
     def done(self) -> bool:
         return not self.steps
@@ -52,6 +54,9 @@ class Mover:
             mx, my = self.steps.pop(0)
             x, y = self.get()
             self.put(x + mx, y + my)
+        if not self.steps and self.on_done is not None:
+            cb, self.on_done = self.on_done, None
+            cb()
 
 
 class FieldScene(Scene):
@@ -74,6 +79,8 @@ class FieldScene(Scene):
         self.pending_auto = True
         self.after_script: Optional[str] = None
         self.pending_labels: list[str] = []   # 依頼達成などで後から実行するスクリプト
+        self.background_movers: list[Mover] = []   # wait=false で動かしている演出移動
+        self._map_area_size = (64, 23)
         self.encounter = None                  # ランダムエンカウントの戦闘画面
         self._when_cache: dict[str, object] = {}
         self._npc_timer: dict[str, float] = {}
@@ -160,16 +167,12 @@ class FieldScene(Scene):
             path = self.find_path((self.st.x, self.st.y), (self.st.x + dx, self.st.y + dy))
             return Mover(lambda: (self.st.x, self.st.y), self._put_hero, dx, dy, steps=path)
         if name == "effect":
-            return self.effects.start(pos[0], pos[1:], kw)
+            return self._effect(ins, pos[0], pos[1:], kw)
         if name == "face":
             return None   # 顔 AA の表示は後工程
         if name == "aa":
             if pos[0] == "show":
-                lines = self.gd.aa.get(pos[1])
-                if lines is None:
-                    text = self.game.package.read_text(pos[1]) or ""
-                    lines = text.rstrip("\n").split("\n")
-                self.overlays[kw.get("name", pos[1])] = (lines, int(pos[2]), int(pos[3]))
+                self.overlays[kw.get("name", pos[1])] = (self._aa_lines(pos[1]), int(pos[2]), int(pos[3]))
             else:
                 self.overlays.pop(pos[1], None)
             return None
@@ -241,6 +244,104 @@ class FieldScene(Scene):
             return
         if b.from_script:
             self._advance()
+
+    # ------------------------------------------------------------ エフェクト（マップ上の物を動かすもの）
+    def _aa_lines(self, path: str) -> list[str]:
+        lines = self.gd.aa.get(path)
+        if lines is None:
+            text = self.game.package.read_text(path) or ""
+            lines = text.splitlines()          # CRLF（Windows で保存したファイル）にも対応
+        return lines
+
+    def _effect(self, ins: Instr, name: str, pos: list[str], kw: dict):
+        """@effect。move / aa_show / aa_hide はここで、それ以外は EffectManager で処理する。"""
+        wait = kw.get("wait", "true") != "false"
+        step = max(10, int(kw.get("ms", 150))) / 1000            # 1 マス（1 セル）あたりの時間
+        if name == "move":
+            target = kw.get("target", pos[0] if pos else "")
+            nums = [int(p) for p in (pos[1:] if "target" not in kw else pos) if p.lstrip("-").isdigit()]
+            if len(nums) < 2:
+                raise ScriptError(ins, "@effect move には 対象 dx dy を指定してください")
+            dx, dy = nums[0], nums[1]
+            if target in self.overlays:                          # AA：セル単位でなめらかに動かす
+                lines, x, y = self.overlays[target]
+
+                def put(nx: int, ny: int, t=target) -> None:
+                    ln, _, _ = self.overlays[t]
+                    self.overlays[t] = (ln, nx, ny)
+                mv = Mover(lambda t=target: self.overlays[t][1:], put, dx, dy, step=step)
+            elif target == "hero":
+                path = self.find_path((self.st.x, self.st.y), (self.st.x + dx, self.st.y + dy))
+                mv = Mover(lambda: (self.st.x, self.st.y), self._put_hero, dx, dy, step=step, steps=path)
+            else:
+                npc = self._find_npc(target)
+                if npc is None:
+                    raise ScriptError(ins, f"@effect move：「{target}」という NPC・AA がいません")
+                s = self.st.npc(self.st.map_id, npc.id)
+                x, y = self._npc_pos(npc)
+                path = self.find_path((x, y), (x + dx, y + dy), mover=npc)
+                mv = Mover(lambda: self._npc_pos(npc), lambda nx, ny: s.update(x=nx, y=ny), dx, dy,
+                           step=step, steps=path)
+            if wait:
+                return mv
+            self.background_movers.append(mv)
+            return None
+        if name == "aa_show":
+            if len(pos) < 3:
+                raise ScriptError(ins, "@effect aa_show には ファイル x y を指定してください")
+            lines = self._aa_lines(pos[0])
+            x, y = int(pos[1]), int(pos[2])
+            key = kw.get("name", pos[0])
+            src = kw.get("from", "")
+            if not src:
+                self.overlays[key] = (lines, x, y)
+                return None
+            sx, sy = self._offscreen(lines, x, y, src)
+            self.overlays[key] = (lines, sx, sy)
+            return self._slide(key, x - sx, y - sy, step / 4, wait)
+        if name == "aa_hide":
+            key = kw.get("name", pos[0] if pos else "")
+            if key not in self.overlays:
+                return None
+            to = kw.get("to", "")
+            if not to:
+                self.overlays.pop(key, None)
+                return None
+            lines, x, y = self.overlays[key]
+            ex, ey = self._offscreen(lines, x, y, to)
+            return self._slide(key, ex - x, ey - y, step / 4, wait, remove=True)
+        if name == "scroll_text":
+            if "file" in kw:
+                text = self.game.package.read_text(kw["file"])
+                if text is None:
+                    raise ScriptError(ins, f"@effect scroll_text：ファイル「{kw['file']}」がありません")
+                kw = dict(kw, _lines=[format_text(ln, self.st, self.gd) for ln in text.splitlines()])
+        return self.effects.start(name, pos, kw)
+
+    def _offscreen(self, lines: list[str], x: int, y: int, side: str) -> tuple[int, int]:
+        """AA を画面（マップ表示領域）の外に出した位置。"""
+        from ..term import text_width
+        w = max((text_width(ln) for ln in lines), default=0)
+        h = len(lines)
+        W, H = self._map_area_size
+        return {"left": (-w, y), "right": (W, y), "top": (x, -h), "bottom": (x, H)}.get(side, (x, y))
+
+    def _slide(self, key: str, dx: int, dy: int, step: float, wait: bool, remove: bool = False):
+        def get(k=key):
+            return self.overlays[k][1:] if k in self.overlays else (0, 0)
+
+        def put(nx: int, ny: int, k=key) -> None:
+            if k in self.overlays:
+                ln, _, _ = self.overlays[k]
+                self.overlays[k] = (ln, nx, ny)
+
+        mv = Mover(get, put, dx, dy, step=step)
+        if remove:
+            mv.on_done = lambda k=key: self.overlays.pop(k, None)
+        if wait:
+            return mv
+        self.background_movers.append(mv)
+        return None
 
     def open_save(self):
         from .saveload import SaveLoadScene
@@ -539,6 +640,9 @@ class FieldScene(Scene):
         self.st.playtime += dt
         self.msg.update(dt)
         self.effects.update(dt)
+        for mv in self.background_movers:
+            mv.update(dt)
+        self.background_movers = [mv for mv in self.background_movers if not mv.done]
         req = self.req
         if isinstance(req, WaitReq):
             self.wait_left -= dt
@@ -640,6 +744,7 @@ class FieldScene(Scene):
         px = area.x + max(0, (cols - m.width) // 2) * 2
         py = area.y + max(0, (rows - m.height) // 2)
         hx, hy = self.st.x, self.st.y
+        self._map_area_size = (area.w, area.h)
 
         def visible(x: int, y: int) -> bool:
             return not m.dark or (abs(x - hx) <= DARK_RADIUS and abs(y - hy) <= DARK_RADIUS)
@@ -657,14 +762,17 @@ class FieldScene(Scene):
                 st = Style.of(tile.color) if tile.color else Style()
                 buf.put(px + tx * 2, py + ty, tile.glyph, st, clip=area)
         for n in m.npcs:
-            if not self.npc_visible(n):
+            if not self.npc_visible(n) or self.effects.hidden(n.id):
                 continue
             nx, ny = self._npc_pos(n)
             if ox <= nx < ox + cols and oy <= ny < oy + rows and visible(nx, ny):
                 buf.put(px + (nx - ox) * 2, py + (ny - oy), n.glyph,
                         Style.of(n.color or "white", bold=True), clip=area)
-        buf.put(px + (hx - ox) * 2, py + (hy - oy), HERO_GLYPH, Style.of("bright_white", bold=True), clip=area)
-        for lines, x, y in self.overlays.values():
+        if not self.effects.hidden("hero"):
+            buf.put(px + (hx - ox) * 2, py + (hy - oy), HERO_GLYPH, Style.of("bright_white", bold=True), clip=area)
+        for key, (lines, x, y) in self.overlays.items():
+            if self.effects.hidden(key):
+                continue
             buf.put_lines(area.x + x, area.y + y, lines, Style.of("bright_white"), clip=area, transparent=True)
 
     def _draw_panel(self, buf: Buffer, area: Rect) -> None:
