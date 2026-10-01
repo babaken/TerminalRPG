@@ -34,11 +34,27 @@ class GameOverScene(Scene):
             self.index = (self.index + 1) % len(self.options)
         elif Action.OK in actions:
             if self.options[self.index] == "セーブからやり直す":
-                # セーブ機能は未実装。実装後はここで最後のセーブを読み込む
+                if self._retry():
+                    return
                 if not self.notice:
-                    self.notice = "セーブデータがありません（セーブ機能は未実装です）。Enter でタイトルへ"
+                    self.notice = "セーブデータがありません。Enter でタイトルへ"
                     return
             self._to_title()
+
+    def _retry(self) -> bool:
+        """最後にセーブしたスロットから再開する。読めるセーブがなければ False。"""
+        from ..save import SaveError
+        from .title import start_field
+        store = self.game.saves()
+        slot = store.latest()
+        if slot is None:
+            return False
+        try:
+            st = store.load(slot)
+        except SaveError:
+            return False
+        start_field(self.app, self.game, st)
+        return True
 
     def _to_title(self) -> None:
         from .title import TitleScene

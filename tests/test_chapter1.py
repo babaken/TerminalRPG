@@ -257,6 +257,15 @@ def test_chapter1_full_playthrough(game):
     d.ov_choose(0)
     d.ov_read()
     talk = d.back_to_field()
+    # 1章の最後でセーブ画面が開く → スロット 1 にセーブ
+    from trpg.scenes.saveload import SaveLoadScene
+    sc = d.scene
+    assert isinstance(sc, SaveLoadScene)
+    d.key("ENTER")
+    while d.scene is sc:
+        d.key("ENTER")
+    assert game.saves().info(1).ok
+    talk += d.back_to_field()
     j = " ".join(talk)
     assert "その剣の紋章" in j
     assert f.st.gold == gold0 - 100

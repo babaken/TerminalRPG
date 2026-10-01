@@ -111,7 +111,16 @@ class FieldScene(Scene):
         elif isinstance(req, WaitReq):
             self.wait_left = req.seconds
 
+    def _show_gameover(self, mode: str) -> None:
+        from .gameover import GameOverScene
+        self.app.push(GameOverScene(self.game, mode))
+
     def _script_finished(self) -> None:
+        if self.after_script and self.after_script.startswith("gameover:"):
+            mode = self.after_script.split(":", 1)[1]
+            self.after_script = None
+            self._show_gameover(mode)
+            return
         if self.after_script == "title":
             self.after_script = None
             self.back_to_title()
@@ -165,7 +174,7 @@ class FieldScene(Scene):
         if name in ("shop", "inn", "guild", "recruit"):
             return self._open_facility(name, pos, kw)
         if name == "save_point":
-            return MessageReq([("", "（セーブ機能は未実装です。この先の工程で実装します）")])
+            return self.open_save()
         if name == "ending":
             self.after_script = "title"
             return MessageReq([("", "―― おわり ――（エンディング演出は未実装です。タイトルに戻ります）")])
@@ -212,16 +221,26 @@ class FieldScene(Scene):
                     return
                 self._advance()
                 return
-            from .gameover import GameOverScene
             self.vm.stop()
             self.req = None
             self.msg.close()
             self.choice = None
             mode = b.gameover or self.game.manifest.gameover
-            self.app.push(GameOverScene(self.game, mode))
+            if self.vm.has_label("gameover"):
+                # *gameover があれば先に実行し、終わったら全滅画面へ
+                self.after_script = "gameover:" + mode
+                self.start_script("gameover")
+                return
+            self._show_gameover(mode)
             return
         if b.from_script:
             self._advance()
+
+    def open_save(self):
+        from .saveload import SaveLoadScene
+        sc = SaveLoadScene(self.game, "save", field=self)
+        self.app.push(sc)
+        return sc
 
     def _cmd_npc(self, ins: Instr, pos: list[str]) -> Optional[object]:
         npc = self._find_npc(pos[0])

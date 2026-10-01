@@ -17,10 +17,15 @@ class Game:
     data: GameData
     script: Script
     dev: bool = False
+    save_dir: Optional[Path] = None      # None なら save.default_dir()
 
     @property
     def manifest(self):
         return self.package.manifest
+
+    def saves(self):
+        from .save import SaveStore
+        return SaveStore(self.manifest.id, self.manifest.version, self.save_dir)
 
     def close(self) -> None:
         self.package.close()

@@ -18,3 +18,9 @@ def edit(path: Path, old: str, new: str) -> None:
     s = path.read_text(encoding="utf-8")
     assert old in s, f"not found in {path.name}: {old!r}"
     path.write_text(s.replace(old, new, 1), encoding="utf-8")
+
+
+@pytest.fixture(autouse=True)
+def _save_dir(tmp_path, monkeypatch):
+    """セーブはテストごとの一時フォルダへ（リポジトリに saves/ を作らない）。"""
+    monkeypatch.setenv("TRPG_SAVE_DIR", str(tmp_path / "saves"))
