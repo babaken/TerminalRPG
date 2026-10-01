@@ -1,0 +1,134 @@
+"""ウィンドウ部品：会話（メッセージ）窓・選択肢窓・パネル描画の補助。"""
+from __future__ import annotations
+
+from typing import Optional
+
+from ..term import Buffer, Rect, Style, text_width, wrap
+from ..term.buffer import BOX_SINGLE
+
+FRAME = Style.of("white")
+TEXT = Style.of("bright_white")
+DIM_TEXT = Style.of("gray")
+CURSOR = Style.of("bright_yellow", bold=True)
+
+
+class MessageWindow:
+    """会話窓。行を折り返してページ分けし、1 文字ずつ表示する。"""
+
+    CHARS_PER_SEC = 40
+
+    def __init__(self):
+        self.pages: list[list[str]] = []
+        self.page = 0
+        self.shown = 0.0          # 現在ページで表示済みの文字数
+        self.speaker = ""
+        self._width = 0
+        self._rows = 0
+        self._lines: list[tuple[str, str]] = []
+        self.blink = 0.0
+
+    @property
+    def active(self) -> bool:
+        return bool(self.pages)
+
+    def open(self, lines: list[tuple[str, str]]) -> None:
+        self._lines = lines
+        self.speaker = next((sp for sp, _ in lines if sp), "")
+        self._paginate()
+        self.page = 0
+        self.shown = 0.0
+
+    def close(self) -> None:
+        self.pages = []
+        self._lines = []
+
+    def _paginate(self) -> None:
+        rows = []
+        for _, text in self._lines:
+            rows.extend(wrap(text, max(1, self._width or 90)))
+        per = max(1, self._rows or 3)
+        self.pages = [rows[i:i + per] for i in range(0, len(rows), per)] or [[""]]
+
+    def layout(self, width: int, rows: int) -> None:
+        """表示領域の大きさが変わったら折り返し直す。"""
+        if (width, rows) != (self._width, self._rows):
+            self._width, self._rows = width, rows
+            if self._lines:
+                page_start = sum(len(p) for p in self.pages[: self.page])
+                self._paginate()
+                # だいたい同じ位置のページに戻す
+                acc = 0
+                for i, p in enumerate(self.pages):
+                    if acc + len(p) > page_start:
+                        self.page = i
+                        break
+                    acc += len(p)
+
+    def _page_len(self) -> int:
+        return sum(len(r) for r in self.pages[self.page]) if self.pages else 0
+
+    @property
+    def page_done(self) -> bool:
+        return self.shown >= self._page_len()
+
+    @property
+    def last_page(self) -> bool:
+        return self.page >= len(self.pages) - 1
+
+    def update(self, dt: float) -> None:
+        self.shown += dt * self.CHARS_PER_SEC
+        self.blink += dt
+
+    def advance(self) -> bool:
+        """決定キー。表示途中なら全部出す。ページ末なら次へ。全部読み終えたら True。"""
+        if not self.page_done:
+            self.shown = self._page_len()
+            return False
+        if self.last_page:
+            return True
+        self.page += 1
+        self.shown = 0.0
+        return False
+
+    def draw(self, buf: Buffer, rect: Rect, show_cursor: bool = True) -> None:
+        inner = buf.box(rect, FRAME, chars=BOX_SINGLE)
+        self.layout(inner.w - 2, inner.h)
+        if not self.pages:
+            return
+        left = int(self.shown)
+        for i, row in enumerate(self.pages[self.page]):
+            if left <= 0:
+                break
+            buf.put(inner.x + 1, inner.y + i, row[:left], TEXT, clip=inner)
+            left -= len(row)
+        if show_cursor and self.page_done and int(self.blink * 3) % 2 == 0:
+            mark = "▼" if not self.last_page else "▽"
+            buf.put(inner.right - 2, inner.bottom - 1, mark, CURSOR, clip=inner)
+
+
+class ChoiceWindow:
+    def __init__(self, options: list[str], cancel_index: Optional[int] = None):
+        self.options = options
+        self.index = 0
+        self.cancel_index = cancel_index
+
+    def move(self, d: int) -> None:
+        self.index = (self.index + d) % len(self.options)
+
+    def size(self) -> tuple[int, int]:
+        w = max(text_width(o) for o in self.options) + 6
+        return w, len(self.options) + 2
+
+    def draw(self, buf: Buffer, right: int, bottom: int) -> None:
+        w, h = self.size()
+        w = min(w, buf.width)
+        rect = Rect(max(0, right - w), max(0, bottom - h), w, h)
+        inner = buf.box(rect, FRAME, chars=BOX_SINGLE)
+        for i, opt in enumerate(self.options):
+            sel = i == self.index
+            buf.put(inner.x + 1, inner.y + i, ("▶ " if sel else "  ") + opt,
+                    CURSOR if sel else TEXT, clip=inner)
+
+
+def gauge_text(cur: int, mx: int) -> str:
+    return f"{cur:>3}/{mx:>3}"

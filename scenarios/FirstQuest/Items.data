@@ -1,0 +1,197 @@
+# ===== アイテム =====
+
+[[item]]
+id = "herb"
+name = "やくそう"
+type = "consumable"
+price = 8
+desc = "HP を 30 回復する。"
+use = { field = true, battle = true, target = "ally_one", effect = "heal", power = 30 }
+
+[[item]]
+id = "rusty_sword"
+name = "錆びた剣"
+type = "equipment"
+slot = "weapon"
+category = "sword"
+price = 0
+stats = { atk = 5 }
+desc = "森の奥で拾った古い剣。柄に見慣れない紋章がある。"
+
+[[item]]
+id = "copper_sword"
+name = "どうのつるぎ"
+type = "equipment"
+slot = "weapon"
+category = "sword"
+price = 100
+stats = { atk = 10 }
+
+[[item]]
+id = "cloth"
+name = "ぬののふく"
+type = "equipment"
+slot = "armor"
+category = "light_armor"
+price = 10
+stats = { def = 2 }
+
+[[item]]
+id = "leather_armor"
+name = "かわのよろい"
+type = "equipment"
+slot = "armor"
+category = "light_armor"
+price = 70
+stats = { def = 6 }
+
+[[item]]
+id = "robe"
+name = "まどうしのローブ"
+type = "equipment"
+slot = "armor"
+category = "robe"
+price = 60
+stats = { def = 3, mag = 2 }
+
+[[item]]
+id = "return_scroll"
+name = "帰還の巻物"
+type = "key"
+desc = "最後に立ち寄った街へ一瞬で戻れる。"
+use = { field = true, effect = "script", label = "use_return_scroll" }
+
+[[item]]
+id = "adventurer_card"
+name = "冒険者証"
+type = "key"
+desc = "冒険者協会の登録証。"
+
+[[item]]
+id = "traveler_clothes"
+name = "たびびとのふく"
+type = "equipment"
+slot = "armor"
+category = "light_armor"
+price = 40
+stats = { def = 4 }
+desc = "丈夫な布で仕立てた旅の服。母が用意してくれた。"
+
+[[item]]
+id = "wood_shield"
+name = "きのたて"
+type = "equipment"
+slot = "shield"
+category = "shield"
+price = 40
+stats = { def = 3 }
+
+[[item]]
+id = "cat_collar"
+name = "ねこのくびわ"
+type = "equipment"
+slot = "accessory"
+category = "accessory"
+price = 20
+stats = { luk = 3, agi = 1 }
+desc = "鈴のついた首輪。持ち主の運が少し良くなる気がする。"
+
+[[item]]
+id = "antidote"
+name = "どくけしそう"
+type = "consumable"
+price = 10
+desc = "毒を消す。"
+use = { field = true, battle = true, target = "ally_one", effect = "cure", status = "poison" }
+
+[[item]]
+id = "bread"
+name = "やきたてパン"
+type = "consumable"
+price = 5
+desc = "HP を 10 回復する。ほんのり甘い。"
+use = { field = true, battle = true, target = "ally_one", effect = "heal", power = 10 }
+
+[[item]]
+id = "package"
+name = "道具屋の荷物"
+type = "key"
+desc = "宿屋「旅鳥亭」に届ける荷物。"
+
+# ===== スキル =====
+
+[[skill]]
+id = "power_slash"
+name = "強撃"
+mp = 2
+target = "enemy_one"
+kind = "physical"
+power = 8
+
+[[skill]]
+id = "fire"
+name = "ファイア"
+mp = 4
+target = "enemy_one"
+kind = "magic"
+element = "fire"
+power = 20
+anim = "flash:red"
+
+[[skill]]
+id = "heal"
+name = "ヒール"
+mp = 3
+target = "ally_one"
+kind = "heal"
+power = 25
+
+[[skill]]
+id = "bite"
+name = "かみつき"
+target = "enemy_one"
+kind = "physical"
+power = 3
+status = "poison"
+status_rate = 0.2
+
+[[skill]]
+id = "dig_attack"
+name = "土かけ"
+target = "enemy_all"
+kind = "physical"
+power = 4
+
+[[skill]]
+id = "spore"
+name = "どくのほうし"
+target = "enemy_one"
+kind = "status"
+status = "poison"
+status_rate = 0.5
+
+# ===== 状態異常 =====
+
+[[status]]
+id = "poison"
+name = "どく"
+turns = [3, 5]
+tick = { hp_rate = -0.08 }
+field = true
+
+# ===== ショップ =====
+
+[[shop]]
+id = "road_merchant"
+name = "旅の商人"
+goods = ["herb", "antidote", "cloth"]
+
+[[shop]]
+id = "town_item"
+name = "ベルンの道具屋"
+goods = ["herb", "antidote", "bread"]
+
+[[shop]]
+id = "town_weapon"
+name = "ベルンの武具屋"
+goods = ["copper_sword", "leather_armor", "wood_shield"]

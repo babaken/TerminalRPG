@@ -1,0 +1,68 @@
+# ===== 職業 =====
+# growth: レベルアップ時の平均上昇量
+
+[[job]]
+id = "hero"
+name = "勇者"
+growth = { hp = 7, mp = 2, atk = 2, def = 2, mag = 1, agi = 2, luk = 1 }
+equip = ["sword", "light_armor", "shield", "accessory"]
+skills = [ { lv = 4, skill = "power_slash" } ]
+
+[[job]]
+id = "warrior"
+name = "戦士"
+growth = { hp = 9, mp = 0, atk = 3, def = 3, mag = 0, agi = 1, luk = 1 }
+equip = ["sword", "axe", "light_armor", "heavy_armor", "shield", "accessory"]
+skills = [ { lv = 3, skill = "power_slash" } ]
+
+[[job]]
+id = "mage"
+name = "魔法使い"
+growth = { hp = 4, mp = 5, atk = 1, def = 1, mag = 4, agi = 2, luk = 1 }
+equip = ["staff", "robe", "accessory"]
+skills = [ { lv = 1, skill = "fire" } ]
+
+[[job]]
+id = "priest"
+name = "僧侶"
+growth = { hp = 5, mp = 4, atk = 1, def = 2, mag = 3, agi = 1, luk = 2 }
+equip = ["staff", "mace", "robe", "light_armor", "accessory"]
+skills = [ { lv = 1, skill = "heal" } ]
+
+# ===== キャラクター =====
+
+[[character]]
+id = "hero"
+name = "ユウ"
+name_input = true
+job = "hero"
+lv = 1
+stats = { hp = 30, mp = 5, atk = 8, def = 6, mag = 3, agi = 6, luk = 5 }
+equip = { armor = "cloth" }
+
+[[character]]
+id = "garo"
+name = "ガロ"
+job = "warrior"
+lv = 3
+stats = { hp = 48, mp = 0, atk = 14, def = 11, mag = 0, agi = 5, luk = 4 }
+equip = { weapon = "copper_sword", armor = "leather_armor" }
+recruit_text = "力なら任せろ。前に立つのは俺の役目だ。"
+
+[[character]]
+id = "mia"
+name = "ミア"
+job = "mage"
+lv = 3
+stats = { hp = 24, mp = 22, atk = 5, def = 5, mag = 14, agi = 8, luk = 6 }
+equip = { armor = "robe" }
+recruit_text = "魔法の研究費を稼ぎたいの。危なくなったら…頼りにしてるわ。"
+
+[[character]]
+id = "rina"
+name = "リナ"
+job = "priest"
+lv = 3
+stats = { hp = 30, mp = 18, atk = 6, def = 7, mag = 11, agi = 6, luk = 9 }
+equip = { armor = "robe" }
+recruit_text = "傷ついた人を放っておけません。どうか一緒に。"

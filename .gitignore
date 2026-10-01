@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.venv/
+venv/
+
+# テスト
+.pytest_cache/
+.coverage
+htmlcov/
+
+# 実行時に作られるもの
+trpg_debug.log
+saves/
+
+# 作成したシナリオパッケージ（scenarios/ の展開形式を正とする）
+*.zip
+
+# OS・エディタ
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

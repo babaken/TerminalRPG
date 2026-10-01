@@ -1,0 +1,43 @@
+# ===== 冒険者協会の依頼 =====
+# when: 掲示板に出る条件  on_complete: 達成報告のあとに実行するスクリプトのラベル
+
+[[quest]]
+id = "q_herb"
+name = "やくそう集め"
+rank = "F"
+desc = "協会の救護室で使うやくそうが足りません。3 つ納品してください。"
+goal = { type = "deliver", item = "herb", count = 3 }
+reward = { gold = 30 }
+repeatable = true
+when = "flag.guild_registered"
+on_complete = "ch1_quest_done"
+
+[[quest]]
+id = "q_slime"
+name = "街道のスライム退治"
+rank = "F"
+desc = "街道にスライムが増えて旅人が困っています。5 体退治してください。"
+goal = { type = "defeat", group = "slime", count = 5 }
+reward = { gold = 60, exp = 10 }
+when = "flag.guild_registered"
+on_complete = "ch1_quest_done"
+
+[[quest]]
+id = "q_lost_cat"
+name = "迷子の猫さがし"
+rank = "F"
+desc = "パン屋の飼い猫ミケがいなくなりました。街のどこかにいるはずです。"
+goal = { type = "flag", flag = "found_cat" }
+reward = { gold = 40, items = ["cat_collar"] }
+when = "flag.guild_registered"
+on_complete = "ch1_quest_done"
+
+[[quest]]
+id = "q_delivery"
+name = "荷物の配達"
+rank = "F"
+desc = "道具屋の荷物を、宿屋「旅鳥亭」の主人に届けてください。"
+goal = { type = "flag", flag = "package_delivered" }
+reward = { gold = 30 }
+when = "flag.guild_registered"
+on_complete = "ch1_quest_done"

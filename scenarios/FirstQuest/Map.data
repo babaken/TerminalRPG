@@ -1,0 +1,584 @@
+# ===== タイルセット =====
+# glyph は表示幅 2（全角 1 文字）。曖昧幅の記号（■ ▼ ─ など）は避ける
+
+[[tileset]]
+id = "default"
+[tileset.tiles]
+"#" = { glyph = "＃", pass = false, color = "gray",         name = "壁" }
+"." = { glyph = "．", pass = true,  color = "green",        name = "地面" }
+"T" = { glyph = "木", pass = false, color = "bright_green", name = "木" }
+"~" = { glyph = "～", pass = false, color = "bright_blue",  name = "水" }
+"H" = { glyph = "家", pass = false, color = "yellow",       name = "家" }
+"D" = { glyph = "戸", pass = true,  color = "yellow",       name = "戸口" }
+"," = { glyph = "畑", pass = true,  color = "green",        name = "畑" }
+"t" = { glyph = "机", pass = false, color = "yellow",       name = "家具" }
+"S" = { glyph = "祠", pass = false, color = "bright_cyan",  name = "祠" }
+"=" = { glyph = "：", pass = true,  color = "yellow",       name = "道" }
+
+# ===== マップ =====
+
+[[map]]
+id = "village_lito"
+name = "リト村"
+tileset = "default"
+rows = [
+  "TTTTTTTTTTTTTTT.TTTTTTTTTTTTTTTT",
+  "T..............................T",
+  "T..HHH.........................T",
+  "T..HDH.......HHH.....~~~~......T",
+  "T............HDH.....~~~~......T",
+  "T....................~~~~......T",
+  "T..............................T",
+  "T...,,,,,,..........HHH........T",
+  "T...,,,,,,..........HDH........T",
+  "T...,,,,,,.....................T",
+  "T..............................T",
+  "T......HHH.....................T",
+  "T......HDH...........,,,,,,....T",
+  "T....................,,,,,,....T",
+  "T..............................T",
+  "T..............................T",
+  "T..............................T",
+  "TTTTTTTTTTTTTTT.TTTTTTTTTTTTTTTT",
+]
+
+[[map.warp]]          # 主人公の家の戸口
+x = 4
+y = 3
+to = "house_hero"
+tx = 5
+ty = 6
+
+[[map.warp]]          # 村長の家の戸口
+x = 14
+y = 4
+to = "house_chief"
+tx = 5
+ty = 6
+
+[[map.warp]]          # 北の出口 → 囁きの森
+x = 15
+y = 0
+to = "forest_1"
+tx = 15
+ty = 14
+
+[[map.event]]         # 家から初めて出たとき：カイが誘いに来る
+x = 4
+y = 4
+trigger = "auto"
+label = "ch1_kai_invite"
+when = "!flag.ch1_invited"
+
+[[map.event]]         # 南の出口（村を出るまでは通れない）
+x = 15
+y = 17
+trigger = "touch"
+label = "ch1_south_gate"
+
+[[map.event]]         # 翌朝、外に出るとモンスターが襲ってくる
+x = 4
+y = 4
+trigger = "auto"
+label = "ch1_raid"
+when = "flag.ch1_raid and !flag.ch1_raid_done"
+
+[[map.npc]]
+id = "kai"
+glyph = "友"
+color = "cyan"
+x = 15
+y = 2
+talk = "ch1_kai_talk"
+when = "!flag.ch1_forest_done"
+
+[[map.npc]]
+id = "chief"
+glyph = "長"
+color = "white"
+x = 16
+y = 5
+talk = "ch1_chief_talk"
+when = "!flag.ch1_raid"
+
+[[map.npc]]
+id = "farmer"
+glyph = "人"
+color = "white"
+x = 6
+y = 10
+move = "random"
+talk = "ch1_farmer_talk"
+when = "!flag.ch1_raid_done"
+
+[[map.npc]]
+id = "wolf1"
+glyph = "狼"
+color = "bright_red"
+x = 15
+y = 7
+when = "flag.ch1_raid and !flag.ch1_raid_done"
+
+[[map.npc]]
+id = "wolf2"
+glyph = "狼"
+color = "bright_red"
+x = 12
+y = 8
+when = "flag.ch1_raid and !flag.ch1_raid_done"
+
+[[map.npc]]
+id = "wolf3"
+glyph = "狼"
+color = "bright_red"
+x = 18
+y = 8
+when = "flag.ch1_raid and !flag.ch1_raid_done"
+
+[[map.npc]]
+id = "villager_a"
+glyph = "人"
+color = "white"
+x = 10
+y = 6
+talk = "ch1_villager_a"
+when = "flag.ch1_raid_done and !flag.ch1_left_village"
+
+[[map.npc]]
+id = "villager_b"
+glyph = "人"
+color = "white"
+x = 21
+y = 6
+talk = "ch1_villager_b"
+when = "flag.ch1_raid_done and !flag.ch1_left_village"
+
+[[map.npc]]
+id = "villager_c"
+glyph = "人"
+color = "white"
+x = 18
+y = 11
+talk = "ch1_villager_c"
+when = "flag.ch1_raid_done and !flag.ch1_left_village"
+
+[[map.npc]]
+id = "kai_gate"
+glyph = "友"
+color = "cyan"
+x = 14
+y = 16
+talk = "ch1_kai_gate_talk"
+when = "flag.ch1_farewell and !flag.ch1_left_village"
+
+[[map]]
+id = "house_hero"
+name = "{hero}の家"
+tileset = "default"
+rows = [
+  "############",
+  "#..........#",
+  "#.tt.......#",
+  "#..........#",
+  "#.......tt.#",
+  "#..........#",
+  "#..........#",
+  "#####D######",
+]
+
+[[map.warp]]
+x = 5
+y = 7
+to = "village_lito"
+tx = 4
+ty = 4
+
+[[map.npc]]
+id = "mother"
+glyph = "母"
+color = "magenta"
+x = 8
+y = 2
+talk = "ch1_mother_talk"
+
+[[map.npc]]
+id = "father"
+glyph = "父"
+color = "yellow"
+x = 9
+y = 5
+talk = "ch1_father_talk"
+when = "flag.ch1_forest_done"
+
+[[map.npc]]
+id = "mina"
+glyph = "妹"
+color = "bright_magenta"
+x = 3
+y = 5
+move = "random"
+talk = "ch1_mina_talk"
+
+[[map]]
+id = "forest_1"
+name = "囁きの森"
+tileset = "default"
+encounter = "forest_1"
+rows = [
+  "TTTTTTTTTTTTTTTTTTTTTTTTTTTTTT",
+  "TTT.......TTTTT.....S...TTTTTT",
+  "TT....TT.....TT..TTT.......TTT",
+  "T....TTTT..........T...~~...TT",
+  "T.....TT.....TTT......~~~~...T",
+  "TT..........TTTTT......~~....T",
+  "TTT....TT....TTT.............T",
+  "T......TT..........TTT......TT",
+  "T..TT.........TT...TTT.......T",
+  "T..TT....TT...TT.........TT..T",
+  "TT.......TT.........TT...TT..T",
+  "TTT..............TT.TT......TT",
+  "TTTT....TTT......TT.........TT",
+  "TTTTT...TTT.................TT",
+  "TTTTTTT......TT.TT.......TTTTT",
+  "TTTTTTTTTTTTTTT.TTTTTTTTTTTTTT",
+]
+
+[[map.warp]]
+x = 15
+y = 15
+to = "village_lito"
+tx = 15
+ty = 1
+
+[[map.event]]         # 森に入ったとき（1回だけ）
+x = 15
+y = 14
+trigger = "auto"
+label = "ch1_forest_enter"
+once = true
+
+[[map.event]]         # 祠を調べる
+x = 20
+y = 1
+trigger = "check"
+label = "ch1_find_sword"
+once = true
+when = "flag.lost_friend"
+
+[[map.npc]]
+id = "kai"
+glyph = "友"
+color = "cyan"
+x = 16
+y = 13
+talk = "ch1_kai_forest_talk"
+when = "!flag.ch1_forest_done"
+
+[[map]]
+id = "house_chief"
+name = "村長の家"
+tileset = "default"
+rows = [
+  "############",
+  "#..........#",
+  "#.tt.......#",
+  "#..........#",
+  "#.......tt.#",
+  "#..........#",
+  "#..........#",
+  "#####D######",
+]
+
+[[map.warp]]
+x = 5
+y = 7
+to = "village_lito"
+tx = 14
+ty = 5
+
+[[map.event]]         # 襲撃のあと：村長の話
+x = 5
+y = 6
+trigger = "auto"
+label = "ch1_meeting"
+when = "flag.ch1_need_meeting and !flag.ch1_meeting_done"
+
+[[map.npc]]
+id = "chief_in"
+glyph = "長"
+color = "white"
+x = 6
+y = 2
+talk = "ch1_chief_home_talk"
+
+[[map]]
+id = "field_road"
+name = "街道"
+tileset = "default"
+encounter = "road"
+rows = [
+  "TTTTTTTTTTTTTTT=TTTTTTTTTTTTTT",
+  "T..............=.............T",
+  "T..TT..........=.............T",
+  "T..............=........TT...T",
+  "T..............=..........T..T",
+  "T..............=.............T",
+  "T..............=....~~~~.....T",
+  "T.....HHH......=....~~~~.....T",
+  "T.....HDH......=....~~~~.....T",
+  "T.T....=========.............T",
+  "T..T...........=.............T",
+  "T..............=.............T",
+  "T..............=..........TT.T",
+  "T..............=.............T",
+  "T..............=.............T",
+  "T....T.........=......T......T",
+  "T..............=.............T",
+  "TTTTTTTTTTTTTTT=TTTTTTTTTTTTTT",
+]
+
+[[map.event]]         # 北：村へ（追い出された後は戻れない）
+x = 15
+y = 0
+trigger = "touch"
+label = "ch1_road_north"
+
+[[map.warp]]          # 南：ベルン北門
+x = 15
+y = 17
+to = "town_bern"
+tx = 20
+ty = 1
+dir = "down"
+
+[[map.npc]]
+id = "merchant"
+glyph = "商"
+color = "bright_green"
+x = 6
+y = 9
+talk = "ch1_road_merchant"
+
+[[map.event]]         # 立て札
+x = 16
+y = 2
+trigger = "check"
+label = "ch1_signpost"
+
+[[map]]
+id = "town_bern"
+name = "交易都市ベルン"
+tileset = "default"
+rows = [
+  "####################=###################",
+  "#...................=..................#",
+  "#...................=..................#",
+  "#..HHHHHHHHH........=.......HHHHHHHH...#",
+  "#..HHHHHHHHH.T......=....T..HHHHHHHH...#",
+  "#..HHHHHHHHH........=.......HHHHHHHH...#",
+  "#..HHHHHHHHH........=.......HHHDHHHH...#",
+  "#..HHHHDHHHH........=..................#",
+  "#...................=..................#",
+  "#............ttt....=...ttt..........T.#",
+  "#...................=..................#",
+  "#...================================...#",
+  "#...................=..................#",
+  "#................~~~~~~~...............#",
+  "#................~~~~~~~...............#",
+  "#..HHHHHH........~~~~~~~......HHHHHHH..#",
+  "#..HHHHHH...........=.........HHHHHHH..#",
+  "#..HHHHHH...........=.........HHHHHHH..#",
+  "#..HHHHHH..HHHHH....=.........HHHHHHH..#",
+  "#########..HHHHH....=...T..............#",
+  "#..........HHHHHT...=..................#",
+  "#...................=..................#",
+  "#...................=..................#",
+  "########################################",
+]
+
+[[map.event]]         # 初めて街に入ったとき：門番
+x = 20
+y = 1
+trigger = "auto"
+label = "ch1_gate"
+when = "!flag.ch1_gate_talked"
+
+[[map.warp]]          # 北門 → 街道
+x = 20
+y = 0
+to = "field_road"
+tx = 15
+ty = 16
+dir = "up"
+
+[[map.warp]]          # 冒険者協会
+x = 7
+y = 7
+to = "guild_bern"
+tx = 10
+ty = 8
+dir = "up"
+
+[[map.warp]]          # 宿屋
+x = 31
+y = 6
+to = "bern_inn"
+tx = 7
+ty = 6
+dir = "up"
+
+[[map.npc]]
+id = "guard"
+glyph = "兵"
+color = "bright_white"
+x = 21
+y = 2
+talk = "ch1_guard_talk"
+
+[[map.npc]]
+id = "bread_girl"
+glyph = "娘"
+color = "bright_magenta"
+x = 17
+y = 8
+talk = "ch1_bread_talk"
+
+[[map.npc]]
+id = "trader"
+glyph = "商"
+color = "bright_green"
+x = 30
+y = 10
+move = "random"
+talk = "ch1_trader_talk"
+
+[[map.npc]]
+id = "old_man"
+glyph = "老"
+color = "white"
+x = 10
+y = 13
+talk = "ch1_oldman_talk"
+
+[[map.npc]]
+id = "child"
+glyph = "子"
+color = "bright_cyan"
+x = 26
+y = 13
+move = "random"
+talk = "ch1_child_talk"
+
+[[map.npc]]
+id = "item_keeper"
+glyph = "道"
+color = "bright_yellow"
+x = 14
+y = 10
+talk = "ch1_item_keeper"
+
+[[map.npc]]
+id = "weapon_keeper"
+glyph = "武"
+color = "bright_yellow"
+x = 25
+y = 10
+talk = "ch1_weapon_keeper"
+
+[[map.npc]]
+id = "cat"
+glyph = "猫"
+color = "yellow"
+x = 2
+y = 21
+talk = "ch1_cat"
+when = "quest.q_lost_cat == active and !flag.found_cat"
+
+[[map]]
+id = "guild_bern"
+name = "冒険者協会ベルン支部"
+tileset = "default"
+rows = [
+  "####################",
+  "####################",
+  "#..................#",
+  "#.....tttt.tttt....#",
+  "#..................#",
+  "#..................#",
+  "#.tt...........tt..#",
+  "#.tt...........tt..#",
+  "#..................#",
+  "##########D#########",
+]
+
+[[map.warp]]
+x = 10
+y = 9
+to = "town_bern"
+tx = 7
+ty = 8
+dir = "down"
+
+[[map.npc]]
+id = "sera"
+glyph = "受"
+color = "bright_magenta"
+x = 10
+y = 3
+talk = "ch1_sera_talk"
+
+[[map.npc]]
+id = "adventurer_a"
+glyph = "剣"
+color = "white"
+x = 5
+y = 5
+talk = "ch1_adv_a_talk"
+
+[[map.npc]]
+id = "adventurer_b"
+glyph = "弓"
+color = "white"
+x = 14
+y = 7
+talk = "ch1_adv_b_talk"
+
+[[map]]
+id = "bern_inn"
+name = "宿屋「旅鳥亭」"
+tileset = "default"
+rows = [
+  "##############",
+  "#ttt.........#",
+  "#ttt.........#",
+  "#...ttt.ttt..#",
+  "#............#",
+  "#............#",
+  "#............#",
+  "#######D######",
+]
+
+[[map.warp]]
+x = 7
+y = 7
+to = "town_bern"
+tx = 31
+ty = 7
+dir = "down"
+
+[[map.npc]]
+id = "innkeeper"
+glyph = "主"
+color = "bright_yellow"
+x = 7
+y = 3
+talk = "ch1_innkeeper_talk"
+
+[[map.npc]]
+id = "traveler"
+glyph = "旅"
+color = "white"
+x = 11
+y = 5
+move = "random"
+talk = "ch1_traveler_talk"

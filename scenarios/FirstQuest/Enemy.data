@@ -1,0 +1,143 @@
+# ===== 敵 =====
+
+[[enemy]]
+id = "slime"
+name = "スライム"
+aa = "aa/slime.txt"
+stats = { hp = 8, atk = 5, def = 2, agi = 3, luk = 1 }
+exp = 3
+gold = 2
+weak = ["fire"]
+drops = [ { item = "herb", rate = 0.1 } ]
+tameable = true
+tame_rate = 0.3
+
+[[enemy]]
+id = "bat"
+name = "コウモリ"
+aa = "aa/bat.txt"
+stats = { hp = 6, atk = 6, def = 1, agi = 9, luk = 3 }
+exp = 3
+gold = 3
+ai = "random"
+[[enemy.actions]]
+skill = "attack"
+weight = 3
+[[enemy.actions]]
+skill = "bite"
+weight = 1
+
+[[enemy]]
+id = "shadow_wolf"
+name = "シャドウウルフ"
+aa = "aa/wolf.txt"
+stats = { hp = 10, atk = 7, def = 3, agi = 7, luk = 2 }
+exp = 6
+gold = 0
+ai = "pattern"
+[[enemy.actions]]
+skill = "attack"
+target = "id:hero"          # 1章: 主人公だけを狙う
+
+[[enemy]]
+id = "mole"
+name = "ハタケモグラ"
+aa = "aa/mole.txt"
+stats = { hp = 40, atk = 12, def = 6, agi = 5, luk = 3 }
+exp = 18
+gold = 12
+weak = ["fire"]
+drops = [ { item = "herb", rate = 0.2 } ]
+tameable = true
+tame_rate = 0.15
+ai = "pattern"
+[[enemy.actions]]
+skill = "attack"
+weight = 3
+[[enemy.actions]]
+skill = "dig_attack"
+weight = 1
+when = "self.hp_rate < 0.5"
+
+[[enemy]]
+id = "rabbit"
+name = "ツノウサギ"
+aa = "aa/rabbit.txt"
+stats = { hp = 10, atk = 6, def = 2, agi = 10, luk = 4 }
+exp = 4
+gold = 4
+drops = [ { item = "herb", rate = 0.25 } ]
+tameable = true
+tame_rate = 0.3
+
+[[enemy]]
+id = "mushroom"
+name = "ドクキノコ"
+aa = "aa/mushroom.txt"
+stats = { hp = 12, atk = 5, def = 4, mag = 2, agi = 2, luk = 2 }
+exp = 5
+gold = 5
+weak = ["fire"]
+drops = [ { item = "antidote", rate = 0.2 } ]
+ai = "random"
+[[enemy.actions]]
+skill = "attack"
+weight = 2
+[[enemy.actions]]
+skill = "spore"
+weight = 1
+
+# ===== 敵グループ =====
+
+[[group]]
+id = "slime_2"
+members = ["slime", "slime"]
+
+[[group]]
+id = "bat_1"
+members = ["bat"]
+
+[[group]]
+id = "slime_bat"
+members = ["slime", "bat"]
+
+[[group]]
+id = "raid_wolves"
+members = ["shadow_wolf", "shadow_wolf", "shadow_wolf"]
+
+[[group]]
+id = "mole_pack"
+members = ["mole", "mole"]
+
+[[group]]
+id = "rabbit_2"
+members = ["rabbit", "rabbit"]
+
+[[group]]
+id = "mushroom_slime"
+members = ["mushroom", "slime"]
+
+[[group]]
+id = "slime_3"
+members = ["slime", "slime", "slime"]
+
+# ===== 出現表 =====
+
+[[encounter]]
+id = "forest_1"
+steps = [12, 24]
+table = [
+  { group = "slime_2", weight = 5 },
+  { group = "bat_1", weight = 2 },
+  { group = "slime_bat", weight = 2 },
+]
+
+[[encounter]]
+id = "road"
+steps = [14, 26]
+table = [
+  { group = "slime_2", weight = 4 },
+  { group = "slime_3", weight = 2 },
+  { group = "rabbit_2", weight = 3 },
+  { group = "mushroom_slime", weight = 2 },
+]

@@ -1,0 +1,23 @@
+# FirstQuest シナリオパッケージ定義
+[package]
+id = "firstquest"
+title = "FirstQuest"
+version = "0.1.0"
+author = "bbk"
+engine = ">=1.0"
+languages = ["ja"]
+
+[title_screen]
+aa = "aa/title.txt"
+effect = "starfall"
+
+[rules]
+gameover = "choose"        # retry_from_save | title | choose
+save = "anywhere"          # anywhere | save_point_only
+party_max = 4
+start_label = "start"
+
+[start]
+party = ["hero"]
+gold = 0
+items = []
