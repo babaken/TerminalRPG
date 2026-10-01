@@ -310,6 +310,15 @@ color = "white"
 x = 6
 y = 2
 talk = "ch1_chief_home_talk"
+when = "flag.ch1_raid"              # 襲撃の前は外（village_lito の chief）にいる
+
+[[map.npc]]
+id = "chief_wife"
+glyph = "妻"
+color = "magenta"
+x = 9
+y = 5
+talk = "ch1_chief_wife_talk"
 
 [[map]]
 id = "field_road"

@@ -250,3 +250,23 @@ def test_script_runtime_error_is_shown(game, sample_dir):
     assert "エラー" in d.screen()
     d.key("ENTER")
     assert f.error is None
+
+
+def test_chief_is_in_one_place_only(game):
+    """襲撃の前は村長は外だけ、襲撃のあとは家の中だけにいる（同時に 2 か所に出ない）。"""
+    d = Driver(game)
+    for _ in range(4):
+        d.key("ENTER")
+    d.settle()
+    f = d.field
+    gd = game.data
+
+    def visible(map_id, npc_id):
+        f._set_map(map_id)
+        npc = next(n for n in gd.maps[map_id].npcs if n.id == npc_id)
+        return f.npc_visible(npc)
+
+    assert visible("village_lito", "chief") and not visible("house_chief", "chief_in")
+    assert visible("house_chief", "chief_wife")
+    f.st.flags.add("ch1_raid")
+    assert not visible("village_lito", "chief") and visible("house_chief", "chief_in")

@@ -264,6 +264,16 @@
 @effect fade_in 600
 @goto *ch1_farewell
 
+*ch1_chief_wife_talk
+@if flag.ch1_meeting_done
+  村長の奥さん「……ごめんなさいね。あの人も、本当はつらいのよ」
+@elif flag.ch1_raid
+  村長の奥さん「主人が待っていたわ。奥へどうぞ」
+@else
+  村長の奥さん「あら{hero}ちゃん。主人なら外で村を見回っていますよ」
+@endif
+@end
+
 *ch1_chief_home_talk
 @if flag.ch1_meeting_done
   村長「……すまぬ。お前の無事を、毎日祈っておる」
