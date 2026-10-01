@@ -51,7 +51,7 @@ TRPG/
 │  │  └─ items.py         【済】 フィールドでのアイテム・スキルの使用
 │  ├─ save/            【済】 直列化・暗号化・スロット管理
 │  ├─ i18n/            【未】 UI 文言（ja / en）
-│  └─ tools/           【一部】 pack【済】 / aa_convert【未】 / map_editor【未】（pip でも入るよう trpg パッケージ内に置く【変更】。lint は本体の --check に統合【変更】）
+│  └─ tools/           【一部】 pack【済】 / aa_convert【済】 / map_editor【未】（pip でも入るよう trpg パッケージ内に置く【変更】。lint は本体の --check に統合【変更】）
 ├─ scenarios/FirstQuest/  サンプルシナリオ（展開形式）
 └─ tests/              【済】 pytest（端末なしで画面にキーを送る通しプレイを含む）
 ```
@@ -68,7 +68,8 @@ TRPG/
 | `python -m trpg --keylog` | 【済】 | 受け取ったキー・画面状態・例外を `trpg_debug.log` に記録 |
 | `--ambiguous-width 1/2` `--no-color` `--fps N` | 【済】 | 表示オプション |
 | `python -m trpg.tools.pack DIR [-o ZIP] [--strict] [--force] [--dry-run]` | 【済】 | 検証してから zip にする（T-03）。エラーで中断、zip 内の日時固定、作った zip を再検証 |
-| `python -m trpg.tools.aa_convert` ほか | 【未】 | 要件 8 章の残りのツール |
+| `python -m trpg.tools.aa_convert IMAGE... [-w N] [-o TXT / -d DIR] [--charset ascii/wide] [--chars S] [--invert] [--edges] [--outline] [--color] [--preview]` | 【済】 | 画像 → AA（T-01、Pillow）。明るさを文字の濃さに、透明は半角空白、輪郭は 1 マスを 4×4 に分けて調べた向きで - / \| \\、色は HSV から 15 色（黒以外）へ |
+| `python -m trpg.tools.map_editor` | 【未】 | マップエディタ（T-02） |
 
 - 開発モードでの F5 スクリプト再読込は【未】。
 - シナリオにエラーがあるとゲームは起動せず、端末を初期化する前に検証結果を表示する。
@@ -495,7 +496,7 @@ on_complete = "ch1_quest_done"   # 達成報告のあとに実行するラベル
 - マップ上・戦闘では半角空白を透過として重ねる（顔・タイトルは透過しない）。
 - 色ファイル `*.color`（`aa/slime.txt` なら `aa/slime.color`）：AA と同じ行・同じ文字位置に色コードを 1 文字ずつ書く。
   `k r g y b m c w`（黒 赤 緑 黄 青 紫 水 白）、大文字で明るい色、`.` か空白で既定の色。足りない部分は既定の色。
-  戦闘の敵・@aa / aa_show・顔・タイトルのどれにも使える（`ui/aa.py`）。
+  戦闘の敵・@aa / aa_show・顔・タイトルのどれにも使える（`ui/aa.py`）。AA 変換ツールの `--color` で画像から作れる。
 - 検証：対応する AA のない色ファイル（警告）、使えない色コード（エラー）、AA より長い行・多い行（警告）。
 
 ---

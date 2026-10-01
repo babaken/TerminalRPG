@@ -10,11 +10,13 @@ requires-python = ">=3.11"
 dependencies = ["cryptography>=42"]   # セーブデータの暗号化（AES-256-GCM）
 
 [project.optional-dependencies]
-dev = ["pytest"]
+dev = ["pytest", "Pillow"]
+tools = ["Pillow"]                    # AA 変換ツール
 
 [project.scripts]
 trpg = "trpg.__main__:main"
 trpg-pack = "trpg.tools.pack:main"
+trpg-aa = "trpg.tools.aa_convert:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
