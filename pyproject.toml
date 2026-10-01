@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "trpg"
-version = "0.2.0"
+version = "0.3.0"
 description = "ASCII アートで表現するコンソール RPG エンジン"
 requires-python = ">=3.11"
 dependencies = ["cryptography>=42"]   # セーブデータの暗号化（AES-256-GCM）
