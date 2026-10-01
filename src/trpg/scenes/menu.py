@@ -341,7 +341,11 @@ class MenuScene(Overlay):
 
         def chosen(k: int) -> None:
             if k == 0:
-                self.say("（セーブ機能は実装中です）")
+                if self.game_manifest().save == "save_point_only":
+                    self.say("ここではセーブできない。（セーブできる場所で行ってください）")
+                else:
+                    from .saveload import SaveLoadScene
+                    self.app.push(SaveLoadScene(self.field.game, "save", field=self.field))
             elif k == 1:
                 self.ask("タイトルにもどりますか？（セーブしていない進行は失われます）", ["はい", "いいえ"],
                          lambda j: self._to_title() if j == 0 else None, cancel_index=1)
@@ -349,6 +353,9 @@ class MenuScene(Overlay):
                 self.ask("ゲームをおわりますか？（セーブしていない進行は失われます）", ["はい", "いいえ"],
                          lambda j: self.app.quit() if j == 0 else None, cancel_index=1)
         self.ask("システム", opts, chosen, cancel_index=3)
+
+    def game_manifest(self):
+        return self.field.game.manifest
 
     def _to_title(self) -> None:
         self.close()

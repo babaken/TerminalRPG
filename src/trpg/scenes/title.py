@@ -30,7 +30,13 @@ class TitleScene(Scene):
         self.game = game
         self.index = 0
         self.notice = ""
-        self.items = [("はじめから", True), ("つづきから", False), ("おわる", True)]
+        try:
+            has_save = game.saves().any_save()
+        except Exception:
+            has_save = False
+        self.items = [("はじめから", True), ("つづきから", has_save), ("おわる", True)]
+        if has_save:
+            self.index = 1
 
     def on_key(self, ev: KeyEvent, actions: frozenset[Action]) -> None:
         self.notice = ""
@@ -42,7 +48,12 @@ class TitleScene(Scene):
             if self.index == 0:
                 self.new_game()
             elif self.index == 1:
-                self.notice = "セーブ・ロードは未実装です"
+                if self.items[1][1]:
+                    from .saveload import SaveLoadScene
+                    self.app.push(SaveLoadScene(self.game, "load",
+                                                on_load=lambda st: start_field(self.app, self.game, st)))
+                else:
+                    self.notice = "セーブデータがありません"
             else:
                 self.app.quit()
         elif Action.CANCEL in actions:
@@ -60,14 +71,8 @@ class TitleScene(Scene):
             self.start(hero.name)
 
     def start(self, name: str) -> None:
-        from .field import FieldScene
         state = GameState.new_game(self.game.data, self.game.manifest, name)
-        field = FieldScene(self.game, state)
-        # 名前入力から来た場合はスタックを全部入れ替える
-        while len(self.app._stack) > 1:
-            self.app.pop()
-        self.app.replace(field)
-        field.start_script(self.game.manifest.start_label)
+        start_field(self.app, self.game, state, new_game=True)
 
     def draw(self, buf: Buffer) -> None:
         m = self.game.manifest
@@ -87,6 +92,22 @@ class TitleScene(Scene):
         foot = f"{m.author}" if m.author else ""
         if foot:
             buf.put_center(buf.height - 2, foot, Style.of("gray"))
+
+
+def start_field(app, game: Game, state: GameState, new_game: bool = False) -> None:
+    """画面を全部片付けてフィールドを始める（ニューゲーム・ロード共通）。"""
+    from .field import FieldScene
+    field = FieldScene(game, state)
+    while len(app._stack) > 1:
+        app.pop()
+    app.replace(field)
+    if new_game:
+        field.start_script(game.manifest.start_label)
+        return
+    # ロード：マップに入ったときの自動イベントは起こさない。*on_load があれば実行する
+    field.pending_auto = False
+    if field.vm.has_label("on_load"):
+        field.start_script("on_load")
 
 
 class NameInputScene(Scene):

@@ -15,17 +15,25 @@ ASCII アートで表現する、ターミナル用の RPG エンジンです。
 | エフェクト `src/trpg/effects/` | flash / fade_in / fade_out / shake / tint / typewriter / wait / rain / snow / starfall |
 | ショップ・宿屋・冒険者協会（依頼）・仲間選択 `src/trpg/scenes/facility.py` | 実装済み |
 | 戦闘（ターン制・スキル・道具・状態異常・逃走・テイム・経験値とレベルアップ） `src/trpg/battle/` `scenes/battle.py` | 実装済み |
-| 全滅時の画面（タイトルへ／セーブから） `scenes/gameover.py` | 実装済み（「セーブから」はセーブ実装待ち） |
+| 全滅時の画面（タイトルへ／セーブから） `scenes/gameover.py` | 実装済み |
 | FirstQuest `scenarios/FirstQuest/` | 1章「出会いと旅立ち」すべて遊べる |
 | フィールドメニュー（どうぐ・スキル・そうび・つよさ・いらい・システム） `scenes/menu.py` | 実装済み |
-| セーブ / ロード | 未着手（M1 で実装） |
+| セーブ / ロード（3 スロット・暗号化・改ざん検知・つづきから・全滅時「セーブから」） `src/trpg/save/` `scenes/saveload.py` | 実装済み |
 
 ## 動作環境
 
-- Python 3.11 以上（外部ライブラリ不要）
+- Python 3.11 以上、`cryptography`（セーブデータの暗号化に使用）
 - UTF-8 と ANSI エスケープに対応した端末、100 桁 × 30 行以上
   - Windows: **Windows Terminal** 推奨（コマンドプロンプト・PowerShell も可）
   - Linux: 一般的な端末エミュレータ
+
+## セットアップ
+
+```sh
+python -m venv .venv
+.venv/bin/pip install pytest cryptography          # Windows: .venv\Scripts\pip install pytest cryptography
+```
+（または `pip install -e .[dev]`）
 
 ## 起動
 
@@ -73,6 +81,9 @@ python -m trpg --list                           # 起動フォルダと scenario
 スクリプト（未知の命令・引数の誤り・条件式の誤り・存在しないラベル / マップ / アイテム / NPC・マップ外や壁の中の座標・
 @if と @endif の対応・使われていないラベル・一度も立てていないフラグ）を、ファイル名と行番号つきで表示します。
 シナリオに誤りがあるとゲームは起動せず、同じ内容を表示します。zip はフォルダごと圧縮した形（`FirstQuest/manifest.toml`）でも読めます。
+
+セーブデータは起動フォルダの `saves/<シナリオID>/slot1〜3.sav` に保存されます（環境変数 `TRPG_SAVE_DIR` で変更可）。
+暗号化と改ざん検知をしているため、書き換えたファイルや別シナリオのファイルは読み込みません。
 
 ウィンドウを 100×30 より小さくすると、警告を出してゲームを一時停止します。大きくすると自動で元に戻ります。
 
@@ -138,3 +149,5 @@ python -m pytest
 | `scenes/gameover.py` | 全滅時の画面 |
 | `scenes/menu.py` | フィールドメニュー |
 | `world/items.py` | フィールドでのアイテム・スキルの使用 |
+| `save/__init__.py` | セーブデータの形式・暗号化（AES-256-GCM）・スロット管理 |
+| `scenes/saveload.py` | セーブ／ロード画面 |
