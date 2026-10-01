@@ -13,6 +13,7 @@ from ..script.parser import Instr
 from ..script.vm import VM, ChoiceReq, KeyWaitReq, MessageReq, ScriptError, WaitReq
 from ..term import Action, Buffer, Key, KeyEvent, Rect, Style, pad, truncate, wrap
 from ..term.buffer import BOX_SINGLE
+from ..ui import markup
 from ..ui.widgets import FRAME, ChoiceWindow, MessageWindow
 from ..world import quests as Q
 from ..world.state import GameState, format_text
@@ -80,6 +81,7 @@ class FieldScene(Scene):
         self.after_script: Optional[str] = None
         self.pending_labels: list[str] = []   # 依頼達成などで後から実行するスクリプト
         self.background_movers: list[Mover] = []   # wait=false で動かしている演出移動
+        self.face: Optional[list[str]] = None      # 会話窓の上に出す顔 AA（@face）
         self._map_area_size = (64, 23)
         self.encounter = None                  # ランダムエンカウントの戦闘画面
         self._when_cache: dict[str, object] = {}
@@ -115,7 +117,7 @@ class FieldScene(Scene):
         elif isinstance(req, MessageReq):
             self.msg.open(req.lines)
         elif isinstance(req, ChoiceReq):
-            self.choice = ChoiceWindow(req.options)
+            self.choice = ChoiceWindow([markup.strip(o) for o in req.options])
             self.choice_cb = None
             if self.msg.active:
                 self.msg.shown = 10 ** 6   # 質問文は全部表示しておく
@@ -127,6 +129,7 @@ class FieldScene(Scene):
         self.app.push(GameOverScene(self.game, mode))
 
     def _script_finished(self) -> None:
+        self.face = None                      # 顔はスクリプトが終わったら消す
         if self.after_script and self.after_script.startswith("gameover:"):
             mode = self.after_script.split(":", 1)[1]
             self.after_script = None
@@ -169,7 +172,14 @@ class FieldScene(Scene):
         if name == "effect":
             return self._effect(ins, pos[0], pos[1:], kw)
         if name == "face":
-            return None   # 顔 AA の表示は後工程
+            if pos[0] == "none":
+                self.face = None
+                return None
+            path = self.gd.face_path(pos[0], self.game.package.exists)
+            if path is None:
+                raise ScriptError(ins, f"@face：「{pos[0]}」の顔 AA が見つかりません")
+            self.face = self._aa_lines(path)
+            return None
         if name == "aa":
             if pos[0] == "show":
                 self.overlays[kw.get("name", pos[1])] = (self._aa_lines(pos[1]), int(pos[2]), int(pos[3]))
@@ -723,6 +733,8 @@ class FieldScene(Scene):
             buf.box(msg_rect, FRAME, chars=BOX_SINGLE)
             return
         if self.msg.active:
+            if self.face:
+                self._draw_face(buf, msg_rect)
             self.msg.draw(buf, msg_rect, show_cursor=self.choice is None)
         elif not self.effects.faded:
             inner = buf.box(msg_rect, FRAME, chars=BOX_SINGLE)
@@ -733,6 +745,16 @@ class FieldScene(Scene):
         self.effects.apply_overlay(buf)
         if self.error:
             self._draw_error(buf)
+
+    def _draw_face(self, buf: Buffer, msg_rect: Rect) -> None:
+        """顔 AA を会話窓の左上に枠つきで重ねる。"""
+        from ..term import text_width
+        lines = self.face or []
+        w = min(max((text_width(ln) for ln in lines), default=0) + 4, buf.width // 2)
+        h = min(len(lines) + 2, msg_rect.y)
+        rect = Rect(msg_rect.x, msg_rect.y - h, w, h)
+        inner = buf.box(rect, FRAME, title=self.msg.speaker, chars=BOX_SINGLE)
+        buf.put_lines(inner.x + 1, inner.y, lines, Style.of("bright_white"), clip=inner)
 
     def _draw_map(self, buf: Buffer, area: Rect) -> None:
         m = self.map

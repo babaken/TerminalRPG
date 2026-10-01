@@ -21,6 +21,7 @@
 # 家から初めて外に出たとき（Map.data の auto イベント）
 *ch1_kai_invite
 @flag set ch1_invited
+@face kai
 カイ「おっそいぞ{hero}！　今日は森で探検するって約束だろ？」
 カイ「北の『囁きの森』、奥に古い石の祠があるって爺ちゃんが言ってたんだ。見に行こうぜ！」
 @choice
@@ -114,7 +115,7 @@
 *ch1_find_sword
 苔むした石の祠がある。
 祠の前の地面に、何かが突き刺さっている。
-……剣だ。ひどく錆びている。
+……\w500剣だ。\w300ひどく錆びている。
 @choice
   - 抜いてみる → *ch1_pull_sword
   - やめておく → *ch1_hesitate_sword
@@ -130,7 +131,7 @@
 @equip hero rusty_sword
 @flag set found_sword
 @effect tint none
-{item.rusty_sword}を手に入れた！　（そのまま装備した）
+\c[bright_yellow]{item.rusty_sword}\c[]を手に入れた！　（そのまま装備した）
 柄には見慣れない紋章が刻まれている。
 @call *ch1_reunion
 @end
@@ -138,6 +139,7 @@
 *ch1_reunion
 @npc kai show
 @npc kai move 4 -4
+@face kai
 カイ「{hero}！！　よかった、どこ行ってたんだよ！」
 カイ「途中で振り返ったらいなくてさ…マジで焦ったんだぞ！」
 @choice
@@ -152,6 +154,7 @@
 カイ「祠で拾った？　すげー！　なんか伝説の剣っぽい！」
 カイ「……いや、錆びすぎか。ははっ」
 カイ「もう日が暮れる。帰ろうぜ」
+@face none
 @flag set ch1_forest_done
 @call *ch1_family
 @return
@@ -189,7 +192,7 @@
 @effect fade_in 800
 ――翌朝。ぐっすり眠って、体の疲れはすっかり取れた。
 @effect shake h 3 800
-ドォン！！
+\c[bright_red]ドォン！！\c[]
 外から大きな音がした！
 母「な、何の音…？」
 父「……{hero}、ここにいろ」

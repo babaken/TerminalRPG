@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Optional
 
 from ..data.models import GameData
 from ..data.report import Report
+from ..ui import markup
 from .expr import ExprError, names, parse_expr
 from .parser import RESERVED_LABELS, Script
 
@@ -64,9 +65,15 @@ def lint_script(script: Script, gd: GameData, rep: Report, pkg: Optional["Packag
         if ins.op in ("goto", "call"):
             label_ref(a["label"], ins.file, ins.line)
         elif ins.op == "choice":
-            for _, label, line in a["options"]:
+            for text, label, line in a["options"]:
                 if label:
                     label_ref(label, ins.file, line)
+                for err in markup.check(text):
+                    rep.error(ins.file, line, err)
+        elif ins.op == "msg":
+            for i, (_, text) in enumerate(a["lines"]):
+                for err in markup.check(text):
+                    rep.error(ins.file, ins.line + i, err)
         elif ins.op == "jif":
             collect_flags(a["cond"], ins.file, ins.line)
         elif ins.op == "cmd":
@@ -115,6 +122,10 @@ def lint_script(script: Script, gd: GameData, rep: Report, pkg: Optional["Packag
             elif name == "npc":
                 if pos[0] not in npc_ids:
                     rep.error(ins.file, ins.line, f"NPC「{pos[0]}」はどのマップにもいません")
+            elif name == "face" and pos[0] != "none" and pkg is not None:
+                if gd.face_path(pos[0], pkg.exists) is None:
+                    rep.error(ins.file, ins.line, f"@face：「{pos[0]}」の顔 AA がありません"
+                              f"（Friends.data の face か aa/face_{pos[0]}.txt を用意してください）")
             elif name == "aa" and pos[0] == "show" and pkg is not None:
                 if not pkg.exists(pos[1]):
                     rep.error(ins.file, ins.line, f"AA ファイル「{pos[1]}」が見つかりません")
