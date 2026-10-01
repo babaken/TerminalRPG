@@ -250,7 +250,7 @@ class FieldScene(Scene):
         lines = self.gd.aa.get(path)
         if lines is None:
             text = self.game.package.read_text(path) or ""
-            lines = text.rstrip("\n").split("\n")
+            lines = text.splitlines()          # CRLF（Windows で保存したファイル）にも対応
         return lines
 
     def _effect(self, ins: Instr, name: str, pos: list[str], kw: dict):
@@ -315,7 +315,7 @@ class FieldScene(Scene):
                 text = self.game.package.read_text(kw["file"])
                 if text is None:
                     raise ScriptError(ins, f"@effect scroll_text：ファイル「{kw['file']}」がありません")
-                kw = dict(kw, _lines=[format_text(ln, self.st, self.gd) for ln in text.rstrip("\n").split("\n")])
+                kw = dict(kw, _lines=[format_text(ln, self.st, self.gd) for ln in text.splitlines()])
         return self.effects.start(name, pos, kw)
 
     def _offscreen(self, lines: list[str], x: int, y: int, side: str) -> tuple[int, int]:

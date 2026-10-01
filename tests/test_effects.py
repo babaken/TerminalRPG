@@ -213,3 +213,15 @@ def test_lint_new_effects(sample_dir):
     for frag in ("対象「ghost」", "対象「nobody」", "aa/none.txt", "from は", "nofile.txt",
                  "tint は", "wipe の向き", "「対象 dx dy」"):
         assert frag in text, frag
+
+
+def test_scroll_text_crlf_file(game, sample_dir):
+    """Windows で保存した（改行が CRLF の）ファイルでも行末に \\r が残らない。"""
+    (sample_dir / "credits.txt").write_bytes("A\r\nB\r\n".encode("utf-8"))
+    g = load_game(sample_dir)
+    d = Driver(g)
+    for _ in range(4):
+        d.key("ENTER")
+    d.settle()
+    d.field.start_script("fx_credits")
+    assert d.field.req.lines == ["A", "B"]
