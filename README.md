@@ -20,6 +20,7 @@ ASCII アートで表現する、ターミナル用の RPG エンジンです。
 | フィールドメニュー（どうぐ・スキル・そうび・つよさ・いらい・システム） `scenes/menu.py` | 実装済み |
 | セーブ / ロード（3 スロット・暗号化・改ざん検知・つづきから・全滅時「セーブから」） `src/trpg/save/` `scenes/saveload.py` | 実装済み |
 | パッケージツール（検証してから zip にする） `src/trpg/tools/pack.py` | 実装済み |
+| AA 変換ツール（画像 → AA・色ファイル） `src/trpg/tools/aa_convert.py` | 実装済み |
 
 ## 動作環境
 
@@ -95,6 +96,26 @@ python -m trpg.tools.pack scenarios/FirstQuest --dry-run    # 入れるファイ
 manifest.toml が zip の直下に来る形で作り、できた zip をもう一度検証します。zip 内の日時は固定なので、同じ中身からは同じ zip ができます。
 同じ名前の zip があるときは `--force` で上書きします。pip でインストールした場合は `trpg-pack` でも起動できます。
 
+## 画像から AA を作る（AA 変換ツール）
+
+`pip install Pillow` が必要です（ゲーム本体には不要）。
+```sh
+python -m trpg.tools.aa_convert slime.png -w 20 --color --preview   # ファイルを作らず端末で確かめる
+python -m trpg.tools.aa_convert slime.png -w 20 --color -d scenarios/FirstQuest/aa   # → slime.txt と slime.color
+python -m trpg.tools.aa_convert images/ -w 24 -d out/                # フォルダ内の画像をまとめて変換
+```
+| オプション | 説明 |
+|---|---|
+| `-w N` | 出力の桁数（半角換算、既定 40） |
+| `--charset ascii / wide` | 記号のみ（既定）／全角の記号。`--chars " .oO@"` で濃さの順に好きな文字を並べることもできる |
+| `--invert` | 明暗を反転（既定は明るいところほど濃い文字。白い背景の画像はこれを付ける） |
+| `--edges` / `--outline` | 輪郭を `- / \| \` の線で描く／線だけを描く。`--edge-threshold 0.3`（小さいほど線が増える） |
+| `--color` | 色ファイル（`.color`）も作る。色合いから 15 色のどれかに近づける |
+| `--aspect 0.5` | 文字 1 個の 幅÷高さ。縦長・横長に見えるときに調整 |
+| `--no-trim` / `--force` | 周りの空白を取らない／同じ名前のファイルを上書きする |
+
+透明なところは半角空白になり、戦闘画面などでは下が透けます。pip でインストールした場合は `trpg-aa` でも起動できます。
+
 セーブデータは起動フォルダの `saves/<シナリオID>/slot1〜3.sav` に保存されます（環境変数 `TRPG_SAVE_DIR` で変更可）。
 暗号化と改ざん検知をしているため、書き換えたファイルや別シナリオのファイルは読み込みません。
 
@@ -142,6 +163,7 @@ python -m pytest
 | `package/__init__.py` | パッケージを開く・探す（`open_package` / `discover`） |
 | `package/check.py` | パッケージの検証（`--check` とパッケージツールで共用） |
 | `tools/pack.py` | パッケージツール（検証 → zip 化 → 作った zip の再検証） |
+| `tools/aa_convert.py` | AA 変換ツール（明るさ → 文字、輪郭 → 線、色 → .color） |
 | `data/reader.py` | 型チェックつきの値取り出し、未知の項目の警告 |
 | `data/models.py` | 職業・キャラ・敵・アイテム・マップ・クエスト等のデータクラス |
 | `data/loader.py` | 各 .data の読み込みと相互参照チェック |
