@@ -16,7 +16,7 @@ ASCII アートで表現する、ターミナル用の RPG エンジンです。
 | ショップ・宿屋・冒険者協会（依頼）・仲間選択 `src/trpg/scenes/facility.py` | 実装済み |
 | 戦闘（ターン制・スキル・道具・状態異常・逃走・テイム・経験値とレベルアップ） `src/trpg/battle/` `scenes/battle.py` | 実装済み |
 | 全滅時の画面（タイトルへ／セーブから） `scenes/gameover.py` | 実装済み |
-| FirstQuest `scenarios/FirstQuest/` | 1章「出会いと旅立ち」すべて遊べる |
+| FirstQuest `scenarios/FirstQuest/` | 1章「出会いと旅立ち」すべて遊べる（v0.2.0：1 章完成版） |
 | フィールドメニュー（どうぐ・スキル・そうび・つよさ・いらい・システム） `scenes/menu.py` | 実装済み |
 | セーブ / ロード（3 スロット・暗号化・改ざん検知・つづきから・全滅時「セーブから」） `src/trpg/save/` `scenes/saveload.py` | 実装済み |
 
