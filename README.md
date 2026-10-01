@@ -21,6 +21,7 @@ ASCII アートで表現する、ターミナル用の RPG エンジンです。
 | セーブ / ロード（3 スロット・暗号化・改ざん検知・つづきから・全滅時「セーブから」） `src/trpg/save/` `scenes/saveload.py` | 実装済み |
 | パッケージツール（検証してから zip にする） `src/trpg/tools/pack.py` | 実装済み |
 | AA 変換ツール（画像 → AA・色ファイル） `src/trpg/tools/aa_convert.py` | 実装済み |
+| マップエディタ（TUI） `src/trpg/tools/map_editor.py` | タイルの編集と保存まで（NPC・ワープ・イベントの配置は今後） |
 
 ## 動作環境
 
@@ -116,6 +117,29 @@ python -m trpg.tools.aa_convert images/ -w 24 -d out/                # フォル
 
 透明なところは半角空白になり、戦闘画面などでは下が透けます。pip でインストールした場合は `trpg-aa` でも起動できます。
 
+## マップを編集する（マップエディタ）
+
+```sh
+python -m trpg.tools.map_editor scenarios/FirstQuest                 # 最初のマップを開く
+python -m trpg.tools.map_editor scenarios/FirstQuest --map town_bern
+```
+| キー | 操作 |
+|---|---|
+| 矢印（PgUp / PgDn / Home / End） | カーソル移動 |
+| Enter / Space | 選んでいるタイルで塗る |
+| `[` `]` / Tab、`1`〜`9` | タイルを選ぶ |
+| `i` | カーソルの下のタイルを選ぶ（スポイト） |
+| `p` | ペン（オンの間は動いた先を塗る） |
+| `u` | 元に戻す |
+| `o` | NPC・ワープ（Ｗ）・イベント（Ｅ）の表示／非表示 |
+| `m` | マップを切り替える |
+| `s` / F2 | 保存 |
+| `q` / Esc | 終わる（未保存なら確認） |
+
+保存では Map.data のうち編集したマップの `rows` だけを書き換えます（コメントや書式はそのまま）。
+最初の保存の前に元のファイルを `Map.data.bak` に写し、保存後に `--check` と同じ検証をして結果を表示します。
+編集できるのはフォルダのシナリオだけです（zip は不可）。pip でインストールした場合は `trpg-mapedit` でも起動できます。
+
 セーブデータは起動フォルダの `saves/<シナリオID>/slot1〜3.sav` に保存されます（環境変数 `TRPG_SAVE_DIR` で変更可）。
 暗号化と改ざん検知をしているため、書き換えたファイルや別シナリオのファイルは読み込みません。
 
@@ -164,6 +188,8 @@ python -m pytest
 | `package/check.py` | パッケージの検証（`--check` とパッケージツールで共用） |
 | `tools/pack.py` | パッケージツール（検証 → zip 化 → 作った zip の再検証） |
 | `tools/aa_convert.py` | AA 変換ツール（明るさ → 文字、輪郭 → 線、色 → .color） |
+| `tools/map_editor.py` | マップエディタの画面と操作 |
+| `tools/mapfile.py` | Map.data のうち 1 マップの rows だけを書き換える（コメント・書式を保つ） |
 | `data/reader.py` | 型チェックつきの値取り出し、未知の項目の警告 |
 | `data/models.py` | 職業・キャラ・敵・アイテム・マップ・クエスト等のデータクラス |
 | `data/loader.py` | 各 .data の読み込みと相互参照チェック |
