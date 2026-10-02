@@ -104,6 +104,10 @@ def test_chapter2_kabura_to_blackrock_order(game):
     assert "黒岩の洞穴" in talk and "ランク D" in talk
     assert st.quests["q_blackrock"] == "active" and "ch2_map_reported" in st.flags
     assert "old_map" not in st.items and st.items.get("map_copy") == 1
+    dorgan = f._find_npc("dorgan")                            # 奥から出てきて、そのまま協会にいる
+    assert f.npc_visible(dorgan) and f._npc_pos(dorgan) == (14, 2) and "会" in d.screen()
+    talk = d.talk(15, 2, "left")
+    assert any("東門の衛兵" in t for t in talk)
 
 
 def test_mole_battle_needs_quest(game):
