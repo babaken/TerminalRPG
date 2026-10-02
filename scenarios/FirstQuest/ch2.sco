@@ -1,7 +1,7 @@
 # ============================================================
 #  FirstQuest  第2章　影を追う者たち
 #  元テキスト: docs/scenario/FirstQuest_story.md（第2章）
-#  現在: 2-1 冒険者が死ぬ事件 〜 2-3 指名依頼まで
+#  現在: 2-1 冒険者が死ぬ事件 〜 2-3 黒岩の洞穴 B11F（帰還の巻物）まで
 # ============================================================
 
 # ------------------------------------------------------------
@@ -115,7 +115,101 @@
 指名依頼「黒岩の洞穴の調査」を受けた！　冒険者ランク D になった！
 {item.map_copy}を受け取った。
 協会長ドルガン「洞穴は街の東門を出た先の岩山だ。……生きて帰れよ」
-（黒岩の洞穴は制作中です。続きは次の更新で遊べるようになります）
+@end
+
+# ---- 黒岩の洞穴前（field_blackrock）
+*ch2_blackrock_out
+岩山の裂け目に、洞穴の入口が見える。
+入口の前に、武装したゴブリンが立っている。
+{party.2}「見張り……？　魔物が見張りを立てるなんて」
+@end
+
+*ch2_blackrock_guard
+ゴブリン隊長「グルル……ニンゲン……ココハ　トオサン」
+@battle group=goblin_guard escape=false
+@flag set ch2_guard_done
+見張りのゴブリンたちを倒した。
+{party.2}「統率された魔物……やっぱり何かあるわね」
+@end
+
+# ---- 黒岩の洞穴（dungeon_b01〜b11。暗く、周りしか見えない）
+*ch2_cave_enter
+洞穴の中は真っ暗だ。手元の明かりで、周りが少しだけ見える。
+{party.2}「足元に気をつけて。……奥から嫌な気配がするわ」
+@end
+
+*ch2_b01_pack
+冒険者のものらしい荷物が転がっている。
+@item add herb 2
+{item.herb}を 2 つ手に入れた！
+中に走り書きのメモが入っている。
+「奥へ行くほど……魔物が……統率されて……」
+@tile 25 12 _
+@end
+
+*ch2_b03_chest
+宝箱を開けた！
+@item add steel_sword
+{item.steel_sword}を手に入れた！
+{party.2}「いい剣ね。……でも、その錆びた剣も手放さないほうがいい気がするわ」
+@tile 5 3 b
+@end
+
+*ch2_b05_spring
+澄んだ水が湧き出している。
+@heal all
+泉の水を飲むと、体の疲れがすっかり取れた！
+@end
+
+*ch2_b06_relic
+冒険者の遺品が落ちている。
+@item add silverfang_emblem
+@flag set found_silverfang
+{item.silverfang_emblem}を手に入れた。
+{party.2}「『銀の牙』……噂の、帰ってこなかったパーティね」
+@tile 3 5 _
+@end
+
+*ch2_b08_ogre
+@effect shake h 2 500
+地響きとともに、巨大な影が立ちはだかった！
+オーガ「グオオオオ……！」
+@battle group=ogre escape=false
+@flag set ch2_ogre_done
+オーガは崩れ落ちた。この先へ進めそうだ。
+@end
+
+*ch2_b10_circle
+地面に、何かの模様が描かれている。
+{party.2}「……魔法陣の跡ね。何かの儀式に使われたみたい」
+古びた地図の写しには、この先の記載はない。
+@end
+
+*ch2_return_scroll
+@if flag.ch2_found_scroll
+  空になった木箱だ。
+  @end
+@endif
+小部屋に古びた木箱がある。
+@item add return_scroll
+@flag set ch2_found_scroll
+@tile 16 14 b
+{item.return_scroll}を手に入れた！
+{party.2}「帰還の巻物……使えば、すぐ街に戻れるわ」
+{party.2}「この先は魔物の気配がずっと濃い。二人じゃ厳しいかもしれない」
+@choice
+  - 一度戻って報告しよう
+  - もう少し進もう
+@if choice == 2
+  {party.2}「……{hero}、ドルガンさんは『必ず戻って報告しろ』って言ってたでしょ？」
+@endif
+{hero}は{item.return_scroll}を広げた。
+@effect flash white count=3
+@effect fade_out 500
+@map guild_bern 10 5 dir=up
+@effect fade_in 600
+……気がつくと、冒険者協会の前に立っていた。
+{party.2}「セラさんに報告しましょう」
 @end
 
 # 指名依頼の報告（2-4。制作中）

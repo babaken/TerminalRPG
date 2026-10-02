@@ -175,3 +175,113 @@ table = [
   { group = "rabbit_2", weight = 3 },
   { group = "mushroom_slime", weight = 1 },
 ]
+
+# ----- 黒岩の洞穴 -----
+[[enemy]]
+id = "goblin"
+name = "ゴブリン"
+aa = "aa/goblin.txt"
+stats = { hp = 28, atk = 13, def = 6, agi = 7, luk = 3 }
+exp = 14
+gold = 10
+drops = [ { item = "herb", rate = 0.15 } ]
+
+[[enemy]]
+id = "goblin_captain"
+name = "ゴブリン隊長"
+aa = "aa/goblin_captain.txt"
+stats = { hp = 60, atk = 16, def = 8, agi = 8, luk = 4 }
+exp = 35
+gold = 30
+ai = "pattern"
+[[enemy.actions]]
+skill = "attack"
+weight = 3
+[[enemy.actions]]
+skill = "smash"
+weight = 1
+
+[[enemy]]
+id = "rock_lizard"
+name = "イワトカゲ"
+aa = "aa/rock_lizard.txt"
+stats = { hp = 45, atk = 15, def = 12, agi = 4, luk = 2 }
+exp = 22
+gold = 14
+weak = ["fire"]
+tameable = true
+tame_rate = 0.1
+
+[[enemy]]
+id = "ogre"
+name = "オーガ"
+aa = "aa/ogre.txt"
+stats = { hp = 220, atk = 25, def = 10, agi = 4, luk = 3 }
+exp = 200
+gold = 150
+ai = "pattern"
+[[enemy.actions]]
+skill = "attack"
+weight = 3
+[[enemy.actions]]
+skill = "smash"
+weight = 2
+
+[[group]]
+id = "goblin_guard"
+members = ["goblin", "goblin_captain", "goblin"]
+
+[[group]]
+id = "cave_goblin_2"
+members = ["goblin", "goblin"]
+
+[[group]]
+id = "cave_goblin_bat"
+members = ["bat", "goblin", "bat"]
+
+[[group]]
+id = "lizard_1"
+members = ["rock_lizard"]
+
+[[group]]
+id = "goblin_3"
+members = ["goblin", "goblin", "goblin"]
+
+[[group]]
+id = "lizard_goblin"
+members = ["rock_lizard", "goblin"]
+
+[[group]]
+id = "lizard_2"
+members = ["rock_lizard", "rock_lizard"]
+
+[[group]]
+id = "ogre"
+members = ["ogre"]
+
+[[encounter]]
+id = "cave_upper"
+steps = [12, 22]
+table = [
+  { group = "cave_goblin_2", weight = 3 },
+  { group = "cave_goblin_bat", weight = 2 },
+  { group = "bat_1", weight = 1 },
+]
+
+[[encounter]]
+id = "cave_mid"
+steps = [12, 22]
+table = [
+  { group = "lizard_1", weight = 2 },
+  { group = "goblin_3", weight = 2 },
+  { group = "lizard_goblin", weight = 2 },
+]
+
+[[encounter]]
+id = "cave_deep"
+steps = [12, 22]
+table = [
+  { group = "goblin_guard", weight = 2 },
+  { group = "lizard_2", weight = 2 },
+  { group = "lizard_goblin", weight = 2 },
+]
