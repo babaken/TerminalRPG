@@ -17,7 +17,7 @@ ASCII アートで表現する、ターミナル用の RPG エンジンです。
 | ダンジョン（`dungeon = true` の階名表示・`map` 条件式・ワープアイテム・`@tile` でタイルを書き換え） | 実装済み |
 | 戦闘（ターン制・スキル・道具・状態異常・逃走・テイム＝ペットが一緒に戦う・経験値とレベルアップ） `src/trpg/battle/` `scenes/battle.py` | 実装済み |
 | 全滅時の画面（タイトルへ／セーブから） `scenes/gameover.py` | 実装済み |
-| FirstQuest `scenarios/FirstQuest/` | 1章「出会いと旅立ち」すべて、2章「影を追う者たち」は黒岩の洞穴 B11F で帰還の巻物を手に入れるところまで（`ch2.sco`） |
+| FirstQuest `scenarios/FirstQuest/` | 1章「出会いと旅立ち」すべて、2章「影を追う者たち」すべて（`ch2.sco`。仲間 2 人の加入まで） |
 | フィールドメニュー（どうぐ・スキル・そうび・つよさ・いらい・システム） `scenes/menu.py` | 実装済み |
 | セーブ / ロード（3 スロット・暗号化・改ざん検知・つづきから・全滅時「セーブから」） `src/trpg/save/` `scenes/saveload.py` | 実装済み |
 | パッケージツール（検証してから zip にする） `src/trpg/tools/pack.py` | 実装済み |

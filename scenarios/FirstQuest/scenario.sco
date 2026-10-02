@@ -458,6 +458,9 @@
 @elif quest.q_mole == active and !flag.mole_defeated
   受付セラ「カブラ村の依頼、よろしくお願いしますね。村はベルンの南門を出てすぐです」
   @guild
+@elif quest.q_blackrock == active and !flag.ch2_found_scroll
+  受付セラ「黒岩の洞穴は、東門を出た先の岩山です。……どうか、無事に戻ってきてくださいね」
+  @guild
 @else
   受付セラ「お疲れさまです、{hero}さん」
   @guild
