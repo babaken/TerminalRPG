@@ -541,6 +541,24 @@ tx = 1
 ty = 8
 dir = "right"
 
+[[map.npc]]
+id = "east_guard"
+glyph = "兵"
+color = "bright_white"
+x = 39
+y = 11
+talk = "ch2_east_guard_talk"
+when = "!flag.ch2_map_reported"
+
+[[map.npc]]
+id = "east_guard_open"
+glyph = "兵"
+color = "bright_white"
+x = 38
+y = 10
+talk = "ch2_east_guard_open_talk"
+when = "flag.ch2_map_reported"
+
 [[map]]
 id = "guild_bern"
 name = "冒険者協会ベルン支部"

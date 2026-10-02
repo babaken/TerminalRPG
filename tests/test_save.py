@@ -209,7 +209,9 @@ def test_save_point_command_resumes_script(game, sample_dir):
 
 def test_on_load_label_runs(game, sample_dir):
     sco = sample_dir / "scenario.sco"
-    sco.write_text(sco.read_text(encoding="utf-8") + "\n*on_load\nおかえりなさい\n@end\n", encoding="utf-8")
+    text = sco.read_text(encoding="utf-8")
+    assert "\n*on_load\n" in text                            # FirstQuest にもある → 先頭に一行足す
+    sco.write_text(text.replace("\n*on_load\n", "\n*on_load\nおかえりなさい\n", 1), encoding="utf-8")
     g = load_game(sample_dir)
     g.save_dir = game.save_dir
     g.saves().save(1, sample_state(g), "ベルン")
