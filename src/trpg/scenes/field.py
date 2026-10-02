@@ -859,7 +859,8 @@ class FieldScene(Scene):
             hp_st = Style.of("bright_red") if mem.hp * 4 <= mem.max_hp else Style.of("white")
             buf.put(area.x + 2, y + 1, f"HP {mem.hp:>3}/{mem.max_hp:>3}  MP {mem.mp:>3}/{mem.max_mp:>3}", hp_st, clip=area)
             y += 3
-        info = [f"G {self.st.gold:>8}"]
+        pet = self.gd.enemies.get(self.st.pet) if self.st.pet else None
+        info = ([f"ペット {pet.name}"] if pet else []) + [f"G {self.st.gold:>8}"]
         if self.st.chapter:
             info.append(f"第{self.st.chapter}章 {self.st.chapter_title}")
         t = int(self.st.playtime)

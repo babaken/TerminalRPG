@@ -95,6 +95,9 @@ def lint_script(script: Script, gd: GameData, rep: Report, pkg: Optional["Packag
                         tile = ts.tiles.get(mp.rows[y][x]) if ts else None
                         if tile is not None and not tile.passable:
                             rep.warning(ins.file, ins.line, f"@map {mp.id}: 座標 ({x}, {y}) は通行できないタイル（{tile.name or tile.char}）です")
+            elif name == "pet":
+                if pos[0] != "release":
+                    need(gd.enemies, pos[0], "敵", ins)
             elif name == "tile":
                 ch = pos[2]
                 mp = gd.maps.get(kw["map"]) if kw.get("map") else None

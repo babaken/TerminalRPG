@@ -34,11 +34,12 @@ class Battler:
     """戦闘の参加者。味方は Member の HP/MP を直接読み書きする（戦闘後もそのまま残る）。"""
 
     def __init__(self, gd: GameData, *, member: Optional[Member] = None, enemy: Optional[Enemy] = None,
-                 name: str = ""):
+                 name: str = "", pet: bool = False):
         self.gd = gd
         self.member = member
         self.enemy = enemy
-        self.side = "party" if member is not None else "enemy"
+        self.pet = pet                            # テイムした魔物（味方側。自動で行動する）
+        self.side = "party" if member is not None or pet else "enemy"
         self.name = name or (member.name if member else enemy.name)
         self.status: dict[str, int] = {}          # 状態異常 ID → 残りターン
         self.mods: dict[str, list[int]] = {}      # 能力の一時増減 stat → [量, 残りターン]
@@ -150,6 +151,9 @@ class Battle:
         self.result: Optional[str] = None        # win / lose / escape
         self.defeated: list[str] = []            # 倒した敵 ID（報酬・討伐依頼用）
         self.party = [Battler(gd, member=m) for m in st.party]
+        # テイムした魔物（パーティ枠の外で 1 体）。毎回 HP 満タンで参加し、経験値はもらわない
+        pet = gd.enemies.get(st.pet) if st.pet else None
+        self.pet: Optional[Battler] = Battler(gd, enemy=pet, pet=True) if pet else None
         ids = gd.groups[group_id].members
         counts = {e: ids.count(e) for e in ids}
         seen: dict[str, int] = {}
@@ -164,8 +168,13 @@ class Battle:
         self._cond_cache: dict[str, Any] = {}
 
     # ---- 状態
+    @property
+    def allies(self) -> list[Battler]:
+        """味方全員（パーティ＋ペット）。"""
+        return self.party + ([self.pet] if self.pet else [])
+
     def alive(self, side: str) -> list[Battler]:
-        lst = self.party if side == "party" else self.enemies
+        lst = self.allies if side == "party" else self.enemies
         return [b for b in lst if b.alive]
 
     def actors(self) -> list[Battler]:
@@ -177,7 +186,7 @@ class Battle:
             return True
         if not self.alive("enemy"):
             self.result = "win"
-        elif not self.alive("party"):
+        elif not any(b.alive for b in self.party):       # ペットだけ残っても負け
             self.result = "lose"
         return self.result is not None
 
@@ -240,6 +249,8 @@ class Battle:
             names[b.enemy.name] = names.get(b.enemy.name, 0) + 1
         for n, c in names.items():
             yield ("msg", f"{n}が {c} 匹あらわれた！" if c > 1 else f"{n}があらわれた！")
+        if self.pet is not None:
+            yield ("msg", f"{self.pet.name}がいっしょに戦う！")
 
     def enemy_command(self, e: Battler) -> Command:
         acts = e.enemy.actions if e.enemy.ai != "attack_only" else []
@@ -260,6 +271,32 @@ class Battle:
         if a.skill == "defend":
             return Command("defend")
         return Command("skill", skill=a.skill, target=self._enemy_target(e, a.target))
+
+    def pet_command(self, p: Battler) -> Command:
+        """ペットの行動：魔物だったときの行動表から選び、敵に向ける（回復などは味方へ）。"""
+        foes = self.alive("enemy")
+        acts = p.enemy.actions if p.enemy.ai != "attack_only" else []
+        cands = []
+        for a in acts:
+            if a.when and not self._cond(a.when, p):
+                continue
+            sk = self.gd.skills.get(a.skill)
+            if sk is not None and sk.mp > p.mp:
+                continue
+            cands.append(a)
+        a = None
+        if cands:
+            weights = [max(0, x.weight) for x in cands]
+            a = self.rng.choices(cands, weights)[0] if sum(weights) > 0 else cands[0]
+        if a is None or a.skill == "attack" or not foes:
+            return Command("attack", target=self.rng.choice(foes) if foes else None)
+        if a.skill == "defend":
+            return Command("defend")
+        sk = self.gd.skills.get(a.skill)
+        if sk is not None and sk.target in ("ally_one", "self"):
+            hurt = min(self.alive("party"), key=lambda b: b.hp_rate, default=p)
+            return Command("skill", skill=a.skill, target=hurt)
+        return Command("skill", skill=a.skill, target=self.rng.choice(foes))
 
     def _cond(self, src: str, me: Battler) -> bool:
         ast = self._cond_cache.get(src)
@@ -284,14 +321,14 @@ class Battle:
             return min(alive, key=lambda b: b.hp)
         if policy.startswith("id:"):
             for b in alive:
-                if b.member.id == policy[3:]:
+                if b.member is not None and b.member.id == policy[3:]:
                     return b
         return self.rng.choice(alive)
 
     def run_round(self, cmds: dict[Battler, Command]) -> Iterator[Event]:
         """1 ラウンド実行する。cmds は味方の入力（逃げるは 1 人でも選べば全員で逃げる）。"""
         self.turn += 1
-        for b in self.party + self.enemies:
+        for b in self.allies + self.enemies:
             b.defending = False
         # 逃げる：行動順の前に判定（失敗するとこのターン味方は行動できない）
         if any(c.kind == "escape" for c in cmds.values()):
@@ -313,6 +350,11 @@ class Battle:
                 if c.kind == "defend":
                     b.defending = True      # 防御は行動順に関係なくすぐ有効
                 order.append((b.stat("agi") * self._rand(0.8, 1.2), b, c))
+        if self.pet is not None and self.pet.can_act() and cmds:
+            c = self.pet_command(self.pet)
+            if c.kind == "defend":
+                self.pet.defending = True
+            order.append((self.pet.stat("agi") * self._rand(0.8, 1.2), self.pet, c))
         for e in self.enemies:
             if e.can_act():
                 c = self.enemy_command(e)
@@ -511,14 +553,17 @@ class Battle:
         yield ("msg", f"{a.name}は{t.name}に手をさしのべた…")
         if self.rng.random() < self.tame_rate(t):
             t.gone = True
+            old = self.gd.enemies.get(self.st.pet) if self.st.pet else None
             self.st.pet = t.enemy.id
             yield ("msg", f"{t.name}はなついた！　仲間になった！")
+            if old is not None:
+                yield ("msg", f"いままでの{old.name}は、野に帰っていった。")
         else:
             yield ("msg", f"{t.name}はそっぽを向いた。")
 
     def _end_of_round(self) -> Iterator[Event]:
         cleared = False
-        for b in self.party + self.enemies:
+        for b in self.allies + self.enemies:
             if not b.alive:
                 continue
             for sid in list(b.status):

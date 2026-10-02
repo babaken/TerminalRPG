@@ -165,6 +165,8 @@ class GameState:
             return self.last_choice
         if root == "chapter" and not rest:
             return self.chapter
+        if root == "pet" and not rest:
+            return self.pet
         if root == "map" and not rest:
             return self.map_id
         if root == "map" and rest in (("id",), ("dungeon",), ("dark",), ("indoor",)):
