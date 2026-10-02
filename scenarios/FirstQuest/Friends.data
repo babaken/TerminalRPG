@@ -29,6 +29,27 @@ growth = { hp = 5, mp = 4, atk = 1, def = 2, mag = 3, agi = 1, luk = 2 }
 equip = ["staff", "mace", "robe", "light_armor", "accessory"]
 skills = [ { lv = 1, skill = "heal" } ]
 
+[[job]]
+id = "gambler"
+name = "遊び人"
+growth = { hp = 6, mp = 2, atk = 2, def = 1, mag = 1, agi = 3, luk = 4 }
+equip = ["dagger", "light_armor", "accessory"]
+skills = [ { lv = 1, skill = "gamble" } ]
+
+[[job]]
+id = "amazon"
+name = "アマゾネス"
+growth = { hp = 8, mp = 1, atk = 3, def = 2, mag = 0, agi = 2, luk = 1 }
+equip = ["axe", "sword", "light_armor", "shield", "accessory"]
+skills = [ { lv = 1, skill = "war_cry" }, { lv = 5, skill = "power_slash" } ]
+
+[[job]]
+id = "tamer"
+name = "テイマー"
+growth = { hp = 6, mp = 3, atk = 2, def = 2, mag = 2, agi = 2, luk = 2 }
+equip = ["whip", "light_armor", "robe", "accessory"]
+skills = [ { lv = 1, skill = "tame" } ]
+
 # ===== キャラクター =====
 
 [[character]]
@@ -66,3 +87,30 @@ lv = 3
 stats = { hp = 30, mp = 18, atk = 6, def = 7, mag = 11, agi = 6, luk = 9 }
 equip = { armor = "robe" }
 recruit_text = "傷ついた人を放っておけません。どうか一緒に。"
+
+[[character]]
+id = "jack"
+name = "ジャック"
+job = "gambler"
+lv = 3
+stats = { hp = 34, mp = 10, atk = 10, def = 6, mag = 4, agi = 10, luk = 16 }
+equip = { weapon = "dagger", armor = "cloth" }
+recruit_text = "ツキは俺の味方さ。たぶんね。"
+
+[[character]]
+id = "zara"
+name = "ザラ"
+job = "amazon"
+lv = 3
+stats = { hp = 44, mp = 6, atk = 15, def = 8, mag = 1, agi = 9, luk = 5 }
+equip = { weapon = "stone_axe", armor = "leather_armor" }
+recruit_text = "弱い奴には興味がない。お前は…まあ、見込みはある。"
+
+[[character]]
+id = "noa"
+name = "ノア"
+job = "tamer"
+lv = 3
+stats = { hp = 32, mp = 12, atk = 9, def = 6, mag = 6, agi = 9, luk = 8 }
+equip = { weapon = "whip", armor = "cloth" }
+recruit_text = "魔物だって話せばわかる子もいるんだよ。"

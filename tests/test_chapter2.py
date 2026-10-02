@@ -224,3 +224,71 @@ def test_return_scroll_only_in_dungeon(game):
 def find_in(game, mid, ch):
     rows = game.data.maps[mid].rows
     return next((x, y) for y, r in enumerate(rows) for x, c in enumerate(r) if c == ch)
+
+
+def test_chapter2_report_and_new_members(game):
+    d = after_chapter1(game)                                  # 1章でミアを選んだ状態
+    f = d.field
+    st = f.st
+    gd = game.data
+    st.chapter = 2
+    st.flags |= {"ch2_rumor", "mole_defeated", "ch2_map_reported", "ch2_found_scroll", "found_silverfang"}
+    st.quests.update(q_mole="done", q_blackrock="active")
+    st.items.update(map_copy=1, return_scroll=1, silverfang_emblem=1)
+    for m in st.party:
+        raise_to_level(m, gd, 9)
+    gold0 = st.gold
+    d.talk(10, 4, "up")
+    d.ov_read()
+    d.ov_choose(1)                                            # 依頼を報告する
+    d.ov_pick("黒岩の洞穴")
+    d.ov_read()
+    d.ov_choose(3)
+    d.ov_read()
+    talk = d.back_to_field()                                  # ドルガンの話 → 仲間選択が開く
+    j = " ".join(talk)
+    assert "銀の牙の紋章" in j and "背中を預けられる奴" in j
+    assert st.gold == gold0 + 300
+    d.ov_read()
+    rows = [r[0] for r in d.ov().list.rows]
+    assert len(rows) == 5 and not any("ミア" in r for r in rows)   # 1章の仲間は候補に出ない
+    assert all("Lv 9" == r[1] for r in d.ov().list.rows)      # 平均レベルで加入
+    d.ov_pick("ノア")
+    d.ov_choose(0)
+    d.ov_read()
+    d.ov_pick("ガロ")
+    d.ov_choose(0)
+    d.ov_read()
+    talk = d.back_to_field()
+    j = " ".join(talk)
+    assert "ピピ" in j and "今度こそ一緒に行けるな" in j and "今度こそ一緒に行けるわね" not in j
+    assert [m.id for m in st.party] == ["hero", "mia", "noa", "garo"]
+    assert "ch2_done" in st.flags and st.quests["q_blackrock"] == "done"
+    from trpg.scenes.saveload import SaveLoadScene
+    sc = d.scene
+    assert isinstance(sc, SaveLoadScene)
+    d.key("ESC")
+    talk = d.back_to_field()
+    assert any("第3章" in t for t in talk)
+
+
+def test_new_jobs_skills(game):
+    import random
+    from trpg.battle.core import Battle, Command
+    st = new_party(game, "jack", "zara", "noa")
+    b = Battle(game.data, st, "cave_goblin_2", rng=random.Random(1))
+    jack, zara, noa = b.party[1:]
+    assert [s.id for s in jack.skills()] == ["gamble"] and [s.id for s in noa.skills()] == ["tame"]
+    out = [v for k, v in b._skill(zara, Command("skill", skill="war_cry", target=zara)) if k == "msg"]
+    assert any("攻撃力が上がった" in m for m in out) and zara.mods["atk"][0] == 6
+    b.tame_rate = lambda t: 1.0
+    out = [v for k, v in b._skill(noa, Command("skill", skill="tame", target=b.enemies[0])) if k == "msg"]
+    assert st.pet == "goblin" or any("そっぽ" in m for m in out) or any("なついた" in m for m in out)
+
+
+def new_party(game, *ids):
+    from trpg.world.state import GameState
+    st = GameState.new_game(game.data, game.manifest)
+    for c in ids:
+        st.party.append(Member.from_data(game.data, c))
+    return st

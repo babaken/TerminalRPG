@@ -196,7 +196,7 @@ goods = ["herb", "antidote", "bread"]
 [[shop]]
 id = "town_weapon"
 name = "ベルンの武具屋"
-goods = ["copper_sword", "leather_armor", "wood_shield"]
+goods = ["copper_sword", "dagger", "whip", "stone_axe", "leather_armor", "wood_shield"]
 
 # ===== 2章 =====
 [[item]]
@@ -242,3 +242,57 @@ target = "enemy_one"
 kind = "physical"
 power = 9
 anim = "shake:3"
+
+[[item]]
+id = "dagger"
+name = "短剣"
+type = "equipment"
+slot = "weapon"
+category = "dagger"
+price = 60
+desc = "軽くて扱いやすい短い剣。"
+stats = { atk = 6, agi = 1 }
+
+[[item]]
+id = "stone_axe"
+name = "石の斧"
+type = "equipment"
+slot = "weapon"
+category = "axe"
+price = 150
+desc = "重い石の刃の斧。力のある者向け。"
+stats = { atk = 12 }
+
+[[item]]
+id = "whip"
+name = "革のムチ"
+type = "equipment"
+slot = "weapon"
+category = "whip"
+price = 80
+desc = "魔物使いが使うしなやかなムチ。"
+stats = { atk = 7 }
+
+[[skill]]
+id = "gamble"
+name = "大博打"
+mp = 3
+target = "enemy_one"
+kind = "physical"
+power = 14
+anim = "flash:yellow"
+
+[[skill]]
+id = "war_cry"
+name = "雄たけび"
+mp = 3
+target = "self"
+kind = "buff"
+power = 6
+
+[[skill]]
+id = "tame"
+name = "手なずける"
+mp = 0
+target = "enemy_one"
+kind = "tame"
