@@ -294,6 +294,25 @@ def new_party(game, *ids):
     return st
 
 
+def test_east_gate_closed_until_named_quest(game):
+    d = after_chapter1(game)
+    f = d.field
+    st = f.st
+    st.flags.add("ch2_rumor")
+    f.change_map("town_bern", 37, 11)
+    f.pending_auto = False
+    guard = f._find_npc("east_guard")
+    assert f.npc_visible(guard) and f.npc_at(39, 11) is guard
+    talk = " ".join(d.talk(38, 11, "right"))
+    assert "通行止め" in talk and "落石" in talk
+    d.key("RIGHT")
+    assert st.map_id == "town_bern" and (st.x, st.y) == (38, 11)    # 門を通れない
+    st.flags.add("ch2_map_reported")                                 # 指名依頼を受けた
+    assert f.npc_at(39, 11) is None and f.npc_visible(f._find_npc("east_guard_open"))
+    d.key("RIGHT")
+    assert st.map_id == "field_blackrock"
+
+
 def test_chapter2_starts_after_loading_chapter1_save(game):
     """1章の最後のセーブ（2章が始まる前）から再開しても 2 章が始まる。"""
     from trpg.scenes.title import start_field
