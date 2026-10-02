@@ -536,6 +536,14 @@
 旅人「南の港町まで行くんだ。ベルンの宿は安くていいよ」
 @end
 
+# ---- ロードしたとき（つづきから・全滅からの「セーブから」） ----
+# 1章の最後のセーブは 2 章を始める前に保存されるので、そこから再開したら 2 章を始める
+*on_load
+@if flag.ch1_done and !flag.ch2_rumor
+  @goto *ch2_start
+@endif
+@end
+
 # ---- アイテム ----
 *use_return_scroll
 @if !map.dungeon
