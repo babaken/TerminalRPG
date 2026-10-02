@@ -18,9 +18,9 @@ def exp_for_next(lv: int) -> int:
 def skills_of(m: Member, gd: GameData) -> list[str]:
     """現在のレベルで使えるスキル ID（職業の習得表から）。"""
     job = gd.jobs.get(m.job)
-    if job is None:
-        return []
-    return [sid for lv, sid in job.skills if lv <= m.lv and sid in gd.skills]
+    out = [sid for lv, sid in job.skills if lv <= m.lv and sid in gd.skills] if job else []
+    out += [sid for sid in m.extra_skills if sid in gd.skills and sid not in out]
+    return out
 
 
 def level_up(m: Member, gd: GameData, rng: Optional[random.Random] = None) -> list[str]:

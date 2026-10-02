@@ -144,7 +144,7 @@ def _load_enemies(f: _File, gd: GameData) -> None:
                   weak=t.strlist("weak", []), resist=t.strlist("resist", []),
                   immune_status=t.strlist("immune_status", []), drops=drops,
                   tameable=t.bool("tameable", False), tame_rate=t.num("tame_rate", 0.0, min=0.0, max=1.0),
-                  ai=t.str("ai", "attack_only", choices=AI_TYPES), actions=actions)
+                  ai=t.str("ai", "attack_only", choices=AI_TYPES), actions=actions, copy=t.str("copy", ""))
         for k in ("weak", "resist"):
             for el in getattr(e, k):
                 if el not in ELEMENTS:

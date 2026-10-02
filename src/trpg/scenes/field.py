@@ -194,14 +194,19 @@ class FieldScene(Scene):
         if name == "battle":
             return self.start_battle(kw["group"], escape=kw.get("escape", "true") != "false",
                                      gameover=kw.get("gameover", ""), target_only=kw.get("target_only", ""),
-                                     lose=kw.get("lose", ""), from_script=True)
+                                     lose=kw.get("lose", ""), from_script=True,
+                                     members=kw["members"].split(",") if kw.get("members") else None,
+                                     turns=int(kw.get("turns", 0)))
         if name in ("shop", "inn", "guild", "recruit"):
             return self._open_facility(name, pos, kw)
         if name == "save_point":
             return self.open_save()
         if name == "ending":
-            self.after_script = "title"
-            return MessageReq([("", "―― おわり ――（エンディング演出は未実装です。タイトルに戻ります）")])
+            from .ending import EndingScene
+            self.after_script = "title"            # エンディング画面を閉じたらタイトルへ
+            scene = EndingScene(self, kw.get("text", ""))
+            self.app.push(scene)
+            return scene
         return MessageReq([("", f"（@{name} は未実装です）")])
 
     def _open_facility(self, name: str, pos: list[str], kw: dict):
@@ -219,12 +224,13 @@ class FieldScene(Scene):
 
     # ------------------------------------------------------------ 戦闘
     def start_battle(self, group: str, *, escape: bool = True, gameover: str = "", target_only: str = "",
-                     lose: str = "", from_script: bool = False):
+                     lose: str = "", from_script: bool = False, members: Optional[list[str]] = None,
+                     turns: int = 0):
         from .battle import BattleScene
         if group not in self.gd.groups:
             raise ScriptError(None, f"敵グループ「{group}」が定義されていません")
         b = BattleScene(self, group, escape=escape, gameover=gameover, target_only=target_only,
-                        lose=lose, from_script=from_script)
+                        lose=lose, from_script=from_script, members=members, turns=turns)
         if not from_script:
             self.encounter = b
         self.app.push(b)
@@ -233,6 +239,9 @@ class FieldScene(Scene):
     def _after_battle(self, b) -> None:
         """戦闘画面が閉じたあと。負けたら負けイベントへ、またはゲームオーバー。"""
         result = b.battle.result
+        if result == "timeout":
+            # turns= のターン数がたった：負けイベントがあればそこへ、なければスクリプトの続きへ
+            result = "lose" if b.lose_label else "escape"
         if result == "lose":
             if b.lose_label:
                 for m in self.st.party:          # 負けイベント：倒れた仲間は HP 1 で起き上がる

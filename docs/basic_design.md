@@ -235,7 +235,7 @@ recruit_text = "…"           # 仲間選択画面の紹介文
 ```
 - 職業の `equip` が空なら何でも装備できる。装飾品も category（例 `accessory`）で判定する【変更】。
 - 途中加入のキャラは、その Lv に見合う累計経験値から始まる（14 章の式）。
-- `@party add` の `lv=avg`（平均 Lv に合わせる）は【未】。
+- `@party add` の `lv=avg`（平均 Lv に合わせる）は【済】。
 
 ---
 
@@ -255,6 +255,7 @@ drops = [ { item = "herb", rate = 0.2 } ]
 tameable = true
 tame_rate = 0.15
 ai = "pattern"                    # attack_only | random | pattern
+# copy = "hero"                   # キャラクター ID：戦闘開始時のそのキャラの能力値（装備込み）を写す【済】（試練の「影の{hero}」。name に {hero} 可）
 [[enemy.actions]]
 skill = "attack"                  # attack / defend は組み込み。それ以外は Items.data の [[skill]]
 weight = 3
@@ -435,6 +436,7 @@ on_complete = "ch1_quest_done"   # 達成報告のあとに実行するラベル
 | `choice` | 直前の選択肢の番号（1 始まり） |
 | `chapter` | 章番号 |
 | `pet` | テイムした魔物の ID（いなければ `""`）【済】 |
+| `away.名前` | `@party leave … keep=名前` で抜けている仲間の ID（いなければ `""`）。本文では `{away.名前}` で名前【済】 |
 | `map` / `map.dungeon` `map.dark` `map.indoor` | 今いるマップの ID（`map == dungeon_b03`）／マップの設定【済】 |
 | `self.hp_rate` など | 敵の行動条件でのみ |
 - 演算子：`== != < <= > >=` `and or not !` 括弧。ドットのない未知の名前（`done` など）は文字列。
@@ -448,6 +450,10 @@ on_complete = "ch1_quest_done"   # 達成報告のあとに実行するラベル
 | `@wait ms` `@keywait` | 【済】 | 待ち |
 | `@flag set/clear 名前` `@var 名前 = 式`（`+=` `-=`） | 【済】 | 状態 |
 | `@item add/remove ID [数]` `@gold add/remove 数` | 【済】 | 所持品・所持金 |
+| `@item replace 旧ID 新ID` | 【済】 | 袋の中も、誰かが装備しているものも入れ替える（錆びた剣 → 目覚めかけた剣 など） |
+| `@skill add/remove キャラID\|all スキルID` | 【済】 | 職業の習得表とは別にスキルを覚える・忘れる（セーブに残る） |
+| `@stat キャラID 能力 +N\|-N` | 【済】 | 能力値（hp mp atk def mag agi luk）を増減。hp / mp を上げると今の値も同じだけ回復 |
+| `@party leave ID\|#番号 [keep=名前]` / `@party return 名前` | 【済】 | 一時離脱と復帰。keep= の名前で能力・装備・レベルごと覚えておき、return で同じ状態で戻す（セーブに残る）。`#2` はパーティの 2 番目 |
 | `@party add/remove ID [lv=avg|数値]` | 【済】 | 加入・離脱。`lv=avg` でパーティの平均 Lv まで、`lv=5` で Lv5 まで、職業の成長どおりに上げて加入（もともと高ければそのまま） |
 | `@equip キャラID アイテムID` | 【済】【変更：追加】 | 袋のアイテムを装備（元の装備は袋へ） |
 | `@heal all` | 【済】 | 全員の HP・MP・状態異常を回復 |
@@ -460,10 +466,10 @@ on_complete = "ch1_quest_done"   # 達成報告のあとに実行するラベル
 | `@aa show ファイル x y [name=]` `@aa hide 名前` | 【済】 | AA を重ねて表示 |
 | `@effect 名前 引数… [wait=false]` | 【一部】 | 11 章 |
 | `@shop ID` `@inn 価格` `@guild` `@recruit 候補… pick=n [lv=avg|数値]` | 【済】 | 施設画面（閉じると続きを実行）。仲間選択の lv= は @party add と同じ（画面には加入時の Lv を表示） |
-| `@battle group=ID [escape=false] [gameover=] [target_only=ID] [lose=*L]` | 【済】 | イベント戦闘 |
+| `@battle group=ID [escape=false] [gameover=] [target_only=ID] [lose=*L] [members=ID,…] [turns=N]` | 【済】 | イベント戦闘。members= の仲間だけが戦う（ほかの仲間とペットは出ない。ペットも出すなら members に pet）。turns= のターン数がたつと終わり、lose= があればそこへ（負けイベント）、なければ続きへ |
 | `@face ID` / `@face none` | 【済】 | 会話窓の左上に顔 AA を枠つきで出す（枠の見出しは話者名）。ID は Friends.data のキャラクターの face → `aa/face_ID.txt` → ID 自体が .txt のパス の順に探す。スクリプトが終わると消える |
 | `@save_point` | 【済】 | セーブ画面を開く（閉じるとスクリプトの続きを実行） |
-| `@ending` | 【一部】 | 「おわり」を表示してタイトルへ（スタッフロールは【未】） |
+| `@ending [text="…"]` | 【済】 | エンディング画面（タイトル・おわりの言葉・パーティと Lv・プレイ時間）→ Enter でタイトルへ。スタッフロールは前に `@effect scroll_text` で |
 
 ### 10.5 予約ラベル
 | ラベル | 状態 |

@@ -39,12 +39,25 @@ def default_dir() -> Path:
 
 
 # ================================================================ 状態 ⇄ 辞書
+def _member_to_dict(m: Member) -> dict:
+    return {"id": m.id, "name": m.name, "job": m.job, "lv": m.lv, "base": dict(m.base),
+            "hp": m.hp, "mp": m.mp, "exp": m.exp, "equip": dict(m.equip), "status": list(m.status),
+            "extra_skills": list(m.extra_skills)}
+
+
+def _member_from_dict(md: dict) -> Member:
+    return Member(
+        id=md["id"], name=md["name"], job=md["job"], lv=int(md["lv"]), base=dict(md["base"]),
+        hp=int(md.get("hp", 0)), mp=int(md.get("mp", 0)), exp=int(md.get("exp", 0)),
+        equip=dict(md.get("equip", {})), status=list(md.get("status", [])),
+        extra_skills=list(md.get("extra_skills", [])),
+    )
+
+
 def state_to_dict(st: GameState) -> dict:
     return {
-        "party": [{
-            "id": m.id, "name": m.name, "job": m.job, "lv": m.lv, "base": dict(m.base),
-            "hp": m.hp, "mp": m.mp, "exp": m.exp, "equip": dict(m.equip), "status": list(m.status),
-        } for m in st.party],
+        "party": [_member_to_dict(m) for m in st.party],
+        "away": {k: _member_to_dict(m) for k, m in st.away.items()},
         "gold": st.gold,
         "items": dict(st.items),
         "flags": sorted(st.flags),
@@ -67,11 +80,8 @@ def state_from_dict(d: dict) -> GameState:
     """辞書から GameState を作る。足りない項目は既定値（古いセーブとの互換）。"""
     st = GameState()
     for md in d.get("party", []):
-        st.party.append(Member(
-            id=md["id"], name=md["name"], job=md["job"], lv=int(md["lv"]), base=dict(md["base"]),
-            hp=int(md.get("hp", 0)), mp=int(md.get("mp", 0)), exp=int(md.get("exp", 0)),
-            equip=dict(md.get("equip", {})), status=list(md.get("status", [])),
-        ))
+        st.party.append(_member_from_dict(md))
+    st.away = {k: _member_from_dict(md) for k, md in d.get("away", {}).items()}
     st.gold = int(d.get("gold", 0))
     st.items = {k: int(v) for k, v in d.get("items", {}).items()}
     st.flags = set(d.get("flags", []))

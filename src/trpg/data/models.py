@@ -82,6 +82,7 @@ class Enemy:
     tame_rate: float = 0.0
     ai: str = "attack_only"
     actions: list[EnemyAction] = field(default_factory=list)
+    copy: str = ""            # キャラクター ID：戦闘開始時のそのキャラの能力値を写す（試練の「影」など）
 
 
 @dataclass

@@ -28,11 +28,13 @@ TARGET_ALLY = ("ally_one",)
 
 class BattleScene(Scene):
     def __init__(self, field: "FieldScene", group: str, *, escape: bool = True, gameover: str = "",
-                 target_only: str = "", lose: str = "", from_script: bool = False, rng=None):
+                 target_only: str = "", lose: str = "", from_script: bool = False, rng=None,
+                 members: Optional[list[str]] = None, turns: int = 0):
         self.field = field
         self.gd = field.gd
         self.st = field.st
-        self.battle = Battle(self.gd, self.st, group, escape=escape, target_only=target_only, rng=rng)
+        self.battle = Battle(self.gd, self.st, group, escape=escape, target_only=target_only, rng=rng,
+                             members=members, turn_limit=turns)
         self.gameover = gameover
         self.lose_label = lose.lstrip("*")
         self.from_script = from_script
