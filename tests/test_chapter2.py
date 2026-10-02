@@ -121,7 +121,8 @@ def test_mole_battle_needs_quest(game):
 
 
 def find(f, ch):
-    return next((x, y) for y, r in enumerate(f.map.rows) for x, c in enumerate(r) if c == ch)
+    """ch のタイルの位置（@tile で書き換えたタイルも見る）。"""
+    return next((x, y) for y in range(f.map.height) for x in range(f.map.width) if f.tile_char(x, y) == ch)
 
 
 def check_tile(d, ch):

@@ -594,6 +594,8 @@ class Battle:
                     dmg = max(1, int(b.max_hp * -rate))
                     yield ("msg", f"{b.name}は{sd.name}で苦しんでいる！")
                     yield from self._damage(b, dmg)
+                    if sid not in b.status:          # 倒れて状態異常が消えた
+                        break
                 b.status[sid] -= 1
                 if b.status[sid] <= 0 and b.alive:
                     del b.status[sid]

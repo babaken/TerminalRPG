@@ -24,6 +24,11 @@ id = "default"
 "P" = { glyph = "袋", pass = false, color = "yellow",       name = "荷物" }
 "O" = { glyph = "泉", pass = false, color = "bright_cyan",  name = "回復の泉" }
 "M" = { glyph = "陣", pass = true,  color = "bright_magenta", name = "魔法陣の跡" }
+"W" = { glyph = "文", pass = false, color = "magenta",      name = "壁の文字" }
+"G" = { glyph = "扉", pass = false, color = "bright_yellow", name = "大扉" }
+"A" = { glyph = "祭", pass = false, color = "bright_red",   name = "祭壇" }
+"F" = { glyph = "炎", pass = false, color = "red",          name = "黒い炎" }
+"Z" = { glyph = "寝", pass = false, color = "white",        name = "寝台" }
 
 # ===== マップ =====
 
@@ -1398,3 +1403,286 @@ x = 16
 y = 14
 trigger = "check"
 label = "ch2_return_scroll"
+
+[[map.warp]]
+x = 26
+y = 5
+to = "dungeon_b12"
+tx = 12
+ty = 5
+dir = "down"
+
+[[map]]
+id = "dungeon_b12"
+name = "黒岩の洞穴 B12F"
+tileset = "default"
+encounter = "cave_abyss"
+dark = true
+dungeon = true
+rows = [
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "RRRRR______RRRRRRRRRRRRRRRRRRR",
+  "RRR________RRRRRRRRRRRRRRRRRRR",
+  "RRR_R______RRRRRRRRRRRRRRRRRRR",
+  "RRR_RRRR_RRR<___RRRRRRRRRRRRRR",
+  "R>___RRR_RRR____RRR________RRR",
+  "R____RRR_RRR____RRR________RRR",
+  "R__________________________RRR",
+  "RRRR_RRR_RRRRR_RR_R________RRR",
+  "R______R_RRRRR_RR_R________RRR",
+  "R______R_RRRRR_RR_RRRRRRRRRRRR",
+  "R______________RR_RRRRRRRRRRRR",
+  "R______R_RRRRRRRR_RRRRRRRRRRRR",
+  "R______R_RRRRRRRR_RRRRRRRRRRRR",
+  "RRRRRRRR_RRRRR___W__RRRRRRRRRR",
+  "RRRRRRRR____________RRRRRRRRRR",
+  "RRRRRRRRRRRRRR______RRRRRRRRRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+]
+
+[[map.warp]]
+x = 12
+y = 4
+to = "dungeon_b11"
+tx = 25
+ty = 5
+dir = "left"
+
+[[map.warp]]
+x = 1
+y = 5
+to = "dungeon_b13"
+tx = 13
+ty = 14
+dir = "down"
+
+[[map.event]]
+x = 17
+y = 14
+trigger = "check"
+label = "ch3_b12_wall"
+
+[[map]]
+id = "dungeon_b13"
+name = "黒岩の洞穴 B13F"
+tileset = "default"
+encounter = "cave_abyss"
+dark = true
+dungeon = true
+rows = [
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "RR________RRRRRRRRRRRRRRRRRRRR",
+  "RR________RRRRRRRRRRRRRRRRRRRR",
+  "RR_______________RRRRRRRRRRRRR",
+  "RR________RRRRRR_RRO____RRRRRR",
+  "RRRRRR_RRRRRRRRR_RR______RRRRR",
+  "RRRRRR>_______RR_RR______RRRRR",
+  "RRRRRR________RR_RRRR_RR_RRRRR",
+  "RRRRRR________RR_RRRR_RR_RRRRR",
+  "RRRRRR________RR_RRRR_RR_RRRRR",
+  "RRRRRR_RRR_RRRRR_RRRR_______RR",
+  "RRRRRR_RRR_RRRRR_RRRR_______RR",
+  "RRR__________<______________RR",
+  "RRR_______RRR_______R_______RR",
+  "RRR___________________RRRRRRRR",
+  "RRR_______RRRRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+]
+
+[[map.warp]]
+x = 13
+y = 13
+to = "dungeon_b12"
+tx = 1
+ty = 6
+dir = "up"
+
+[[map.warp]]
+x = 6
+y = 7
+to = "dungeon_b14"
+tx = 13
+ty = 5
+dir = "down"
+
+[[map.npc]]
+id = "rod"
+glyph = "人"
+color = "white"
+x = 21
+y = 5
+talk = "ch3_b13_rod"
+when = "!flag.rod_rescued"
+
+[[map.event]]
+x = 19
+y = 5
+trigger = "check"
+label = "ch2_b05_spring"
+
+[[map]]
+id = "dungeon_b14"
+name = "黒岩の洞穴 B14F"
+tileset = "default"
+encounter = "cave_abyss"
+dark = true
+dungeon = true
+rows = [
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRRRRRRRRRG_______RR",
+  "R_____RRRRRRRRRRRRRR________RR",
+  "R_____RRRRRRRRRRRRRR________RR",
+  "R____________<______________RR",
+  "R_____RRRRRR_______RRRRR__RRRR",
+  "RRRRRRRRRRRR_______RRRRR__RRRR",
+  "RRRRRRRRRRRR_______R_______RRR",
+  "RRRRRRRRRRRR_______________RRR",
+  "RRRRRRRRRRRR_RRRRRRR_______RRR",
+  "RRRRRRRRRRRR_RRRRRRRRRR___RRRR",
+  "RRRRRRRRRRRR_RRRRRRRRR______RR",
+  "RRRRRRRRRR_____RRRRRRR______RR",
+  "RRRRRRRRRR_____RRRRRRR______RR",
+  "RRRRRRRRRR_______________RRRRR",
+  "RRRRRRRRRR_____RRRRRRRRRRRRRRR",
+  "RRRRRRRRRR_____RRRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+]
+
+[[map.warp]]
+x = 13
+y = 4
+to = "dungeon_b13"
+tx = 6
+ty = 8
+dir = "up"
+
+[[map.warp]]
+x = 20
+y = 1
+to = "dungeon_b15"
+tx = 21
+ty = 2
+dir = "down"
+
+[[map.event]]
+x = 20
+y = 1
+trigger = "check"
+label = "ch3_b14_door"
+
+[[map]]
+id = "dungeon_b15"
+name = "黒岩の洞穴 B15F"
+tileset = "default"
+encounter = "cave_abyss"
+dark = true
+dungeon = true
+rows = [
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRRR________RRR<___RRRRR",
+  "RRRRRRRRRR________RRR____RRRRR",
+  "RRR>___RRR________RRR____RRRRR",
+  "RRR____RRRRRRR_RRRRRR____RRRRR",
+  "RRR____RRRRRRR_RRRRRR____RRRRR",
+  "RRRRR_RRRRRRRR_RRRRRRRR_RRRRRR",
+  "RRRR_______RRR_R____RRR_RRRRRR",
+  "RRRR_______RRR_R____RRR_RRRRRR",
+  "RRRR________________RRR_RRRRRR",
+  "RRRR_______RRR_R____RRR_RRRRRR",
+  "RRRRRRRRRRRRRR_R____RRR_RRRRRR",
+  "RRRRRRRRRRRRRR_RRRRRR_____RRRR",
+  "RRRRRRRRRRRRRR_RRRRRR_____RRRR",
+  "RRRRRRRRRRRRRR____________RRRR",
+  "RRRRRRRRRRRRRRRRRRRRR_____RRRR",
+  "RRRRRRRRRRRRRRRRRRRRR_____RRRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+]
+
+[[map.warp]]
+x = 21
+y = 1
+to = "dungeon_b14"
+tx = 20
+ty = 2
+dir = "up"
+
+[[map.warp]]
+x = 3
+y = 3
+to = "dungeon_altar"
+tx = 14
+ty = 14
+dir = "up"
+
+[[map]]
+id = "dungeon_altar"
+name = "儀式の間"
+tileset = "default"
+dungeon = true
+rows = [
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRRRRFFFFFFFFRRRRRRRRRRR",
+  "RRRRRRRRRRF___AA___FRRRRRRRRRR",
+  "RRRRRRRR_____________RRRRRRRRR",
+  "RRRRRR_________________RRRRRRR",
+  "RRRRR___________________RRRRRR",
+  "RRRR_____M_________M_____RRRRR",
+  "RRRR_____________________RRRRR",
+  "RRRR_____________________RRRRR",
+  "RRRRR___________________RRRRRR",
+  "RRRRRR_________________RRRRRRR",
+  "RRRRRRRR_____________RRRRRRRRR",
+  "RRRRRRRRRRRR_____RRRRRRRRRRRRR",
+  "RRRRRRRRRRRRR___RRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRR___RRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRRR<RRRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+]
+
+[[map.warp]]
+x = 14
+y = 15
+to = "dungeon_b15"
+tx = 3
+ty = 4
+dir = "up"
+
+[[map.event]]
+x = 14
+y = 13
+trigger = "auto"
+label = "ch3_garza"
+when = "!flag.ch3_lost"
+
+[[map.npc]]
+id = "garza"
+glyph = "灰"
+color = "bright_white"
+x = 14
+y = 3
+when = "!flag.ch3_lost"
+
+[[map]]
+id = "guild_infirmary"
+name = "冒険者協会・医務室"
+tileset = "default"
+indoor = true
+rows = [
+  "############",
+  "#..........#",
+  "#.Z..Z..Z..#",
+  "#..........#",
+  "#.Z..Z.....#",
+  "#..........#",
+  "######D#####",
+]
+
+[[map.warp]]
+x = 6
+y = 6
+to = "guild_bern"
+tx = 10
+ty = 8
+dir = "down"
