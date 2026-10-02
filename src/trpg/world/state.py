@@ -85,6 +85,8 @@ class GameState:
     playtime: float = 0.0
     last_choice: int = 0
     pet: str = ""            # テイマーが手なずけた魔物（敵 ID）
+    tiles: dict[str, dict[str, str]] = field(default_factory=dict)   # @tile で変えたタイル：マップ → {"x,y": 文字}
+    current_map: Any = field(default=None, repr=False, compare=False)  # 今いるマップ（GameMap。セーブしない）
 
     # ------------------------------------------------------------ 生成
     @classmethod
@@ -135,6 +137,12 @@ class GameState:
     def hero(self) -> Optional[Member]:
         return self.member("hero") or (self.party[0] if self.party else None)
 
+    def tile_override(self, map_id: str, x: int, y: int) -> Optional[str]:
+        return self.tiles.get(map_id, {}).get(f"{x},{y}")
+
+    def set_tile(self, map_id: str, x: int, y: int, ch: str) -> None:
+        self.tiles.setdefault(map_id, {})[f"{x},{y}"] = ch
+
     def npc(self, map_id: str, npc_id: str) -> dict:
         return self.npc_state.setdefault(f"{map_id}:{npc_id}", {})
 
@@ -157,6 +165,12 @@ class GameState:
             return self.last_choice
         if root == "chapter" and not rest:
             return self.chapter
+        if root == "map" and not rest:
+            return self.map_id
+        if root == "map" and rest in (("id",), ("dungeon",), ("dark",), ("indoor",)):
+            if rest == ("id",):
+                return self.map_id
+            return bool(getattr(self.current_map, rest[0], False))
         if root == "self":
             raise ExprError("self.〜 は戦闘中の敵の行動条件でのみ使えます")
         raise ExprError(f"「{'.'.join(path)}」は使えない名前です")

@@ -11,7 +11,7 @@ from ..game import Game
 from ..script.expr import ExprError, evaluate, parse_expr
 from ..script.parser import Instr
 from ..script.vm import VM, ChoiceReq, KeyWaitReq, MessageReq, ScriptError, WaitReq
-from ..term import Action, Buffer, Key, KeyEvent, Rect, Style, pad, truncate, wrap
+from ..term import Action, Buffer, Key, KeyEvent, Rect, Style, pad, truncate, wrap, text_width
 from ..term.buffer import BOX_SINGLE
 from ..ui import markup
 from ..ui.aa import draw_aa
@@ -23,6 +23,7 @@ DIR_VEC = {"up": (0, -1), "down": (0, 1), "left": (-1, 0), "right": (1, 0)}
 ACTION_DIR = {Action.UP: "up", Action.DOWN: "down", Action.LEFT: "left", Action.RIGHT: "right"}
 HERO_GLYPH = "＠"
 DARK_RADIUS = 3
+BANNER_SECONDS = 2.0
 NPC_STEP_INTERVAL = (1.2, 3.0)
 ROUTE_STEP_INTERVAL = 0.6        # 道順で歩く NPC の 1 歩の間隔（秒）
 
@@ -90,6 +91,8 @@ class FieldScene(Scene):
         self._npc_timer: dict[str, float] = {}
         self.enc_left = 0
         self.map: Optional[GameMap] = None
+        self.banner = ""                       # ダンジョンの階に入ったときに出すマップ名
+        self.banner_left = 0.0
         if state.map_id:
             self._set_map(state.map_id)
 
@@ -423,8 +426,13 @@ class FieldScene(Scene):
 
     # ============================================================ マップ
     def _set_map(self, map_id: str) -> None:
+        changed = self.st.map_id != map_id or self.map is None
         self.map = self.gd.maps[map_id]
         self.st.map_id = map_id
+        self.st.current_map = self.map
+        if self.map.dungeon and changed:
+            self.banner = format_text(self.map.name, self.st, self.gd)
+            self.banner_left = BANNER_SECONDS
         self._reset_encounter()
         self._npc_timer.clear()
 
@@ -444,10 +452,13 @@ class FieldScene(Scene):
             return eff
         return None
 
+    def tile_char(self, x: int, y: int) -> str:
+        """(x, y) のタイルの文字（@tile で変えていればそれ）。"""
+        return self.st.tile_override(self.map.id, x, y) or self.map.rows[y][x]
+
     def _tile(self, x: int, y: int):
-        m = self.map
-        ts = self.gd.tilesets[m.tileset]
-        return ts.tiles.get(m.rows[y][x])
+        ts = self.gd.tilesets[self.map.tileset]
+        return ts.tiles.get(self.tile_char(x, y))
 
     def passable(self, x: int, y: int) -> bool:
         if self.map is None or not self.map.in_bounds(x, y):
@@ -648,7 +659,13 @@ class FieldScene(Scene):
             self.open_menu()
 
     # ============================================================ 更新
+    def warp_by_item(self, to: str, x: int, y: int, d: str = "") -> None:
+        """帰還の巻物など（アイテムの effect = "warp"）で移動する。"""
+        self.change_map(to, x, y, d or None)
+        self.effects.active.append(Fade(False, 400))
+
     def update(self, dt: float) -> None:
+        self.banner_left = max(0.0, self.banner_left - dt)
         self.st.playtime += dt
         self.msg.update(dt)
         self.effects.update(dt)
@@ -752,6 +769,8 @@ class FieldScene(Scene):
         # 屋内のマップでは雨・雪を描かない（外に出ればまた降っている）
         weather_area = None if self.map is not None and self.map.indoor else map_inner
         self.effects.apply_world(buf, weather_area)
+        if self.banner_left > 0 and self.banner:
+            self._draw_banner(buf, map_inner)
 
         if overlay:
             buf.box(msg_rect, FRAME, chars=BOX_SINGLE)
@@ -769,6 +788,13 @@ class FieldScene(Scene):
         self.effects.apply_overlay(buf)
         if self.error:
             self._draw_error(buf)
+
+    def _draw_banner(self, buf: Buffer, area: Rect) -> None:
+        """ダンジョンの階に入ったときのマップ名（例：黒岩の洞穴 B3F）。"""
+        w = text_width(self.banner) + 6
+        rect = Rect(area.x + max(0, (area.w - w) // 2), area.y + 1, min(w, area.w), 3)
+        inner = buf.box(rect, Style.of("bright_white"), chars=BOX_SINGLE)
+        buf.put(inner.x + 2, inner.y, self.banner, Style.of("bright_white", bold=True), clip=inner)
 
     def _draw_face(self, buf: Buffer, msg_rect: Rect) -> None:
         """顔 AA を会話窓の左上に枠つきで重ねる。"""
@@ -803,7 +829,7 @@ class FieldScene(Scene):
                 mx = ox + tx
                 if not visible(mx, my):
                     continue
-                tile = ts.tiles.get(row[mx])
+                tile = ts.tiles.get(self.st.tile_override(m.id, mx, my) or row[mx])
                 if tile is None:
                     continue
                 st = Style.of(tile.color) if tile.color else Style()

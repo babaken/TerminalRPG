@@ -286,7 +286,10 @@ price = 8                         # 0 = 売れない
 desc = "HP を 30 回復する。"
 use = { field = true, battle = true, target = "ally_one", effect = "heal", power = 30 }
 #   effect: heal | heal_mp | cure（status を治す）| revive（power % で復活）| script（label を実行）| skill（skill を発動）
+#           | warp（to のマップの x, y へ移動。dir で向き。フィールドのみ）【済】
 #   consume: 使うと減るか（既定 consumable なら true）
+#   when: 使える条件（条件式。例 "map.dungeon"。満たさないと「ここでは使えない。」で消費しない）【済】
+# 例：帰り羽  use = { field = true, effect = "warp", to = "town_bern", x = 20, y = 12, when = "map.dungeon" }
 
 [[item]]
 id = "rusty_sword"
@@ -342,6 +345,7 @@ tileset = "default"
 encounter = "forest_1"           # 省略時エンカウントなし
 dark = false
 indoor = false                    # true：屋内。雨・雪を表示しない（天気の状態は保ったまま）
+dungeon = false                   # true：ダンジョンの階。入ったときにマップ名を 2 秒表示、条件式 map.dungeon が真【済】
 rows = [ "TTTTT…", … ]            # 1 文字 = 1 タイル。全行同じ長さ
 bgm = ""                          # 予約（音なし）
 
@@ -430,6 +434,7 @@ on_complete = "ch1_quest_done"   # 達成報告のあとに実行するラベル
 | `quest.ID` | none / active / done / failed |
 | `choice` | 直前の選択肢の番号（1 始まり） |
 | `chapter` | 章番号 |
+| `map` / `map.dungeon` `map.dark` `map.indoor` | 今いるマップの ID（`map == dungeon_b03`）／マップの設定【済】 |
 | `self.hp_rate` など | 敵の行動条件でのみ |
 - 演算子：`== != < <= > >=` `and or not !` 括弧。ドットのない未知の名前（`done` など）は文字列。
 
@@ -448,6 +453,7 @@ on_complete = "ch1_quest_done"   # 達成報告のあとに実行するラベル
 | `@quest give/done/fail ID` | 【済】 | 依頼の状態を直接変更 |
 | `@chapter n "タイトル"` | 【済】 | 章（右パネルに表示） |
 | `@map ID x y [dir=] [transition=fade]` | 【済】 | マップ移動 |
+| `@tile x y 文字 [map=ID]` | 【済】 | タイルを書き換える（宝箱を開ける・扉を開くなど）。セーブに残る。map 省略時は今のマップ。--check で座標・タイルセットを確認 |
 | `@npc ID show/hide/move dx dy/face 向き` `@hero move dx dy/face 向き` | 【済】 | 演出移動（1 マス 0.15 秒）。目的地（現在地＋dx,dy）まで木・壁・ほかの人を避けた最短経路で歩く（NPC は主人公のマスも避ける）。目的地が通れないか着けないときは横→縦にまっすぐ進む |
 | `@aa show ファイル x y [name=]` `@aa hide 名前` | 【済】 | AA を重ねて表示 |
 | `@effect 名前 引数… [wait=false]` | 【一部】 | 11 章 |
@@ -512,7 +518,7 @@ on_complete = "ch1_quest_done"   # 達成報告のあとに実行するラベル
 | 拒否 | 改ざん・別シナリオ →「セーブデータが壊れているか、別のシナリオのものです」。形式違い・ゴミファイルも拒否。スロット一覧には「読み込めません」と表示 |
 | 互換 | state の項目が欠けていても既定値で読む（古いセーブとの互換）。シナリオの version は AAD に含めない（シナリオ更新後も読める） |
 
-- 保存対象：`world/state.py` の GameState すべて（パーティ・所持金・所持品・フラグ・変数・依頼と進み具合・章・位置と向き・一度きりイベント・NPC の状態・継続エフェクト・プレイ時間・ペット）。
+- 保存対象：`world/state.py` の GameState すべて（パーティ・所持金・所持品・フラグ・変数・依頼と進み具合・章・位置と向き・一度きりイベント・NPC の状態・継続エフェクト・プレイ時間・ペット・@tile で変えたタイル）。
 - セーブはフィールド操作中（メニュー）か `@save_point` の時点。VM の状態は保存しない（`@save_point` 以降のスクリプトはロード時には再実行されない）。
 - ロード：タイトルの「つづきから」（セーブがあれば既定で選択）、全滅画面の「セーブからやり直す」（最後にセーブしたスロット）。
 

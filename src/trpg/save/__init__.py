@@ -59,6 +59,7 @@ def state_to_dict(st: GameState) -> dict:
         "effects": dict(st.effects),
         "playtime": st.playtime,
         "pet": st.pet,
+        "tiles": {k: dict(v) for k, v in st.tiles.items()},
     }
 
 
@@ -87,6 +88,7 @@ def state_from_dict(d: dict) -> GameState:
     st.effects = dict(d.get("effects", {}))
     st.playtime = float(d.get("playtime", 0.0))
     st.pet = d.get("pet", "")
+    st.tiles = {k: {p: str(c) for p, c in v.items()} for k, v in d.get("tiles", {}).items()}
     return st
 
 
