@@ -218,3 +218,27 @@ target = "enemy_one"
 kind = "physical"
 power = 10
 anim = "shake:2"
+
+[[item]]
+id = "steel_sword"
+name = "鋼の剣"
+type = "equipment"
+slot = "weapon"
+category = "sword"
+price = 400
+desc = "よく鍛えられた鋼の剣。錆びた剣よりずっと切れ味がいい。"
+stats = { atk = 16 }
+
+[[item]]
+id = "silverfang_emblem"
+name = "銀の牙の紋章"
+type = "key"
+desc = "冒険者パーティ『銀の牙』の紋章。洞穴の奥に落ちていた。"
+
+[[skill]]
+id = "smash"
+name = "たたきつけ"
+target = "enemy_one"
+kind = "physical"
+power = 9
+anim = "shake:3"

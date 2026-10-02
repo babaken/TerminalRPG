@@ -535,6 +535,16 @@
 
 # ---- アイテム ----
 *use_return_scroll
+@if !map.dungeon
+  {item.return_scroll}は、ここでは使えない。
+  @end
+@endif
+{hero}は{item.return_scroll}を広げた。
+@effect flash white count=2
+@effect fade_out 400
+@map town_bern 7 8 dir=down
+@effect fade_in 500
+ベルンの街に戻ってきた。
 @end
 
 @include "ch2.sco"

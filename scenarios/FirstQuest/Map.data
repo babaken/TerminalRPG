@@ -14,6 +14,16 @@ id = "default"
 "t" = { glyph = "机", pass = false, color = "yellow",       name = "家具" }
 "S" = { glyph = "祠", pass = false, color = "bright_cyan",  name = "祠" }
 "=" = { glyph = "：", pass = true,  color = "yellow",       name = "道" }
+"R" = { glyph = "岩", pass = false, color = "white",        name = "岩壁" }
+"_" = { glyph = "．", pass = true,  color = "gray",         name = "洞穴の床" }
+"<" = { glyph = "上", pass = true,  color = "bright_white", name = "上り階段" }
+">" = { glyph = "下", pass = true,  color = "bright_white", name = "下り階段" }
+"C" = { glyph = "穴", pass = true,  color = "bright_white", name = "洞穴の入口" }
+"B" = { glyph = "箱", pass = false, color = "bright_yellow", name = "宝箱" }
+"b" = { glyph = "箱", pass = false, color = "gray",         name = "開いた宝箱" }
+"P" = { glyph = "袋", pass = false, color = "yellow",       name = "荷物" }
+"O" = { glyph = "泉", pass = false, color = "bright_cyan",  name = "回復の泉" }
+"M" = { glyph = "陣", pass = true,  color = "bright_magenta", name = "魔法陣の跡" }
 
 # ===== マップ =====
 
@@ -392,7 +402,7 @@ rows = [
   "#...................=..................#",
   "#............ttt....=...ttt..........T.#",
   "#...................=..................#",
-  "#...================================...#",
+  "#...====================================",
   "#...................=..................#",
   "#................~~~~~~~...............#",
   "#................~~~~~~~...............#",
@@ -522,6 +532,14 @@ to = "village_kabura"
 tx = 14
 ty = 1
 dir = "down"
+
+[[map.warp]]
+x = 39
+y = 11
+to = "field_blackrock"
+tx = 1
+ty = 8
+dir = "right"
 
 [[map]]
 id = "guild_bern"
@@ -728,3 +746,628 @@ trigger = "auto"
 label = "ch2_mole_battle"
 once = true
 when = "quest.q_mole == active and flag.ch2_kabura_talked and !flag.mole_defeated"
+
+[[map]]
+id = "field_blackrock"
+name = "黒岩の洞穴前"
+tileset = "default"
+rows = [
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRRRCRRRRRRRRRRRRRRR",
+  "RRRRRRRRRRRR__=__RRRRRRRRRRRRR",
+  "RRRRRRRRRR....=....RRRRRRRRRRR",
+  "RRRRRRRR......=......RRRRRRRRR",
+  "RRRR..........=..........RRRRR",
+  "RR..T.......=...........RRRRRR",
+  "R.........R.=......R.....RRRRR",
+  "===============............RRR",
+  "R....T....................RRRR",
+  "RR......R.........T......RRRRR",
+  "RRRR.....................RRRRR",
+  "RRRRRRR...............RRRRRRRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+]
+
+[[map.warp]]
+x = 14
+y = 1
+to = "dungeon_b01"
+tx = 3
+ty = 10
+dir = "down"
+
+[[map.warp]]
+x = 0
+y = 8
+to = "town_bern"
+tx = 38
+ty = 11
+dir = "left"
+
+[[map.event]]
+x = 14
+y = 12
+trigger = "auto"
+label = "ch2_blackrock_out"
+once = true
+
+[[map.event]]
+x = 13
+y = 4
+trigger = "touch"
+label = "ch2_blackrock_guard"
+when = "!flag.ch2_guard_done"
+
+[[map.event]]
+x = 14
+y = 4
+trigger = "touch"
+label = "ch2_blackrock_guard"
+when = "!flag.ch2_guard_done"
+
+[[map.event]]
+x = 15
+y = 4
+trigger = "touch"
+label = "ch2_blackrock_guard"
+when = "!flag.ch2_guard_done"
+
+[[map.npc]]
+id = "goblin_a"
+glyph = "ゴ"
+color = "green"
+x = 13
+y = 3
+when = "!flag.ch2_guard_done"
+
+[[map.npc]]
+id = "goblin_cap"
+glyph = "隊"
+color = "bright_green"
+x = 14
+y = 2
+when = "!flag.ch2_guard_done"
+
+[[map.npc]]
+id = "goblin_b"
+glyph = "ゴ"
+color = "green"
+x = 15
+y = 3
+when = "!flag.ch2_guard_done"
+
+[[map]]
+id = "dungeon_b01"
+name = "黒岩の洞穴 B1F"
+tileset = "default"
+encounter = "cave_upper"
+dark = true
+dungeon = true
+rows = [
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRRRRRRRRR________RR",
+  "RRRRR_______RRRRR___________RR",
+  "RRRRR_______RR>___RR________RR",
+  "RRRRR_____________________RRRR",
+  "RRRRR_______RR____RRRRRR__RRRR",
+  "RRRRR_______RR____RRRRRR__RRRR",
+  "RRRRRRRRRRRRRRRRR_RRRRRR__RRRR",
+  "RRRRRRRRRRRRRRRRR_RRRRRR__RRRR",
+  "RRR<___RRRRRRRRRR_RRRRRR__RRRR",
+  "RRR____RRRRRRRRRR_RRRRRR__RRRR",
+  "RRR____RRRRRRRRRR_RRRRRR__RRRR",
+  "RRRRR_RRRRRRRR_______RR__P_RRR",
+  "RRRRR________________RR____RRR",
+  "RRRRRRRRRRRRRR_______RR____RRR",
+  "RRRRRRRRRRRRRRRRRRRRRRR____RRR",
+  "RRRRRRRRRRRRRRRRRRRRRRR____RRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+]
+
+[[map.warp]]
+x = 3
+y = 9
+to = "field_blackrock"
+tx = 14
+ty = 2
+dir = "down"
+
+[[map.warp]]
+x = 14
+y = 3
+to = "dungeon_b02"
+tx = 14
+ty = 5
+dir = "down"
+
+[[map.event]]
+x = 25
+y = 12
+trigger = "check"
+label = "ch2_b01_pack"
+once = true
+
+[[map.event]]
+x = 3
+y = 10
+trigger = "auto"
+label = "ch2_cave_enter"
+once = true
+
+[[map]]
+id = "dungeon_b02"
+name = "黒岩の洞穴 B2F"
+tileset = "default"
+encounter = "cave_upper"
+dark = true
+dungeon = true
+rows = [
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRRR<_______RRRRRRRR",
+  "RRRRRRRRRRRRRR________RRRRRRRR",
+  "RRRRRRRRRRRRRR________RRRRRRRR",
+  "RRRRRRRRRRRRRR________RRR>___R",
+  "RRRRRRRRRRRRRR________RRR____R",
+  "RRRRRRRRRRRRRRRRRRRRR_RRR____R",
+  "R____RRRRRRRRRRRRRR_____RRR_RR",
+  "R____RRRRRRRRRRRRRR_____RRR_RR",
+  "R_______________________RRR_RR",
+  "R____RRR____RR______________RR",
+  "RRR_________RR____R_____RRRRRR",
+  "RRRRRRRR____RRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+]
+
+[[map.warp]]
+x = 14
+y = 4
+to = "dungeon_b01"
+tx = 14
+ty = 4
+dir = "up"
+
+[[map.warp]]
+x = 25
+y = 7
+to = "dungeon_b03"
+tx = 12
+ty = 5
+dir = "down"
+
+[[map]]
+id = "dungeon_b03"
+name = "黒岩の洞穴 B3F"
+tileset = "default"
+encounter = "cave_upper"
+dark = true
+dungeon = true
+rows = [
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "R____B___RRRRRRRRRRRRRRRRRRRRR",
+  "R________RRR<______RRRRRRRRRRR",
+  "R_____________________RRRRRRRR",
+  "R________RRR_______RR______>RR",
+  "R________RRR_______RR_______RR",
+  "RRRRR_RRRRRR_______RR_______RR",
+  "RRRRR_RRRRRRRRR_RRRRR_______RR",
+  "RRRRR_RRRRR_____RRRRR_______RR",
+  "RR________R_____RRRRR_RR_RRRRR",
+  "RR______________RRR______RRRRR",
+  "RR________R____RRRR______RRRRR",
+  "RR________RRRRRRRRR_____RRRRRR",
+  "RR________RRRRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+]
+
+[[map.warp]]
+x = 12
+y = 4
+to = "dungeon_b02"
+tx = 25
+ty = 8
+dir = "up"
+
+[[map.warp]]
+x = 27
+y = 6
+to = "dungeon_b04"
+tx = 20
+ty = 10
+dir = "down"
+
+[[map.event]]
+x = 5
+y = 3
+trigger = "check"
+label = "ch2_b03_chest"
+once = true
+
+[[map]]
+id = "dungeon_b04"
+name = "黒岩の洞穴 B4F"
+tileset = "default"
+encounter = "cave_upper"
+dark = true
+dungeon = true
+rows = [
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRRRRRRR________RRRR",
+  "RRRRRRRRRRRRRRRRRR________RRRR",
+  "RRRRR_____________________RRRR",
+  "RRRRR_R________RRR________RRRR",
+  "RRRRR_R________RRRRRRRRRRRRRRR",
+  "RRRRR_R_________________RRRRRR",
+  "RRRRR_R________RRRRRRRR_RRRRRR",
+  "RRRRR_R________RRRRRRRR_RRRRRR",
+  "RRRRR_RRRRR_R_RRRRRR<______RRR",
+  "RRRRR_RRRRR>___RRRRR_______RRR",
+  "RRRRR_RRRRR____RRRRR_______RRR",
+  "RR______RRR____RRRRRRRRRRRRRRR",
+  "RR______RRR____RRRRRRRRRRRRRRR",
+  "RR_____________RRRRRRRRRRRRRRR",
+  "RR______RRRRRRRRRRRRRRRRRRRRRR",
+  "RR______RRRRRRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+]
+
+[[map.warp]]
+x = 20
+y = 9
+to = "dungeon_b03"
+tx = 27
+ty = 7
+dir = "up"
+
+[[map.warp]]
+x = 11
+y = 10
+to = "dungeon_b05"
+tx = 18
+ty = 8
+dir = "down"
+
+[[map]]
+id = "dungeon_b05"
+name = "黒岩の洞穴 B5F"
+tileset = "default"
+encounter = "cave_mid"
+dark = true
+dungeon = true
+rows = [
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRRRRR__O_RRRRRRRRRR",
+  "RRRRRRRRRRRRRRRR____RRRRRRRRRR",
+  "RR__________________RRRRRRRRRR",
+  "RR_______R_RRRRR____RRRRRRRRRR",
+  "RR_______R_RRRRRRRRRRRRRRRRRRR",
+  "RRRRR_RRRR_RRRRRRR<______RRRRR",
+  "RRRRR_________RRRR_______RRRRR",
+  "RRRRR____________________RRRRR",
+  "RRRRR_________RRRR_______RRRRR",
+  "RRRRR_________RRRRRRRRRRRRRRRR",
+  "RRRRR_________RRRRRRRRRRRRRRRR",
+  "RRRRR_RRRRRRRRRRRRR>_____RRRRR",
+  "RRRRR____________________RRRRR",
+  "RRRRRRRRRRRRRRRRRRR______RRRRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+]
+
+[[map.warp]]
+x = 18
+y = 7
+to = "dungeon_b04"
+tx = 11
+ty = 11
+dir = "up"
+
+[[map.warp]]
+x = 19
+y = 13
+to = "dungeon_b06"
+tx = 8
+ty = 9
+dir = "down"
+
+[[map.event]]
+x = 18
+y = 2
+trigger = "check"
+label = "ch2_b05_spring"
+
+[[map]]
+id = "dungeon_b06"
+name = "黒岩の洞穴 B6F"
+tileset = "default"
+encounter = "cave_mid"
+dark = true
+dungeon = true
+rows = [
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "R__P_RRRRRRRRRRRRRRRRRRRRRRRRR",
+  "R____RRRRRRRRRRRRRR____RRRRRRR",
+  "R____RRRRRR____________RR>___R",
+  "R____RRR<_____RRRRR____RR____R",
+  "RRR_RRRR_____________________R",
+  "RRR_RRRR______RRRRRRR_RRR____R",
+  "RRR_RRRRRRR_RRRRRRRRR_RRR____R",
+  "RRR_RRRRRRR_RRRRRRRRR_RRRRRRRR",
+  "RRR_RRRRR____RRRR_____RRRRRRRR",
+  "RRR___________________RRRRRRRR",
+  "RRRRRRRRR____RRRR____RRRRRRRRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+]
+
+[[map.warp]]
+x = 8
+y = 8
+to = "dungeon_b05"
+tx = 19
+ty = 14
+dir = "up"
+
+[[map.warp]]
+x = 25
+y = 7
+to = "dungeon_b07"
+tx = 6
+ty = 6
+dir = "down"
+
+[[map.event]]
+x = 3
+y = 5
+trigger = "check"
+label = "ch2_b06_relic"
+once = true
+
+[[map]]
+id = "dungeon_b07"
+name = "黒岩の洞穴 B7F"
+tileset = "default"
+encounter = "cave_mid"
+dark = true
+dungeon = true
+rows = [
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "R____RRRRRRRRRRRR_____RRRRRRRR",
+  "R________________________RRRRR",
+  "R____RRRRRRRRRRRR_____RR_RRRRR",
+  "RRR_RRRRRRRRRRRRRRR_R_RR_RRRRR",
+  "RRR_RR<___RRRRRRRRR_R_RR_RRRRR",
+  "RRR_RR____RR>____RR____R_RRRRR",
+  "RRR____________________R_RRRRR",
+  "RRRRRR____RR_____RR____R_RRRRR",
+  "RRRRRR____RRRRRRRRR____R_RRRRR",
+  "RRRRRRRRRRRRRRRRRRRRR_RR_RRRRR",
+  "RRRRRRRRRRRRRRRRRRRRR_RR_RRRRR",
+  "RRRRRRRRRRRRRRRRRRRRR_RR_RRRRR",
+  "RRRRRRRRRRRRRRRRRRRRR_RR_RRRRR",
+  "RRRRRRRRRRRRRRRRRRRRR_____RRRR",
+  "RRRRRRRRRRRRRRRRRRRRR_____RRRR",
+  "RRRRRRRRRRRRRRRRRRRRRR____RRRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+]
+
+[[map.warp]]
+x = 6
+y = 5
+to = "dungeon_b06"
+tx = 25
+ty = 8
+dir = "up"
+
+[[map.warp]]
+x = 12
+y = 6
+to = "dungeon_b08"
+tx = 11
+ty = 3
+dir = "down"
+
+[[map]]
+id = "dungeon_b08"
+name = "黒岩の洞穴 B8F"
+tileset = "default"
+encounter = "cave_mid"
+dark = true
+dungeon = true
+rows = [
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRRRR<_______RRRRR____RR",
+  "RRR>_____RR________RRRRR____RR",
+  "RRR_________________________RR",
+  "RRR______RR________RRRRR____RR",
+  "RRRRRRRRRRRRRRRRR_RRRRRR____RR",
+  "RRRRRRRRRRRRRRRRR_RRRRRR_RRRRR",
+  "RRRRRRRRRRRRRRRRR_RRRRRR_RRRRR",
+  "R________RRRRRRRR_RRRRRR_RRRRR",
+  "R________RRRRRRRR_RRRRRR_RRRRR",
+  "R_________________RRRRRR_RRRRR",
+  "R________RRRRRR_____RR____RRRR",
+  "RRRRR_____________________RRRR",
+  "RRRRRRRRRRRRRRR_____RR____RRRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+]
+
+[[map.warp]]
+x = 11
+y = 2
+to = "dungeon_b07"
+tx = 12
+ty = 7
+dir = "up"
+
+[[map.warp]]
+x = 3
+y = 3
+to = "dungeon_b09"
+tx = 16
+ty = 3
+dir = "down"
+
+[[map.event]]
+x = 3
+y = 4
+trigger = "touch"
+label = "ch2_b08_ogre"
+when = "!flag.ch2_ogre_done"
+
+[[map.event]]
+x = 4
+y = 3
+trigger = "touch"
+label = "ch2_b08_ogre"
+when = "!flag.ch2_ogre_done"
+
+[[map]]
+id = "dungeon_b09"
+name = "黒岩の洞穴 B9F"
+tileset = "default"
+encounter = "cave_deep"
+dark = true
+dungeon = true
+rows = [
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRR_____RR<____RRRRRRRRR",
+  "RRRRRRRRR_____RR_____RRRRRRRRR",
+  "RRRRRRRRR_____RR_____RRRRRRRRR",
+  "RRRRRRRRRR__RRRRRR_RRRRRRRRRRR",
+  "RRRRRRRRRR__RRRRRR_RRRR>_____R",
+  "RRRRRRRRRR__RRRRRR_R_________R",
+  "RRRRRRRRRR__RRRRRR_R_RR______R",
+  "RRRRRR________RRRR____RRRRRRRR",
+  "RRRRRR________RRRR____RRRRRRRR",
+  "RRRRRR______________________RR",
+  "RRRRRR______________________RR",
+  "RRRRRRRRRRRRRRRRRRRRRRR_____RR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+]
+
+[[map.warp]]
+x = 16
+y = 2
+to = "dungeon_b08"
+tx = 3
+ty = 4
+dir = "up"
+
+[[map.warp]]
+x = 23
+y = 6
+to = "dungeon_b10"
+tx = 18
+ty = 3
+dir = "down"
+
+[[map]]
+id = "dungeon_b10"
+name = "黒岩の洞穴 B10F"
+tileset = "default"
+encounter = "cave_deep"
+dark = true
+dungeon = true
+rows = [
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "RRR______RRRRRRRRRRRRRRRRRRRRR",
+  "RRR______RRRRRRRRR<_______RRRR",
+  "RRR______RRRRRRRRR________RRRR",
+  "RRR______R______RR________RRRR",
+  "RRR______R______RRRRRR_RRRRRRR",
+  "RRRRRR_R_________________RRRRR",
+  "RRRRRR_R_R______RRRRRR_R_RRRRR",
+  "RRRRRR_R_R______RRRRRR>____RRR",
+  "RRRRRR_R_RRRRRRRRRRRRR_____RRR",
+  "RRRRRR_R_RRRRRRRRRRRRR_____RRR",
+  "RRRRRR_R_RRRRRRRR____R_____RRR",
+  "RRRRRR__M__RRRRRR____R_____RRR",
+  "RRRRRR_________________RRRRRRR",
+  "RRRRRR_____RRRRRR____RRRRRRRRR",
+  "RRRRRR_____RRRRRR____RRRRRRRRR",
+  "RRRRRR_____RRRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+]
+
+[[map.warp]]
+x = 18
+y = 2
+to = "dungeon_b09"
+tx = 23
+ty = 7
+dir = "up"
+
+[[map.warp]]
+x = 22
+y = 8
+to = "dungeon_b11"
+tx = 1
+ty = 8
+dir = "down"
+
+[[map.event]]
+x = 8
+y = 12
+trigger = "check"
+label = "ch2_b10_circle"
+
+[[map]]
+id = "dungeon_b11"
+name = "黒岩の洞穴 B11F"
+tileset = "default"
+encounter = "cave_deep"
+dark = true
+dungeon = true
+rows = [
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRRRRRRR_______RRRRR",
+  "RRRRRR___________________RRRRR",
+  "RRRRRR______RRRRRR_______RRRRR",
+  "RRRRRR______RRRRRRRRR_RRRRRRRR",
+  "RRRRRR______RRRRRRRRR_____RRRR",
+  "RRRRRRRRRRRRRRRRRRRRR_____RRRR",
+  "R<_____RRRRRRRR___________RRRR",
+  "R______RRRRRRRR_____R_____RRRR",
+  "R___________________R_RRRRRRRR",
+  "R______RRRRRRRR_____R_RRRRRRRR",
+  "RRRRRRRRRRRRRRR_____R_RRRRRRRR",
+  "RRRRRRRRRRRRRRRR_RRRR_RRRRRRRR",
+  "RRRRRRRRRRRRRRRR_RRRR_RRRRRRRR",
+  "RRRRRRRRRRRRRR__B__RR_RRRRRRRR",
+  "RRRRRRRRRRRRRR________RRRRRRRR",
+  "RRRRRRRRRRRRRR_____RRRRRRRRRRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+]
+
+[[map.warp]]
+x = 1
+y = 7
+to = "dungeon_b10"
+tx = 22
+ty = 9
+dir = "up"
+
+[[map.event]]
+x = 16
+y = 14
+trigger = "check"
+label = "ch2_return_scroll"
