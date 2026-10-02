@@ -197,3 +197,24 @@ goods = ["herb", "antidote", "bread"]
 id = "town_weapon"
 name = "ベルンの武具屋"
 goods = ["copper_sword", "leather_armor", "wood_shield"]
+
+# ===== 2章 =====
+[[item]]
+id = "old_map"
+name = "古びた地図"
+type = "key"
+desc = "ドリルモールが落とした羊皮紙。ベルンの東の岩山に印と、見たことのない文字。"
+
+[[item]]
+id = "map_copy"
+name = "地図の写し"
+type = "key"
+desc = "協会長ドルガンが写した地図。印の場所は「黒岩の洞穴」。"
+
+[[skill]]
+id = "drill_attack"
+name = "ドリルアタック"
+target = "enemy_one"
+kind = "physical"
+power = 10
+anim = "shake:2"

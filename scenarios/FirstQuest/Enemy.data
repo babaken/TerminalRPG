@@ -141,3 +141,37 @@ table = [
   { group = "rabbit_2", weight = 3 },
   { group = "mushroom_slime", weight = 2 },
 ]
+
+# ===== 2章 =====
+[[enemy]]
+id = "drill_mole"
+name = "ドリルモール"
+aa = "aa/drill_mole.txt"
+stats = { hp = 80, mp = 0, atk = 13, def = 8, mag = 0, agi = 6, luk = 4 }
+exp = 80
+gold = 60
+weak = ["fire"]
+ai = "pattern"
+[[enemy.actions]]
+skill = "attack"
+weight = 3
+[[enemy.actions]]
+skill = "dig_attack"
+weight = 2
+[[enemy.actions]]
+skill = "drill_attack"
+weight = 2
+when = "self.hp_rate < 0.5"
+
+[[group]]
+id = "mole_boss"
+members = ["mole", "drill_mole", "mole"]
+
+[[encounter]]
+id = "kabura"
+steps = [14, 26]
+table = [
+  { group = "mole_pack", weight = 3 },
+  { group = "rabbit_2", weight = 3 },
+  { group = "mushroom_slime", weight = 1 },
+]

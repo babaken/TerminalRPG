@@ -1,7 +1,7 @@
 # ============================================================
 #  FirstQuest  scenario.sco
 #  元テキスト: docs/scenario/FirstQuest_story.md
-#  現在: 第1章（出会いと旅立ち）すべて
+#  現在: 第1章（出会いと旅立ち）すべて、第2章（ch2.sco）の途中まで
 # ============================================================
 
 # ------------------------------------------------------------
@@ -455,6 +455,9 @@
   @guild
 @elif var.ch1_quests >= 3 and !flag.ch1_done
   @goto *ch1_recruit
+@elif quest.q_mole == active and !flag.mole_defeated
+  受付セラ「カブラ村の依頼、よろしくお願いしますね。村はベルンの南門を出てすぐです」
+  @guild
 @else
   受付セラ「お疲れさまです、{hero}さん」
   @guild
@@ -500,8 +503,7 @@
 @flag set ch1_done
 @effect typewriter "第1章　完"
 @save_point
-（第2章「影を追う者たち」は制作中です。このまま街や街道を自由に歩けます）
-@end
+@goto *ch2_start
 
 *ch1_adv_a_talk
 @if flag.ch1_done
@@ -534,3 +536,5 @@
 # ---- アイテム ----
 *use_return_scroll
 @end
+
+@include "ch2.sco"
