@@ -1,0 +1,4 @@
+# ゲームの実行に必要なライブラリ（run.bat / run.sh が仮想環境に入れる）
+cryptography>=42
+# AA 変換ツール（python -m trpg.tools.aa_convert）を使うときは次の行の # を外す
+# Pillow

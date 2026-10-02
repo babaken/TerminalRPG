@@ -31,11 +31,26 @@ ASCII アートで表現する、ターミナル用の RPG エンジンです。
   - Windows: **Windows Terminal** 推奨（コマンドプロンプト・PowerShell も可）
   - Linux: 一般的な端末エミュレータ
 
-## セットアップ
+## かんたん起動（起動スクリプト）
+
+| OS | 起動 | デバッグつきで起動 |
+|---|---|---|
+| Windows | `run.bat`（ダブルクリックでも可） | `run.bat` の `set DEBUG=0` を `1` に書き換える、または `set DEBUG=1` のあとで `run.bat` |
+| Linux / macOS | `./run.sh` | `DEBUG=1 ./run.sh`（スクリプト内の `DEBUG=${DEBUG:-0}` を `1` にしてもよい） |
+
+スクリプトは次の順に動きます。
+1. 仮想環境（`.venv`）がなければ作る（Python 3.11 以上が必要）
+2. `requirements.txt` のライブラリを入れる（初回と、`requirements.txt` が変わったときだけ）
+3. デバッグフラグが ON なら `--dev --keylog`（座標表示とキーログ `trpg_debug.log`）つきで、OFF ならふつうに起動する
+
+引数はそのままゲームに渡します（例：`run.bat --scenario FirstQuest.zip`、`./run.sh --check scenarios/FirstQuest`）。
+`run.bat` はコマンドプロンプトで文字化けしないよう Shift_JIS で保存しています（`.gitattributes` で変換しない設定）。
+
+## セットアップ（手動）
 
 ```sh
 python -m venv .venv
-.venv/bin/pip install pytest cryptography          # Windows: .venv\Scripts\pip install pytest cryptography
+.venv/bin/pip install -r requirements.txt pytest   # Windows: .venv\Scripts\pip install -r requirements.txt pytest
 ```
 （または `pip install -e .[dev]`）
 
