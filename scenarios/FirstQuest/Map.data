@@ -609,6 +609,15 @@ x = 14
 y = 7
 talk = "ch1_adv_b_talk"
 
+[[map.npc]]
+id = "dorgan"
+glyph = "会"
+color = "bright_yellow"
+x = 18
+y = 2
+talk = "ch2_dorgan_talk"
+when = "flag.ch2_map_reported"
+
 [[map]]
 id = "bern_inn"
 name = "宿屋「旅鳥亭」"
