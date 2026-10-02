@@ -298,6 +298,22 @@ def new_party(game, *ids):
     return st
 
 
+@pytest.mark.parametrize("cid, line, bad", [
+    ("garo", "ガロ「……物騒な話だな」", "ね」"),
+    ("rina", "リナ「……物騒なお話ですね」", "ガロ「"),
+])
+def test_companion_voice(game, cid, line, bad):
+    """1章で選んだ仲間ごとに口調が変わる（ガロは男らしい口調、リナは丁寧語）。"""
+    d = after_chapter1(game)
+    st = d.field.st
+    st.party[1] = Member.from_data(game.data, cid)
+    d.field.start_script("ch2_start")
+    talk = d.settle()
+    assert line in " ".join(talk)
+    said = [t for t in talk if t.startswith(st.party[1].name + "「")]
+    assert said and not any(bad in t for t in said) and not any("ミア「" in t for t in talk)
+
+
 def test_east_gate_closed_until_named_quest(game):
     d = after_chapter1(game)
     f = d.field

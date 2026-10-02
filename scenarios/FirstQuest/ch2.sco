@@ -1,6 +1,7 @@
 # ============================================================
 #  FirstQuest  第2章　影を追う者たち
 #  元テキスト: docs/scenario/FirstQuest_story.md（第2章）
+#  1章で選んだ仲間（ガロ・ミア・リナ）の台詞は、それぞれの口調で書き分ける
 #  現在: 第2章すべて（2-1 冒険者が死ぬ事件 〜 2-4 一時帰還・仲間 2 人）
 # ============================================================
 
@@ -19,7 +20,13 @@
 冒険者「聞いたか？　『銀の牙』のパーティ、帰ってこなかったらしい」
 冒険者「またか。今月で 3 組目だぞ。それもベテランばかり」
 冒険者「依頼自体は簡単な調査だったはずなんだがな……」
-{party.2}「……物騒な話ね」
+@if party.has(garo)
+  ガロ「……物騒な話だな」
+@elif party.has(rina)
+  リナ「……物騒なお話ですね」
+@elif party.has(mia)
+  ミア「……物騒な話ね」
+@endif
 @flag set ch2_rumor
 @goto *ch2_take_kabura
 
@@ -78,7 +85,13 @@
 地面が大きく揺れた！
 @effect shake v 3 600
 畑の土が盛り上がり、巨大なモグラが顔を出した！
-{party.2}「来るわよ、{hero}！」
+@if party.has(garo)
+  ガロ「来るぞ、{hero}！」
+@elif party.has(rina)
+  リナ「来ます、{hero}さん！」
+@elif party.has(mia)
+  ミア「来るわよ、{hero}！」
+@endif
 @battle group=mole_boss escape=false
 @goto *ch2_map_drop
 
@@ -89,7 +102,13 @@
 {item.old_map}を手に入れた！
 地図には、ベルンの東の岩山に印がつけられている。
 印の横に、見たことのない文字が書かれている。
-{party.2}「魔物が地図を持ってるなんて……おかしくない？」
+@if party.has(garo)
+  ガロ「魔物が地図を持ってるなんて……妙だな」
+@elif party.has(rina)
+  リナ「魔物が地図を持っているなんて……おかしいですね」
+@elif party.has(mia)
+  ミア「魔物が地図を持ってるなんて……おかしくない？」
+@endif
 @flag set mole_defeated
 これで依頼は達成だ。冒険者協会に報告しよう。
 @end
@@ -150,7 +169,13 @@
 *ch2_blackrock_out
 岩山の裂け目に、洞穴の入口が見える。
 入口の前に、武装したゴブリンが立っている。
-{party.2}「見張り……？　魔物が見張りを立てるなんて」
+@if party.has(garo)
+  ガロ「見張り……？　魔物が見張りを立てるとはな」
+@elif party.has(rina)
+  リナ「見張り……？　魔物が見張りを立てるなんて……」
+@elif party.has(mia)
+  ミア「見張り……？　魔物が見張りを立てるなんて」
+@endif
 @end
 
 *ch2_blackrock_guard
@@ -158,13 +183,25 @@
 @battle group=goblin_guard escape=false
 @flag set ch2_guard_done
 見張りのゴブリンたちを倒した。
-{party.2}「統率された魔物……やっぱり何かあるわね」
+@if party.has(garo)
+  ガロ「統率された魔物か……こいつは何かあるな」
+@elif party.has(rina)
+  リナ「統率された魔物……やはり何かあるのですね」
+@elif party.has(mia)
+  ミア「統率された魔物……やっぱり何かあるわね」
+@endif
 @end
 
 # ---- 黒岩の洞穴（dungeon_b01〜b11。暗く、周りしか見えない）
 *ch2_cave_enter
 洞穴の中は真っ暗だ。手元の明かりで、周りが少しだけ見える。
-{party.2}「足元に気をつけて。……奥から嫌な気配がするわ」
+@if party.has(garo)
+  ガロ「足元に気をつけろ。……奥から嫌な気配がする」
+@elif party.has(rina)
+  リナ「足元にお気をつけて。……奥から嫌な気配がします」
+@elif party.has(mia)
+  ミア「足元に気をつけて。……奥から嫌な気配がするわ」
+@endif
 @end
 
 *ch2_b01_pack
@@ -180,7 +217,13 @@
 宝箱を開けた！
 @item add steel_sword
 {item.steel_sword}を手に入れた！
-{party.2}「いい剣ね。……でも、その錆びた剣も手放さないほうがいい気がするわ」
+@if party.has(garo)
+  ガロ「いい剣だ。……だが、その錆びた剣は手放すなよ。なんとなくだがな」
+@elif party.has(rina)
+  リナ「立派な剣ですね。……でも、その錆びた剣も手放さないほうがいい気がします」
+@elif party.has(mia)
+  ミア「いい剣ね。……でも、その錆びた剣も手放さないほうがいい気がするわ」
+@endif
 @tile 5 3 b
 @end
 
@@ -195,7 +238,13 @@
 @item add silverfang_emblem
 @flag set found_silverfang
 {item.silverfang_emblem}を手に入れた。
-{party.2}「『銀の牙』……噂の、帰ってこなかったパーティね」
+@if party.has(garo)
+  ガロ「『銀の牙』……噂の、帰ってこなかった連中か」
+@elif party.has(rina)
+  リナ「『銀の牙』……噂の、帰ってこなかった方々ですね。どうか安らかに……」
+@elif party.has(mia)
+  ミア「『銀の牙』……噂の、帰ってこなかったパーティね」
+@endif
 @tile 3 5 _
 @end
 
@@ -210,7 +259,13 @@
 
 *ch2_b10_circle
 地面に、何かの模様が描かれている。
-{party.2}「……魔法陣の跡ね。何かの儀式に使われたみたい」
+@if party.has(garo)
+  ガロ「……魔法陣の跡か？　何かの儀式をやったらしいな」
+@elif party.has(rina)
+  リナ「……魔法陣の跡ですね。何かの儀式に使われたようです」
+@elif party.has(mia)
+  ミア「……魔法陣の跡ね。何かの儀式に使われたみたい」
+@endif
 古びた地図の写しには、この先の記載はない。
 @end
 
@@ -224,13 +279,31 @@
 @flag set ch2_found_scroll
 @tile 16 14 b
 {item.return_scroll}を手に入れた！
-{party.2}「帰還の巻物……使えば、すぐ街に戻れるわ」
-{party.2}「この先は魔物の気配がずっと濃い。二人じゃ厳しいかもしれない」
+@if party.has(garo)
+  ガロ「帰還の巻物か……これがあれば、すぐ街に戻れるな」
+@elif party.has(rina)
+  リナ「帰還の巻物……これを使えば、すぐ街に戻れます」
+@elif party.has(mia)
+  ミア「帰還の巻物……使えば、すぐ街に戻れるわ」
+@endif
+@if party.has(garo)
+  ガロ「この先は魔物の気配がずっと濃い。二人じゃ厳しいかもしれん」
+@elif party.has(rina)
+  リナ「この先は魔物の気配がずっと濃いです。二人では厳しいかもしれません」
+@elif party.has(mia)
+  ミア「この先は魔物の気配がずっと濃い。二人じゃ厳しいかもしれない」
+@endif
 @choice
   - 一度戻って報告しよう
   - もう少し進もう
 @if choice == 2
-  {party.2}「……{hero}、ドルガンさんは『必ず戻って報告しろ』って言ってたでしょ？」
+  @if party.has(garo)
+    ガロ「……{hero}、ドルガンの旦那は『必ず戻って報告しろ』と言ってたろう」
+  @elif party.has(rina)
+    リナ「……{hero}さん、ドルガンさんは『必ず戻って報告しろ』とおっしゃっていましたよ」
+  @elif party.has(mia)
+    ミア「……{hero}、ドルガンさんは『必ず戻って報告しろ』って言ってたでしょ？」
+  @endif
 @endif
 {hero}は{item.return_scroll}を広げた。
 @effect flash white count=3
@@ -238,7 +311,13 @@
 @map guild_bern 10 5 dir=up
 @effect fade_in 600
 ……気がつくと、冒険者協会の前に立っていた。
-{party.2}「セラさんに報告しましょう」
+@if party.has(garo)
+  ガロ「セラに報告しに行くぞ」
+@elif party.has(rina)
+  リナ「セラさんに報告しましょう」
+@elif party.has(mia)
+  ミア「セラさんに報告しましょう」
+@endif
 @end
 
 # ------------------------------------------------------------
