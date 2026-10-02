@@ -20,6 +20,7 @@ from .models import (AI_TYPES, BUILTIN_SKILLS, ELEMENTS, EQUIP_SLOTS, EVENT_TRIG
 from ..term.style import color as to_color
 from .models import SKILL_ANIMS, parse_anim
 from .reader import REQUIRED, Tbl
+from ..script.expr import ExprError, parse_expr
 from .report import DataError, Report, find_id_line, find_table_line, toml_error
 
 if TYPE_CHECKING:
@@ -193,7 +194,19 @@ def _load_items(f: _File, gd: GameData) -> None:
                 "skill": use_t.str("skill", ""),
                 "status": use_t.str("status", ""),
                 "consume": use_t.bool("consume", typ == "consumable"),
+                "when": use_t.str("when", ""),           # 使える条件（例 "map.dungeon"）
+                "to": use_t.str("to", ""),               # effect = "warp" の行き先
+                "x": use_t.int("x", 0, min=0),
+                "y": use_t.int("y", 0, min=0),
+                "dir": use_t.str("dir", "", choices=DIRS + ("",)),
             }
+            if use["effect"] == "warp" and not use["to"]:
+                use_t._err("to", "effect = \"warp\" のときは行き先のマップ（to）を指定してください")
+            if use["when"]:
+                try:
+                    parse_expr(use["when"])
+                except ExprError as e:
+                    use_t._err("when", f"条件式の誤り: {e}")
             if use["effect"] == "script" and not use["label"]:
                 use_t._err("label", "effect = \"script\" のときは呼び出すラベルを指定してください")
             if use["effect"] == "skill" and not use["skill"]:
@@ -318,7 +331,7 @@ def _load_maps(f: _File, gd: GameData) -> None:
             n.done()
         m = GameMap(id=t.id(), name=t.str("name"), tileset=t.str("tileset", "default"), rows=rows,
                     encounter=t.str("encounter", ""), dark=t.bool("dark", False),
-                    indoor=t.bool("indoor", False),
+                    indoor=t.bool("indoor", False), dungeon=t.bool("dungeon", False),
                     events=events, warps=warps, npcs=npcs)
         t.raw("bgm")  # 予約項目（音なしのため未使用）
         t.done()
@@ -431,6 +444,12 @@ def _cross_check(gd: GameData, manifest, rep: Report) -> None:
             need(gd.statuses, it.use["status"], "状態異常", ITEMS, ln(it), f"アイテム {it.id}")
         if it.use.get("label"):
             gd.label_refs.append((it.use["label"], ITEMS, ln(it)))
+        if it.use.get("effect") == "warp" and it.use.get("to"):
+            to = it.use["to"]
+            need(gd.maps, to, "マップ", ITEMS, ln(it), f"アイテム {it.id} の行き先")
+            mp = gd.maps.get(to)
+            if mp is not None and not mp.in_bounds(it.use["x"], it.use["y"]):
+                rep.error(ITEMS, ln(it), f"アイテム {it.id} の行き先 ({it.use['x']}, {it.use['y']}) がマップ {to} の外です")
     for sk in gd.skills.values():
         if sk.status:
             need(gd.statuses, sk.status, "状態異常", ITEMS, ln(sk), f"スキル {sk.id}")

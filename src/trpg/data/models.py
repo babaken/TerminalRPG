@@ -28,7 +28,7 @@ def parse_anim(text: str) -> list[tuple[str, str]]:
     return out
 
 
-USE_EFFECTS = ("heal", "heal_mp", "cure", "revive", "script", "skill")
+USE_EFFECTS = ("heal", "heal_mp", "cure", "revive", "script", "skill", "warp")
 
 # エンジン組み込みのスキル（データに書かなくても使える）
 BUILTIN_SKILLS = ("attack", "defend")
@@ -203,6 +203,7 @@ class GameMap:
     encounter: str = ""
     dark: bool = False
     indoor: bool = False      # 屋内：雨・雪を表示しない（天気の状態は保ったまま）
+    dungeon: bool = False     # ダンジョンの階：入ったときに名前を表示。条件式 map.dungeon が真になる
     events: list[MapEvent] = field(default_factory=list)
     warps: list[Warp] = field(default_factory=list)
     npcs: list[Npc] = field(default_factory=list)

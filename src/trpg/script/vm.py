@@ -216,6 +216,18 @@ class VM:
         elif name == "chapter":
             st.chapter = int(pos[0])
             st.chapter_title = pos[1] if len(pos) > 1 else ""
+        elif name == "tile":
+            mid = kw.get("map") or st.map_id
+            mp = self.gd.maps.get(mid)
+            x, y, ch = int(pos[0]), int(pos[1]), pos[2]
+            if mp is None:
+                raise ScriptError(ins, f"@tile：マップ「{mid}」が定義されていません")
+            if not mp.in_bounds(x, y):
+                raise ScriptError(ins, f"@tile：座標 ({x}, {y}) がマップ {mid} の外です")
+            ts = self.gd.tilesets.get(mp.tileset)
+            if len(ch) != 1 or ts is None or ch not in ts.tiles:
+                raise ScriptError(ins, f"@tile：「{ch}」はマップ {mid} のタイルセットにありません")
+            st.set_tile(mid, x, y, ch)
         elif name == "wait":
             return WaitReq(int(pos[0]) / 1000)
         elif name == "keywait":

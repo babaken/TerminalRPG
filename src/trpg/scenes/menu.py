@@ -182,9 +182,15 @@ class MenuScene(Overlay):
         def apply(target: Optional[Member]) -> None:
             res = I.use_item(self.st, self.gd, iid, target)
             if res.label:
-                # 帰還の巻物など：メニューを閉じてスクリプトを実行
+                # メニューを閉じてスクリプトを実行
                 self.field.pending_labels.append(res.label)
                 self.close()
+                return
+            if res.warp:
+                # 帰還の巻物など：メニューを閉じて移動する
+                self.close()
+                self.field.warp_by_item(*res.warp)
+                self.field.local_message(res.messages[0])
                 return
             depth = 2
             self._back_to(depth)

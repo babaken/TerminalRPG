@@ -95,6 +95,20 @@ def lint_script(script: Script, gd: GameData, rep: Report, pkg: Optional["Packag
                         tile = ts.tiles.get(mp.rows[y][x]) if ts else None
                         if tile is not None and not tile.passable:
                             rep.warning(ins.file, ins.line, f"@map {mp.id}: 座標 ({x}, {y}) は通行できないタイル（{tile.name or tile.char}）です")
+            elif name == "tile":
+                ch = pos[2]
+                mp = gd.maps.get(kw["map"]) if kw.get("map") else None
+                if kw.get("map") and mp is None:
+                    need(gd.maps, kw["map"], "マップ", ins)
+                elif mp is not None:
+                    x, y = int(pos[0]), int(pos[1])
+                    ts = gd.tilesets.get(mp.tileset)
+                    if not mp.in_bounds(x, y):
+                        rep.error(ins.file, ins.line, f"@tile: 座標 ({x}, {y}) がマップ {mp.id} の外です（{mp.width}×{mp.height}）")
+                    if ts is not None and ch not in ts.tiles:
+                        rep.error(ins.file, ins.line, f"@tile: 「{ch}」はマップ {mp.id} のタイルセット {ts.id} にありません")
+                elif not any(ch in ts.tiles for ts in gd.tilesets.values()):
+                    rep.error(ins.file, ins.line, f"@tile: 「{ch}」はどのタイルセットにもありません")
             elif name == "item":
                 need(gd.items, pos[1], "アイテム", ins)
             elif name == "party":

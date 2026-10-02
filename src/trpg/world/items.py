@@ -13,10 +13,19 @@ class UseResult:
     used: bool                       # 効果があった（消費した）
     messages: list[str] = field(default_factory=list)
     label: str = ""                  # effect = "script" のとき実行するラベル
+    warp: Optional[tuple[str, int, int, str]] = None   # effect = "warp" の行き先（マップ, x, y, 向き）
 
 
 def needs_target(it: Item) -> bool:
-    return it.use.get("target", "self") in ("ally_one",) and it.use.get("effect") != "script"
+    return it.use.get("target", "self") in ("ally_one",) and it.use.get("effect") not in ("script", "warp")
+
+
+def _cond(src: str, st: GameState) -> bool:
+    from ..script.expr import ExprError, evaluate, parse_expr
+    try:
+        return bool(evaluate(parse_expr(src), st))
+    except ExprError:
+        return False
 
 
 def usable_on_field(it: Item) -> bool:
@@ -40,6 +49,8 @@ def use_item(st: GameState, gd: GameData, iid: str, target: Optional[Member]) ->
     if not usable_on_field(it):
         return UseResult(False, [f"{it.name}はここでは使えない。"])
     use = it.use
+    if use.get("when") and not _cond(use["when"], st):
+        return UseResult(False, ["ここでは使えない。"])
     eff = use.get("effect")
     targets = st.party if use.get("target") == "ally_all" else [target or st.hero]
     res = UseResult(False, [f"{st.hero.name if target is None else target.name}に{it.name}を使った。"
@@ -48,6 +59,11 @@ def use_item(st: GameState, gd: GameData, iid: str, target: Optional[Member]) ->
         res.used = True
         res.messages = []
         res.label = use.get("label", "")
+    if eff == "warp":
+        res.used = True
+        res.messages = [f"{it.name}を使った！"]
+        res.warp = (use["to"], int(use.get("x", 0)), int(use.get("y", 0)), use.get("dir", ""))
+        targets = []
     for m in targets:
         if m is None:
             continue
@@ -82,7 +98,7 @@ def use_item(st: GameState, gd: GameData, iid: str, target: Optional[Member]) ->
                 res.messages.append("しかし、何も起こらなかった。")
     if res.used and use.get("consume", it.type == "consumable"):
         st.remove_item(iid)
-    if not res.used and eff != "script":
+    if not res.used and eff not in ("script", "warp"):
         res.messages = [m for m in res.messages[1:] if m] or ["しかし、何も起こらなかった。"]
     res.messages = [m for m in res.messages if m]
     return res
