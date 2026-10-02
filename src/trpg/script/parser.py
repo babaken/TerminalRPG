@@ -10,6 +10,7 @@ import re
 from dataclasses import dataclass, field
 from typing import Any, Callable, Optional
 
+from ..data.models import STAT_KEYS
 from ..data.report import Report
 from .expr import ExprError, parse_expr, unquote
 
@@ -78,9 +79,11 @@ SPECS: dict[str, tuple[tuple[str, ...], Optional[set[str]]]] = {
     "wait": (("int",), set()),
     "keywait": ((), set()),
     "flag": (("set|clear", "name"), set()),
-    "item": (("add|remove", "id", "?int"), set()),
+    "item": (("add|remove|replace", "id", "?str"), set()),   # @item replace 旧ID 新ID：袋の中も装備中も入れ替える
     "gold": (("add|remove", "int"), set()),
-    "party": (("add|remove", "id"), {"lv"}),
+    "party": (("add|remove|leave|return", "str"), {"lv", "keep"}),   # leave ID|#番号 keep=名前 / return 名前
+    "skill": (("add|remove", "str", "id"), set()),   # @skill add キャラID|all スキルID
+    "stat": (("id", "name", "str"), set()),          # @stat キャラID 能力 +N / -N
     "equip": (("id", "id"), set()),          # @equip キャラID アイテムID（袋から装備）
     "recruit": (("*",), {"pick", "exclude_party", "lv"}),
     "heal": (("all",), set()),
@@ -98,8 +101,8 @@ SPECS: dict[str, tuple[tuple[str, ...], Optional[set[str]]]] = {
     "inn": (("int",), set()),
     "guild": ((), set()),
     "save_point": ((), set()),
-    "battle": ((), {"group", "escape", "gameover", "target_only", "lose"}),
-    "ending": ((), set()),
+    "battle": ((), {"group", "escape", "gameover", "target_only", "lose", "members", "turns"}),
+    "ending": ((), {"text"}),                       # @ending [text="おわりの言葉"]：エンディング画面 → タイトルへ
 }
 BLOCK_CMDS = ("if", "elif", "else", "endif", "choice", "var", "include")
 
@@ -309,8 +312,34 @@ class Parser:
                 return bad("gameover は retry_from_save / title / choose のどれかです")
             if "escape" in kw and kw["escape"] not in ("true", "false"):
                 return bad("escape は true / false です")
+            if "turns" in kw and not (_is_int(kw["turns"]) and int(kw["turns"]) > 0):
+                return bad("turns は 1 以上の整数です")
+            if "members" in kw and not all(ID_RE.match(x) for x in kw["members"].split(",")):
+                return bad("members はキャラクター ID を , で区切って書いてください（例 members=hero）")
         if name in ("party", "recruit") and "lv" in kw and not (kw["lv"] == "avg" or _is_int(kw["lv"])):
             return bad("lv は整数か avg です")
+        if name == "party" and len(pos) > 1:
+            target = pos[1]
+            if pos[0] == "leave" and re.fullmatch(r"#[1-9]", target):
+                pass
+            elif not ID_RE.match(target):
+                return bad(f"「{target}」は ID（leave なら #2 のような何番目か）で書いてください")
+            if pos[0] == "leave" and "keep" in kw and not ID_RE.match(kw["keep"]):
+                return bad("keep= の名前は英小文字・数字・_ で書いてください")
+        if name == "item" and len(pos) > 2:
+            if pos[0] == "replace" and not ID_RE.match(pos[2]):
+                return bad("replace の後に 旧ID 新ID を書いてください")
+            if pos[0] != "replace" and not _is_int(pos[2]):
+                return bad("個数は整数で書いてください")
+        if name == "item" and pos and pos[0] == "replace" and len(pos) < 3:
+            return bad("replace の後に 旧ID 新ID を書いてください")
+        if name == "skill" and len(pos) > 1 and pos[1] != "all" and not ID_RE.match(pos[1]):
+            return bad("キャラクター ID か all を書いてください")
+        if name == "stat" and len(pos) > 2:
+            if pos[1] not in STAT_KEYS:
+                return bad(f"能力は {' / '.join(STAT_KEYS)} のどれかです")
+            if not re.fullmatch(r"[+-]\d+", pos[2]):
+                return bad("増減は +20 や -5 のように書いてください")
         if name == "recruit":
             if not pos:
                 return bad("候補のキャラクター ID を 1 つ以上書いてください")

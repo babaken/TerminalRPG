@@ -157,6 +157,31 @@ class VM:
                     return req
         return None
 
+    def _member_ref(self, ins: Instr, ref: str, required: bool = False):
+        """キャラクター ID か「#2」（パーティの何番目か）で仲間を探す。"""
+        st = self.state
+        if ref.startswith("#"):
+            i = int(ref[1:]) - 1
+            m = st.party[i] if 0 <= i < len(st.party) else None
+        else:
+            m = st.member(ref)
+        if m is None and required:
+            raise ScriptError(ins, f"「{ref}」はパーティにいません")
+        return m
+
+    def _replace_item(self, ins: Instr, old: str, new: str) -> None:
+        """袋の中のものも、誰かが装備しているものも入れ替える（武器の進化など）。"""
+        if new not in self.gd.items:
+            raise ScriptError(ins, f"アイテム「{new}」が定義されていません")
+        st = self.state
+        n = st.items.pop(old, 0)
+        if n:
+            st.add_item(new, n)
+        for m in st.party + list(st.away.values()):
+            for slot, iid in list(m.equip.items()):
+                if iid == old:
+                    m.equip[slot] = new
+
     def _cmd(self, ins: Instr) -> Optional[object]:
         a = ins.args
         name, pos, kw = a["name"], a["pos"], a["kw"]
@@ -172,9 +197,12 @@ class VM:
             cur = st.vars.get(a["var"], 0)
             st.vars[a["var"]] = int({"=": v, "+=": cur + v, "-=": cur - v}[a["op"]])
         elif name == "item":
-            n = int(pos[2]) if len(pos) > 2 else 1
             if pos[1] not in self.gd.items:
                 raise ScriptError(ins, f"アイテム「{pos[1]}」が定義されていません")
+            if pos[0] == "replace":
+                self._replace_item(ins, pos[1], pos[2])
+                return None
+            n = int(pos[2]) if len(pos) > 2 else 1
             if pos[0] == "add":
                 st.add_item(pos[1], n)
             else:
@@ -193,8 +221,35 @@ class VM:
                     m = Member.from_data(self.gd, cid)
                     raise_to_level(m, self.gd, target)
                     st.party.append(m)
-            else:
+            elif pos[0] == "remove":
                 st.party = [m for m in st.party if m.id != cid]
+            elif pos[0] == "leave":
+                # 一時的に抜ける：keep= の名前で能力・装備ごと覚えておき、@party return で戻す
+                m = self._member_ref(ins, cid)
+                if m is not None:
+                    st.party.remove(m)
+                    if "keep" in kw:
+                        st.away[kw["keep"]] = m
+            else:                                   # return
+                m = st.away.pop(cid, None)
+                if m is not None and st.member(m.id) is None:
+                    st.party.append(m)
+        elif name == "skill":
+            if pos[2] not in self.gd.skills:
+                raise ScriptError(ins, f"スキル「{pos[2]}」が定義されていません")
+            for m in (st.party if pos[1] == "all" else [self._member_ref(ins, pos[1], required=True)]):
+                if pos[0] == "add" and pos[2] not in m.extra_skills:
+                    m.extra_skills.append(pos[2])
+                elif pos[0] == "remove" and pos[2] in m.extra_skills:
+                    m.extra_skills.remove(pos[2])
+        elif name == "stat":
+            m = self._member_ref(ins, pos[0], required=True)
+            d = int(pos[2])
+            m.base[pos[1]] = max(1 if pos[1] == "hp" else 0, m.base.get(pos[1], 0) + d)
+            if pos[1] == "hp":
+                m.hp = min(m.max_hp, m.hp + max(0, d)) if m.hp > 0 else 0
+            elif pos[1] == "mp":
+                m.mp = min(m.max_mp, m.mp + max(0, d))
         elif name == "equip":
             m = st.member(pos[0])
             it = self.gd.items.get(pos[1])

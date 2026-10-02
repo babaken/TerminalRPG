@@ -22,7 +22,7 @@ from ..data.models import BUILTIN_SKILLS, Enemy, GameData, Skill
 from ..script.expr import ExprError, evaluate, parse_expr
 from ..world import quests as Q
 from ..world.growth import gain_exp, skills_of
-from ..world.state import GameState, Member
+from ..world.state import GameState, Member, format_text
 
 Event = tuple[str, Any]
 LETTERS = "ＡＢＣＤＥＦＧＨ"
@@ -139,7 +139,8 @@ class _SelfContext:
 # ====================================================================== 戦闘
 class Battle:
     def __init__(self, gd: GameData, st: GameState, group_id: str, *, escape: bool = True,
-                 target_only: str = "", rng: Optional[random.Random] = None):
+                 target_only: str = "", rng: Optional[random.Random] = None,
+                 members: Optional[list[str]] = None, turn_limit: int = 0):
         self.gd = gd
         self.st = st
         self.group_id = group_id
@@ -148,24 +149,37 @@ class Battle:
         # 既定はグローバルの random から種を取る（テストで random.seed() すると再現できる）
         self.rng = rng or random.Random(random.random())
         self.turn = 0
-        self.result: Optional[str] = None        # win / lose / escape
+        self.result: Optional[str] = None        # win / lose / escape / timeout（turn_limit ターンたった）
+        self.turn_limit = turn_limit
         self.defeated: list[str] = []            # 倒した敵 ID（報酬・討伐依頼用）
-        self.party = [Battler(gd, member=m) for m in st.party]
+        # members を指定すると、その仲間だけが戦う（試練など。ほかの仲間とペットは参加しない）
+        self.party = [Battler(gd, member=m) for m in st.party if not members or m.id in members]
         # テイムした魔物（パーティ枠の外で 1 体）。毎回 HP 満タンで参加し、経験値はもらわない
-        pet = gd.enemies.get(st.pet) if st.pet else None
+        pet = gd.enemies.get(st.pet) if st.pet and (not members or "pet" in members) else None
         self.pet: Optional[Battler] = Battler(gd, enemy=pet, pet=True) if pet else None
         ids = gd.groups[group_id].members
         counts = {e: ids.count(e) for e in ids}
         seen: dict[str, int] = {}
         self.enemies: list[Battler] = []
         for eid in ids:
-            e = gd.enemies[eid]
-            name = e.name
+            e = self._copied(gd.enemies[eid])
+            name = format_text(e.name, st, gd)
             if counts[eid] > 1:
                 name += LETTERS[seen.get(eid, 0) % len(LETTERS)]
                 seen[eid] = seen.get(eid, 0) + 1
             self.enemies.append(Battler(gd, enemy=e, name=name))
         self._cond_cache: dict[str, Any] = {}
+
+    def _copied(self, e: Enemy) -> Enemy:
+        """copy = キャラID の敵は、戦闘開始時のそのキャラの能力値（装備込み）になる。"""
+        if not e.copy:
+            return e
+        m = self.st.member(e.copy)
+        if m is None:
+            return e
+        from dataclasses import replace
+        stats = {k: m.stat(k, self.gd) for k in ("hp", "mp", "atk", "def", "mag", "agi", "luk")}
+        return replace(e, stats=stats)
 
     # ---- 状態
     @property
@@ -376,7 +390,8 @@ class Battle:
             if self._check_end():
                 return
         yield from self._end_of_round()
-        self._check_end()
+        if not self._check_end() and self.turn_limit and self.turn >= self.turn_limit:
+            self.result = "timeout"
 
     # ---- 行動
     def _retarget(self, actor: Battler, t: Any, hostile: bool) -> Any:

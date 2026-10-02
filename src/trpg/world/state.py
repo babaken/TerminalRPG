@@ -21,6 +21,7 @@ class Member:
     exp: int = 0
     equip: dict[str, str] = field(default_factory=dict)
     status: list[str] = field(default_factory=list)
+    extra_skills: list[str] = field(default_factory=list)   # @skill add で覚えたスキル（職業の習得表とは別）
 
     @property
     def max_hp(self) -> int:
@@ -86,6 +87,7 @@ class GameState:
     last_choice: int = 0
     pet: str = ""            # テイマーが手なずけた魔物（敵 ID）
     tiles: dict[str, dict[str, str]] = field(default_factory=dict)   # @tile で変えたタイル：マップ → {"x,y": 文字}
+    away: dict[str, "Member"] = field(default_factory=dict)  # @party leave keep= で一時的に抜けた仲間（名前 → Member）
     current_map: Any = field(default=None, repr=False, compare=False)  # 今いるマップ（GameMap。セーブしない）
 
     # ------------------------------------------------------------ 生成
@@ -165,6 +167,9 @@ class GameState:
             return self.last_choice
         if root == "chapter" and not rest:
             return self.chapter
+        if root == "away" and len(rest) == 1:
+            m = self.away.get(rest[0])
+            return m.id if m else ""
         if root == "pet" and not rest:
             return self.pet
         if root == "map" and not rest:
@@ -200,6 +205,9 @@ def format_text(text: str, st: GameState, gd: Optional[GameData] = None) -> str:
         if parts[0] == "party" and len(parts) == 2 and parts[1].isdigit():
             i = int(parts[1]) - 1
             return st.party[i].name if 0 <= i < len(st.party) else ""
+        if parts[0] == "away" and len(parts) == 2:
+            m = st.away.get(parts[1])
+            return m.name if m else ""
         if parts[0] == "var" and len(parts) == 2:
             return str(st.vars.get(parts[1], 0))
         if parts[0] == "item" and len(parts) == 2 and gd is not None and parts[1] in gd.items:

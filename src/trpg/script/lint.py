@@ -22,6 +22,8 @@ def lint_script(script: Script, gd: GameData, rep: Report, pkg: Optional["Packag
     labels = script.labels
     referenced: set[str] = set()
     flags_set: set[str] = set()
+    keeps: set[str] = set()                         # @party leave keep= の名前
+    returns: list = []                              # @party return の名前と命令
     flags_used: list[tuple[str, str, int]] = []
     npc_ids = {n.id for m in gd.maps.values() for n in m.npcs}
     targets: list = []
@@ -114,8 +116,21 @@ def lint_script(script: Script, gd: GameData, rep: Report, pkg: Optional["Packag
                     rep.error(ins.file, ins.line, f"@tile: 「{ch}」はどのタイルセットにもありません")
             elif name == "item":
                 need(gd.items, pos[1], "アイテム", ins)
+                if pos[0] == "replace" and len(pos) > 2:
+                    need(gd.items, pos[2], "アイテム", ins)
             elif name == "party":
-                need(gd.characters, pos[1], "キャラクター", ins)
+                if pos[0] in ("add", "remove") or (pos[0] == "leave" and not pos[1].startswith("#")):
+                    need(gd.characters, pos[1], "キャラクター", ins)
+                if pos[0] == "leave" and "keep" in kw:
+                    keeps.add(kw["keep"])
+                if pos[0] == "return":
+                    returns.append((pos[1], ins))
+            elif name == "skill":
+                if pos[1] != "all":
+                    need(gd.characters, pos[1], "キャラクター", ins)
+                need(gd.skills, pos[2], "スキル", ins)
+            elif name == "stat":
+                need(gd.characters, pos[0], "キャラクター", ins)
             elif name == "equip":
                 need(gd.characters, pos[0], "キャラクター", ins)
                 it = gd.items.get(pos[1])
@@ -136,6 +151,8 @@ def lint_script(script: Script, gd: GameData, rep: Report, pkg: Optional["Packag
                     label_ref(kw["lose"].lstrip("*"), ins.file, ins.line)
                 if "target_only" in kw:
                     need(gd.characters, kw["target_only"], "キャラクター", ins)
+                for cid in kw.get("members", "").split(",") if kw.get("members") else []:
+                    need(gd.characters, cid, "キャラクター", ins)
             elif name == "npc":
                 if pos[0] not in npc_ids:
                     rep.error(ins.file, ins.line, f"NPC「{pos[0]}」はどのマップにもいません")
@@ -195,6 +212,10 @@ def lint_script(script: Script, gd: GameData, rep: Report, pkg: Optional["Packag
     for label, (file, line) in script.label_lines.items():
         if label not in referenced and label not in RESERVED_LABELS:
             rep.warning(file, line, f"ラベル *{label} はどこからも使われていません")
+
+    for keep, ins in returns:
+        if keep not in keeps:
+            rep.error(ins.file, ins.line, f"@party return {keep}：@party leave … keep={keep} がどこにもありません")
 
     warned = set()
     for flag, file, line in flags_used:
