@@ -87,7 +87,8 @@ SPECS: dict[str, tuple[tuple[str, ...], Optional[set[str]]]] = {
     "quest": (("give|done|fail", "id"), set()),
     "chapter": (("int", "?str"), set()),
     "map": (("id", "int", "int"), {"dir", "transition"}),
-    "tile": (("int", "int", "str"), {"map"}),     # @tile x y 文字 [map=ID]：タイルを書き換える（セーブに残る）
+    "tile": (("int", "int", "str"), {"map"}),
+    "pet": (("id",), set()),                        # @pet 敵ID：その魔物をペットにする / @pet release：手放す     # @tile x y 文字 [map=ID]：タイルを書き換える（セーブに残る）
     "npc": (("id", "show|hide|move|face", "*"), set()),
     "hero": (("move|face", "*"), set()),
     "face": (("name",), set()),

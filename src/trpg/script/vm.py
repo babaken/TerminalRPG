@@ -216,6 +216,13 @@ class VM:
         elif name == "chapter":
             st.chapter = int(pos[0])
             st.chapter_title = pos[1] if len(pos) > 1 else ""
+        elif name == "pet":
+            if pos[0] == "release":
+                st.pet = ""
+            elif pos[0] not in self.gd.enemies:
+                raise ScriptError(ins, f"@pet：敵「{pos[0]}」が定義されていません")
+            else:
+                st.pet = pos[0]
         elif name == "tile":
             mid = kw.get("map") or st.map_id
             mp = self.gd.maps.get(mid)

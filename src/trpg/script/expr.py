@@ -11,6 +11,7 @@
     gold    所持金                      item.X  所持数
     party.size / party.has(ID)          quest.X 状態（none / active / done / failed）
     choice  直前の選択肢の番号（1 始まり）  chapter 現在の章番号
+    pet     テイムした魔物の ID（いなければ ""）
     map     今いるマップの ID（map == dungeon_b03）  map.dungeon / map.dark / map.indoor  マップの設定
     self.hp_rate など（戦闘中の敵 AI 用。フィールドでは使えない）
 ドットを含まない未知の名前（done など）は文字列として扱う。
@@ -20,7 +21,7 @@ from __future__ import annotations
 import re
 from typing import Any, Iterator, Protocol
 
-ROOTS = ("flag", "var", "gold", "item", "party", "quest", "choice", "chapter", "map", "self")
+ROOTS = ("flag", "var", "gold", "item", "party", "quest", "choice", "chapter", "map", "pet", "self")
 
 
 class ExprError(Exception):
