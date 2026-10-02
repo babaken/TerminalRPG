@@ -216,7 +216,7 @@ def test_lint_missing_label_from_data(sample_dir):
     rep = Report()
     with open_package(sample_dir, rep) as pkg:
         gd = load_game_data(pkg, rep)
-        sc = parse_script(sco.read_text(encoding="utf-8"), rep, "scenario.sco")
+        sc = parse_script(sco.read_text(encoding="utf-8"), rep, "scenario.sco", loader=pkg.read_text)
         lint_script(sc, gd, rep, pkg)
     [err] = rep.errors
     assert err.file == "Map.data" and "*ch1_chief_talk" in err.message

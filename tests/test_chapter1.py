@@ -271,4 +271,5 @@ def test_chapter1_full_playthrough(game):
     assert f.st.gold == gold0 - 100
     assert [m.id for m in f.st.party] == ["hero", "mia"]
     assert "ch1_done" in f.st.flags
-    assert "第2章" in j
+    assert "数日後" in j and "ch2_rumor" in f.st.flags      # そのまま第2章へ
+    assert f.st.chapter == 2 and f.st.quests["q_mole"] == "active"

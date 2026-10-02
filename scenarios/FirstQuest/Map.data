@@ -404,7 +404,7 @@ rows = [
   "#..........HHHHHT...=..................#",
   "#...................=..................#",
   "#...................=..................#",
-  "########################################",
+  "####################=###################",
 ]
 
 [[map.event]]         # 初めて街に入ったとき：門番
@@ -515,6 +515,14 @@ y = 21
 talk = "ch1_cat"
 when = "quest.q_lost_cat == active and !flag.found_cat"
 
+[[map.warp]]
+x = 20
+y = 23
+to = "village_kabura"
+tx = 14
+ty = 1
+dir = "down"
+
 [[map]]
 id = "guild_bern"
 name = "冒険者協会ベルン支部"
@@ -605,3 +613,118 @@ x = 11
 y = 5
 move = "random"
 talk = "ch1_traveler_talk"
+
+[[map]]
+id = "village_kabura"
+name = "カブラ村"
+tileset = "default"
+rows = [
+  "TTTTTTTTTTTTTT=TTTTTTTTTTTTTTT",
+  "T.............=..............T",
+  "T..HHH........=.......HHH....T",
+  "T..HDH........=.......HDH....T",
+  "T.............=..............T",
+  "T....T........=........T.....T",
+  "T...,,,,,,,...=....,,,,,,,...T",
+  "T...,,,,,,,...=....,,,,,,,...T",
+  "T...,,,,,,,...=....,,,,,,,...T",
+  "T.............=..............T",
+  "T.............======.........T",
+  "T..................=.........T",
+  "T....HHH...........=...~~~...T",
+  "T....HDH...........=...~~~...T",
+  "T..................=.........T",
+  "T.....T............=.....T...T",
+  "T..................=.........T",
+  "TTTTTTTTTTTTTTTTTTT=TTTTTTTTTT",
+]
+
+[[map.warp]]
+x = 14
+y = 0
+to = "town_bern"
+tx = 20
+ty = 22
+dir = "up"
+
+[[map.warp]]
+x = 19
+y = 17
+to = "field_kabura"
+tx = 19
+ty = 1
+dir = "down"
+
+[[map.npc]]
+id = "kabura_wife"
+glyph = "婦"
+color = "bright_yellow"
+x = 6
+y = 4
+talk = "ch2_kabura_wife_talk"
+
+[[map.npc]]
+id = "kabura_farmer"
+glyph = "農"
+color = "white"
+x = 21
+y = 9
+move = "random"
+talk = "ch2_kabura_farmer_talk"
+
+[[map.npc]]
+id = "kabura_child"
+glyph = "子"
+color = "white"
+x = 10
+y = 14
+move = "random"
+talk = "ch2_kabura_child_talk"
+
+[[map.npc]]
+id = "kabura_elder"
+glyph = "老"
+color = "white"
+x = 23
+y = 4
+talk = "ch2_kabura_elder_talk"
+
+[[map]]
+id = "field_kabura"
+name = "カブラ村の畑"
+tileset = "default"
+encounter = "kabura"
+rows = [
+  "TTTTTTTTTTTTTTTTTTT=TTTTTTTTTT",
+  "T..................=.........T",
+  "T..,,,,,,,,,.......=..,,,,,..T",
+  "T..,,,,,,,,,..........,,,,,..T",
+  "T..,,,,,,,,,..........,,,,,..T",
+  "T.........................T..T",
+  "T....,,,,,,,,,,,,,,,,,,......T",
+  "T....,,,,,,,,,,,,,,,,,,......T",
+  "T....,,,,,,,,,,,,,,,,,,......T",
+  "T....,,,,,,,,,,,,,,,,,,......T",
+  "T..T.........................T",
+  "T........,,,,,,,......~~~....T",
+  "T........,,,,,,,......~~~....T",
+  "T........,,,,,,,.............T",
+  "T............................T",
+  "TTTTTTTTTTTTTTTTTTTTTTTTTTTTTT",
+]
+
+[[map.warp]]
+x = 19
+y = 0
+to = "village_kabura"
+tx = 19
+ty = 16
+dir = "up"
+
+[[map.event]]
+x = 0
+y = 0
+trigger = "auto"
+label = "ch2_mole_battle"
+once = true
+when = "quest.q_mole == active and flag.ch2_kabura_talked and !flag.mole_defeated"

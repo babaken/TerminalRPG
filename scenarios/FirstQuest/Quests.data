@@ -41,3 +41,24 @@ goal = { type = "flag", flag = "package_delivered" }
 reward = { gold = 30 }
 when = "flag.guild_registered"
 on_complete = "ch1_quest_done"
+
+# ===== 2章 =====
+[[quest]]
+id = "q_mole"
+name = "カブラ村の畑荒らし"
+rank = "E"
+desc = "カブラ村の畑を荒らすモグラのような魔物を退治してください。村はベルンの南門を出てすぐです。"
+goal = { type = "flag", flag = "mole_defeated" }
+reward = { gold = 200, exp = 30 }
+when = "flag.ch2_rumor"
+on_complete = "ch2_report_map"
+
+[[quest]]
+id = "q_blackrock"
+name = "黒岩の洞穴の調査（指名）"
+rank = "D"
+desc = "協会長からの指名依頼。ベルンの東の黒岩の洞穴を調べ、わかったことを必ず報告すること。"
+goal = { type = "flag", flag = "ch2_found_scroll" }
+reward = { gold = 300, exp = 100 }
+when = "flag.ch2_map_reported"
+on_complete = "ch2_report"
