@@ -292,3 +292,23 @@ def new_party(game, *ids):
     for c in ids:
         st.party.append(Member.from_data(game.data, c))
     return st
+
+
+def test_chapter2_starts_after_loading_chapter1_save(game):
+    """1章の最後のセーブ（2章が始まる前）から再開しても 2 章が始まる。"""
+    from trpg.scenes.title import start_field
+    d = after_chapter1(game)
+    st = d.field.st
+    game.saves().save(1, st)
+    loaded = game.saves().load(1)
+    assert "ch2_rumor" not in loaded.flags
+    start_field(d.app, game, loaded)
+    talk = " ".join(d.settle())
+    f = d.field
+    assert f.st is loaded and "銀の牙" in talk
+    assert loaded.chapter == 2 and loaded.quests.get("q_mole") == "active"
+    # 2章が始まったあとのセーブからは、もう一度始まらない
+    game.saves().save(2, loaded)
+    again = game.saves().load(2)
+    start_field(d.app, game, again)
+    assert d.settle() == [] and again.quests["q_mole"] == "active"
