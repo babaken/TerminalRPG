@@ -1,4 +1,5 @@
 """3-1：パッケージツール（検証してから zip にする）のテスト。"""
+import tomllib
 import zipfile
 
 import pytest
@@ -21,7 +22,8 @@ def test_pack_makes_playable_zip(sample_dir, tmp_path, monkeypatch):
     (sample_dir / "plugin.py").write_text("print('no')", encoding="utf-8")
     monkeypatch.chdir(tmp_path)
     dest = pack(sample_dir, out=quiet)
-    assert dest == tmp_path / "FirstQuest-0.3.0.zip"
+    version = tomllib.loads((sample_dir / "manifest.toml").read_text(encoding="utf-8"))["package"]["version"]
+    assert dest == tmp_path / f"FirstQuest-{version}.zip"
     names = zipfile.ZipFile(dest).namelist()
     assert "manifest.toml" in names and "aa/slime.color" in names       # manifest が直下
     assert not [n for n in names if "pycache" in n or n.startswith(".") or n.endswith(("~", ".py"))]
