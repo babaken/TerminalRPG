@@ -103,3 +103,104 @@ def test_door_stays_closed_after_defeat(game):
     st.set_tile("dungeon_b14", 20, 1, "G")
     talk = check_tile(d, "G")
     assert any("固く閉ざされている" in t for t in talk) and f.tile_char(20, 1) == "G"
+
+
+def after_defeat(game) -> Play:
+    """ガルザに敗れて医務室で目覚めた直後の状態（ミアが一時離脱）。"""
+    d = after_chapter2(game)
+    f = d.field
+    st = f.st
+    st.chapter = 3
+    st.flags |= {"ch3_started", "ch3_lost", "rod_rescued"}
+    st.quests["q_blackrock_deep"] = "active"
+    mia = st.member("mia")
+    st.party.remove(mia)
+    st.away["injured"] = mia
+    st.set_tile("field_blackrock", 27, 8, ".")
+    st.set_tile("field_blackrock", 29, 8, "=")
+    for mid in game.data.maps:
+        st.traps[mid] = []
+    return d
+
+
+def test_rockslide_until_defeat(game):
+    d = after_chapter2(game)
+    f = d.field
+    f.change_map("field_blackrock", 26, 8)
+    f.pending_auto = False
+    assert not f.passable(27, 8)
+    talk = d.talk(26, 8, "right")
+    assert any("落石でふさがっている" in t for t in talk)
+
+
+def test_chapter3_temple_trials_and_return(game):
+    d = after_defeat(game)
+    f = d.field
+    st = f.st
+    gd = game.data
+
+    # ---- 洞穴前の東 → 山道（雪）→ 神殿
+    f.change_map("field_blackrock", 26, 8)
+    f.pending_auto = False
+    d.walk_to(29, 8)
+    talk = " ".join(d.settle())
+    assert st.map_id == "field_mountain" and st.effects.get("snow") not in (None, "off")
+    assert "古い神殿" in talk
+    d.walk_to(23, 0)
+    talk = " ".join(d.settle())
+    assert st.map_id == "temple_kazami" and "封剣アストラ" in talk and "ch3_temple_met" in st.flags
+
+    # ---- 勇気の間：影と一人で戦う（負けたら挑み直す）
+    d.walk_to(5, 1)
+    assert st.map_id == "trial_1"
+    for _ in range(5):
+        talk = " ".join(d.talk(9, 2, "up"))
+        if "trial1_done" in st.flags:
+            break
+        assert "出直してこい" in talk
+    assert "trial1_done" in st.flags
+    assert st.hero.equip["weapon"] == "awakening_sword" and "fuukouzan" in st.hero.extra_skills
+    assert "影のユウ" in talk and "封光斬" in talk
+    d.walk_to(9, 7)
+    assert st.map_id == "temple_kazami"
+
+    # ---- 慈愛の間：手当てしてやる
+    luk0, hp0 = st.hero.base["luk"], st.hero.max_hp
+    d.walk_to(16, 1)
+    d.walk_to(9, 2)
+    d.settle(choose=0)
+    assert "trial2_done" in st.flags and "helped_pup" in st.flags
+    assert st.hero.base["luk"] == luk0 + 2 and st.hero.max_hp == hp0 + 20
+    d.walk_to(9, 7)
+
+    # ---- 絆の間：「それでも一緒に行きたい」を選ぶまで続く
+    d.walk_to(27, 1)
+    d.walk_to(9, 2)
+    st.dir = "up"
+    d.key("ENTER")
+    answers = [0, 1, 2]                                       # ごめん → 一人で行く → それでも一緒に行きたい
+    asked = 0
+    for _ in range(100):
+        d.tick(0.2)
+        if f.choice is not None:
+            for _ in range(answers[asked]):
+                d.key("DOWN")
+            d.key("ENTER")
+            asked += 1
+        elif f.msg.active or f.busy:
+            d.key("ENTER")
+        else:
+            break
+    assert asked == 3 and "trial3_done" in st.flags
+    d.walk_to(9, 7)
+
+    # ---- オルド → 仲間の復帰・上位スキル → 伝説 → 3 章 完
+    talk = " ".join(d.talk(15, 5, "left"))                   # 司祭オルド（祭壇の上）
+    assert "ミア「……待たせちゃったね」" in talk
+    assert [m.id for m in st.party] == ["hero", "garo", "noa", "mia"] and st.away == {}
+    assert "whirlwind" in st.member("garo").extra_skills and "flame_storm" in st.member("mia").extra_skills
+    assert "beast_call" in st.member("noa").extra_skills
+    assert "三柱の魔" in talk and "蝕王ヴェルム" in talk
+    assert "ch3_done" in st.flags and st.effects.get("snow") in (None, "off")
+    from trpg.scenes.saveload import SaveLoadScene
+    assert isinstance(d.scene, SaveLoadScene)
