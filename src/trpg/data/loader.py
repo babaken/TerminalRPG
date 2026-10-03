@@ -16,7 +16,7 @@ from ..term.width import text_width
 from .models import (AI_TYPES, BUILTIN_SKILLS, ELEMENTS, EQUIP_SLOTS, EVENT_TRIGGERS, ITEM_TYPES,
                      NPC_MOVES, QUEST_GOALS, ROUTE_STEPS, SKILL_KINDS, STAT_KEYS, TARGETS, USE_EFFECTS, Character,
                      Encounter, Enemy, EnemyAction, GameData, GameMap, Group, Item, Job, MapEvent, Npc,
-                     Quest, Shop, Skill, StatusDef, Tile, TileSet, Warp)
+                     Quest, Shop, Skill, StatusDef, Tile, TileSet, TRAP_TARGETS, Trap, Warp)
 from ..term.style import color as to_color
 from .models import SKILL_ANIMS, parse_anim
 from .reader import REQUIRED, Tbl
@@ -291,6 +291,16 @@ def _load_maps(f: _File, gd: GameData) -> None:
         t.done()
         _register(gd.tilesets, ts, t, "タイルセット")
 
+    for t in f.entries("trap"):
+        tr = Trap(id=t.id(), name=t.str("name"), glyph=t.str("glyph"), color=t.str("color", ""),
+                  target=t.str("target", "one", choices=TRAP_TARGETS),
+                  damage_rate=t.num("damage_rate", 0.1, min=0.0, max=1.0), status=t.str("status", ""),
+                  message=t.str("message", ""))
+        if text_width(tr.glyph) != 2:
+            t._err("glyph", f"「{tr.glyph}」の表示幅が {text_width(tr.glyph)} です。全角 1 文字にしてください")
+        t.done()
+        _register(gd.traps, tr, t, "罠")
+
     for t in f.entries("map"):
         rows = t.strlist("rows")
         if not rows:
@@ -329,7 +339,13 @@ def _load_maps(f: _File, gd: GameData) -> None:
             if gw != 2:
                 n._err("glyph", f"「{npcs[-1].glyph}」の表示幅が {gw} です。幅 2 にしてください")
             n.done()
+        trap_n = t.raw("traps", [])
+        if trap_n and not (isinstance(trap_n, list) and len(trap_n) == 2 and all(isinstance(v, int) for v in trap_n)
+                           and 0 <= trap_n[0] <= trap_n[1]):
+            t._err("traps", "traps は [最小, 最大] の 2 つの整数で書いてください（例 [2, 3]）")
+            trap_n = []
         m = GameMap(id=t.id(), name=t.str("name"), tileset=t.str("tileset", "default"), rows=rows,
+                    traps=tuple(trap_n) if trap_n else (0, 0), trap_kinds=t.strlist("trap_kinds", []),
                     encounter=t.str("encounter", ""), dark=t.bool("dark", False),
                     indoor=t.bool("indoor", False), dungeon=t.bool("dungeon", False),
                     events=events, warps=warps, npcs=npcs)
@@ -457,6 +473,9 @@ def _cross_check(gd: GameData, manifest, rep: Report) -> None:
         for iid in sh.goods:
             need(gd.items, iid, "アイテム", ITEMS, ln(sh), f"ショップ {sh.id}")
 
+    for tr in gd.traps.values():
+        need(gd.statuses, tr.status, "状態異常", MAP, ln(tr), f"罠 {tr.id}")
+
     for m in gd.maps.values():
         ts = gd.tilesets.get(m.tileset)
         if ts is None:
@@ -466,6 +485,10 @@ def _cross_check(gd: GameData, manifest, rep: Report) -> None:
             if bad:
                 rep.error(MAP, ln(m), f"マップ {m.id}: タイルセット {ts.id} にない記号があります: {' '.join(repr(b) for b in bad)}")
         need(gd.encounters, m.encounter, "出現表", MAP, ln(m), f"マップ {m.id}")
+        for k in m.trap_kinds:
+            need(gd.traps, k, "罠", MAP, ln(m), f"マップ {m.id} の trap_kinds")
+        if m.traps[1] and not (m.trap_kinds or gd.traps):
+            rep.error(MAP, ln(m), f"マップ {m.id}: traps がありますが、[[trap]] が 1 つもありません")
 
         def passable(mp: GameMap, x: int, y: int) -> bool:
             t = gd.tilesets.get(mp.tileset)
