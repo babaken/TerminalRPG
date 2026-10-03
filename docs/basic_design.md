@@ -50,7 +50,7 @@ TRPG/
 │  │  ├─ growth.py        【済】 経験値・レベルアップ・習得スキル
 │  │  └─ items.py         【済】 フィールドでのアイテム・スキルの使用
 │  ├─ save/            【済】 直列化・暗号化・スロット管理
-│  ├─ i18n/            【未】 UI 文言（ja / en）
+│  ├─ i18n/            【済】 UI 文言（ja / en）。tr() と en.py、settings.json
 │  └─ tools/           【一部】 pack【済】 / aa_convert【済】 / map_editor【済】（pip でも入るよう trpg パッケージ内に置く【変更】。lint は本体の --check に統合【変更】）
 ├─ scenarios/FirstQuest/  サンプルシナリオ（展開形式）
 └─ tests/              【済】 pytest（端末なしで画面にキーを送る通しプレイを含む）

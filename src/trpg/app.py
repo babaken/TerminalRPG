@@ -1,6 +1,8 @@
 """アプリケーション本体：シーン管理とフレームループ。"""
 from __future__ import annotations
 
+from .i18n import tr
+
 import time
 import unicodedata
 from typing import Optional
@@ -114,7 +116,7 @@ class App:
         if debuglog.enabled():
             debuglog.log(f"key  {ev} -> {type(self.scene).__name__} actions={sorted(a.value for a in actions)}")
         if looks_like_ime(ev) and not self.scene.accepts_text:
-            self.show_notice(IME_NOTICE, IME_NOTICE_SECONDS)
+            self.show_notice(tr(IME_NOTICE), IME_NOTICE_SECONDS)
         self.scene.on_key(ev, actions)
 
     # ---------------------------------------------------------------- ループ
@@ -187,9 +189,9 @@ class App:
 
     def draw_too_small(self, buf: Buffer) -> None:
         lines = [
-            "画面が小さすぎます。ウィンドウを広げてください。",
-            f"現在: {buf.width} × {buf.height}  /  必要: {self.min_size[0]} × {self.min_size[1]}",
-            "（Ctrl+C で終了）",
+            tr('画面が小さすぎます。ウィンドウを広げてください。'),
+            tr('現在: {0} × {1}  /  必要: {2} × {3}', buf.width, buf.height, self.min_size[0], self.min_size[1]),
+            tr('（Ctrl+C で終了）'),
         ]
         top = max(0, (buf.height - len(lines)) // 2)
         for i, line in enumerate(lines):

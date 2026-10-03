@@ -1,6 +1,8 @@
 """タイトル画面・名前入力・シナリオ選択。"""
 from __future__ import annotations
 
+from ..i18n import get_lang, lang_label, save_lang, set_lang, tr
+
 from pathlib import Path
 from typing import Callable, Optional
 
@@ -35,13 +37,26 @@ class TitleScene(Scene):
             has_save = game.saves().any_save()
         except Exception:
             has_save = False
-        self.items = [("はじめから", True), ("つづきから", has_save), ("おわる", True)]
+        self.has_save = has_save
+        self._make_items()
         # 背景エフェクト（manifest の title_screen.effect）
         self.bg_kind = game.manifest.title_effect if game.manifest.title_effect not in ("", "none") else ""
         self.bg = None
         self._make_bg()
         if has_save:
             self.index = 1
+
+    LANG_INDEX = 2                     # はじめから / つづきから / 言語 / おわる
+
+    def _make_items(self) -> None:
+        self.items = [(tr('はじめから'), True), (tr('つづきから'), self.has_save), (lang_label(), True),
+                      (tr('おわる'), True)]
+
+    def toggle_lang(self) -> None:
+        """日本語 ⇄ 英語を切り替えて設定ファイルに覚える。"""
+        set_lang("en" if get_lang() == "ja" else "ja")
+        save_lang(get_lang())
+        self._make_items()
 
     def on_key(self, ev: KeyEvent, actions: frozenset[Action]) -> None:
         self.notice = ""
@@ -58,7 +73,9 @@ class TitleScene(Scene):
                     self.app.push(SaveLoadScene(self.game, "load",
                                                 on_load=lambda st: start_field(self.app, self.game, st)))
                 else:
-                    self.notice = "セーブデータがありません"
+                    self.notice = tr('セーブデータがありません')
+            elif self.index == self.LANG_INDEX:
+                self.toggle_lang()
             else:
                 self.app.quit()
         elif Action.CANCEL in actions:
@@ -148,7 +165,7 @@ class NameInputScene(Scene):
         if ev.key is Key.ENTER:
             name = self.name.strip()
             if not name:
-                self.warn = "名前を入力してください"
+                self.warn = tr('名前を入力してください')
                 return
             self.on_done(name)
         elif ev.key is Key.ESC:
@@ -157,7 +174,7 @@ class NameInputScene(Scene):
             self.name = self.name[:-1]
         elif ev.key is Key.CHAR:
             if text_width(self.name + ev.char) > NAME_MAX_WIDTH:
-                self.warn = "これ以上入力できません"
+                self.warn = tr('これ以上入力できません')
             elif ev.char.isprintable():
                 self.name += ev.char
 
@@ -167,16 +184,16 @@ class NameInputScene(Scene):
     def draw(self, buf: Buffer) -> None:
         w, h = 64, 11
         rect = Rect((buf.width - w) // 2, (buf.height - h) // 2, w, h)
-        inner = buf.box(rect, FRAME, title="なまえ", chars=BOX_SINGLE)
-        buf.put(inner.x + 2, inner.y + 1, "主人公の名前を入力してください", TEXT)
+        inner = buf.box(rect, FRAME, title=tr('なまえ'), chars=BOX_SINGLE)
+        buf.put(inner.x + 2, inner.y + 1, tr('主人公の名前を入力してください'), TEXT)
         field = Style.of("bright_white", bold=True)
-        end_x = buf.put(inner.x + 4, inner.y + 3, "［ " + self.name, field)
-        buf.put(inner.x + 4 + 2 + NAME_MAX_WIDTH + 2, inner.y + 3, "］", field)
+        end_x = buf.put(inner.x + 4, inner.y + 3, tr('［ ') + self.name, field)
+        buf.put(inner.x + 4 + 2 + NAME_MAX_WIDTH + 2, inner.y + 3, tr('］'), field)
         # 端末カーソルを入力位置に出す → 日本語入力の変換中の文字がここに表示される
         buf.cursor = (end_x, inner.y + 3)
-        buf.put(inner.x + 2, inner.y + 5, "Enter: 決定  BackSpace: 削除  Esc: 戻る", DIM_TEXT)
-        buf.put(inner.x + 2, inner.y + 6, "日本語は Enter で変換を確定してから、もう一度 Enter", Style.of("cyan"))
-        buf.put(inner.x + 2, inner.y + 7, "決定したら［半角/全角］で日本語入力をオフにしてください", Style.of("cyan"))
+        buf.put(inner.x + 2, inner.y + 5, tr('Enter: 決定  BackSpace: 削除  Esc: 戻る'), DIM_TEXT)
+        buf.put(inner.x + 2, inner.y + 6, tr('日本語は Enter で変換を確定してから、もう一度 Enter'), Style.of("cyan"))
+        buf.put(inner.x + 2, inner.y + 7, tr('決定したら［半角/全角］で日本語入力をオフにしてください'), Style.of("cyan"))
         if self.warn:
             buf.put(inner.x + 2, inner.y + 8, self.warn, Style.of("yellow"))
 
@@ -208,24 +225,24 @@ class SelectScene(Scene):
                 self.error = str(e)
                 return
             except DataError as e:
-                self.error = f"データに {len(e.report.errors)} 件のエラーがあります。python -m trpg --check {c.path} で確認してください"
+                self.error = tr('データに {0} 件のエラーがあります。python -m trpg --check {1} で確認してください', len(e.report.errors), c.path)
                 return
             self.app.replace(TitleScene(game))
         elif Action.CANCEL in actions:
             self.app.quit()
 
     def draw(self, buf: Buffer) -> None:
-        buf.put_center(2, "シナリオを選んでください", Style.of("bright_yellow", bold=True))
+        buf.put_center(2, tr('シナリオを選んでください'), Style.of("bright_yellow", bold=True))
         for i, c in enumerate(self.cands):
             sel = i == self.index
             label = f"{c.title or c.path.name}  {c.version}"
             st = CURSOR if sel else (DIM_TEXT if c.error else TEXT)
             buf.put(6, 5 + i, ("▶ " if sel else "  ") + truncate(label, buf.width - 12), st)
             if c.error:
-                buf.put(buf.width - 14, 5 + i, "（読込不可）", DIM_TEXT)
+                buf.put(buf.width - 14, 5 + i, tr('（読込不可）'), DIM_TEXT)
         if self.error:
             y = 6 + len(self.cands)
             for line in wrap(self.error, buf.width - 12)[: buf.height - y - 2]:
                 buf.put(6, y, line, Style.of("bright_red"))
                 y += 1
-        buf.put_center(buf.height - 2, "Enter: 決定  Esc: 終了", DIM_TEXT)
+        buf.put_center(buf.height - 2, tr('Enter: 決定  Esc: 終了'), DIM_TEXT)

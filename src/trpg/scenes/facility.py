@@ -5,6 +5,8 @@
 """
 from __future__ import annotations
 
+from ..i18n import tr
+
 from typing import TYPE_CHECKING, Callable, Optional
 
 from ..app import Scene
@@ -48,7 +50,7 @@ class ListWindow:
         elif self.index >= self.top + h:
             self.top = self.index - h + 1
         if not self.rows:
-            buf.put(inner.x + 2, inner.y, "（ありません）", DIM_TEXT, clip=inner)
+            buf.put(inner.x + 2, inner.y, tr('（ありません）'), DIM_TEXT, clip=inner)
             return
         for i in range(h):
             j = self.top + i
@@ -173,7 +175,7 @@ class Overlay(Scene):
 
     def draw_gold(self, buf: Buffer) -> None:
         a = self.area(buf)
-        text = f"所持金 {self.st.gold:>7} G"
+        text = tr('所持金 {0:>7} G', self.st.gold)
         w = text_width(text) + 4
         inner = buf.box(Rect(a.right - w - 1, a.y, w, 3), FRAME, chars=BOX_SINGLE)
         buf.put(inner.x + 1, inner.y, text, GOLD_ST)
@@ -199,7 +201,7 @@ class ShopScene(Overlay):
         self.shop = self.gd.shops[shop_id]
         self.mode = "top"
         self.list: Optional[ListWindow] = None
-        self._top("いらっしゃい！　何にする？")
+        self._top(tr('いらっしゃい！\u3000何にする？'))
 
     def on_enter(self) -> None:
         pass
@@ -207,7 +209,7 @@ class ShopScene(Overlay):
     def _top(self, text: str) -> None:
         self.mode = "top"
         self.list = None
-        self.ask(text, ["かう", "うる", "やめる"], self._top_done, cancel_index=2)
+        self.ask(text, [tr('かう'), tr('うる'), tr('やめる')], self._top_done, cancel_index=2)
 
     def _top_done(self, i: int) -> None:
         if i == 0:
@@ -215,7 +217,7 @@ class ShopScene(Overlay):
         elif i == 1:
             self._open_sell()
         else:
-            self.say("またどうぞ！", then=self.close)
+            self.say(tr('またどうぞ！'), then=self.close)
 
     # ---- 買う
     def _open_buy(self) -> None:
@@ -226,7 +228,7 @@ class ShopScene(Overlay):
 
     def _buy(self, it: Item) -> None:
         if it.price > self.st.gold:
-            self.say("お金が足りないよ。")
+            self.say(tr('お金が足りないよ。'))
             return
         if it.type != "equipment":
             # 道具は個数を選んで買う（装備品は 1 つずつ。買ったあと装備するか聞くため）
@@ -235,7 +237,7 @@ class ShopScene(Overlay):
             if it.price > 0:
                 most = min(most, self.st.gold // it.price)
             if most <= 0:
-                self.say("それ以上は持てないよ。")
+                self.say(tr('それ以上は持てないよ。'))
                 return
             self._ask_qty("buy", it, most)
             return
@@ -248,21 +250,21 @@ class ShopScene(Overlay):
             self._open_buy_keep_cursor()
             able = [m for m in self.st.party if m.can_equip(it.id, self.gd)]
             if it.type == "equipment" and able:
-                names = [m.name for m in able] + ["装備しない"]
+                names = [m.name for m in able] + [tr('装備しない')]
 
                 def eq(j: int) -> None:
                     if j < len(able):
                         old = self.st.equip(able[j], it.id, self.gd)
-                        msg = f"{able[j].name}は{it.name}を装備した。"
+                        msg = tr('{0}は{1}を装備した。', able[j].name, it.name)
                         if old:
-                            msg += f"（{self.gd.items[old].name}は袋にしまった）"
-                        self.say(["まいどあり！", msg])
+                            msg += tr('（{0}は袋にしまった）', self.gd.items[old].name)
+                        self.say([tr('まいどあり！'), msg])
                     else:
-                        self.say("まいどあり！")
-                self.ask("いま装備しますか？", names, eq, cancel_index=len(names) - 1)
+                        self.say(tr('まいどあり！'))
+                self.ask(tr('いま装備しますか？'), names, eq, cancel_index=len(names) - 1)
             else:
-                self.say("まいどあり！")
-        self.ask(f"{it.name}を {it.price} G で買いますか？", ["はい", "いいえ"], yes, cancel_index=1)
+                self.say(tr('まいどあり！'))
+        self.ask(tr('{0}を {1} G で買いますか？', it.name, it.price), [tr('はい'), tr('いいえ')], yes, cancel_index=1)
 
     def _open_buy_keep_cursor(self) -> None:
         idx = self.list.index if self.list else 0
@@ -289,7 +291,7 @@ class ShopScene(Overlay):
 
     def _sell_n(self, it: Item, n: int) -> None:
         price = self._sell_price(it) * n
-        what = it.name if n == 1 else f"{it.name}を {n} 個、合計"
+        what = it.name if n == 1 else tr('{0}を {1} 個、合計', it.name, n)
 
         def yes(i: int) -> None:
             if i == 0:
@@ -298,8 +300,8 @@ class ShopScene(Overlay):
                 idx = self.list.index
                 self._open_sell()
                 self.list.index = min(idx, max(0, len(self.list.rows) - 1))
-                self.say(f"{what if n > 1 else it.name + 'を'} {price} G で買い取ったよ。")
-        self.ask(f"{what if n > 1 else it.name + 'を'} {price} G で売りますか？", ["はい", "いいえ"], yes, cancel_index=1)
+                self.say(tr('{0} {1} G で買い取ったよ。', what if n > 1 else tr('{0}を', it.name), price))
+        self.ask(tr('{0} {1} G で売りますか？', what if n > 1 else tr('{0}を', it.name), price), [tr('はい'), tr('いいえ')], yes, cancel_index=1)
 
     # ---- 個数
     def _ask_qty(self, kind: str, it: Item, most: int) -> None:
@@ -335,9 +337,9 @@ class ShopScene(Overlay):
             self.st.gold -= total
             self.st.add_item(it.id, n)
             self._open_buy_keep_cursor()
-            self.say("まいどあり！")
-        what = f"{it.name}を" if n == 1 else f"{it.name}を {n} 個、合計"
-        self.ask(f"{what} {total} G で買いますか？", ["はい", "いいえ"], yes, cancel_index=1)
+            self.say(tr('まいどあり！'))
+        what = tr('{0}を', it.name) if n == 1 else tr('{0}を {1} 個、合計', it.name, n)
+        self.ask(tr('{0} {1} G で買いますか？', what, total), [tr('はい'), tr('いいえ')], yes, cancel_index=1)
 
     # ---- 入力・描画
     def on_ui_key(self, ev: KeyEvent, actions: frozenset[Action]) -> None:
@@ -351,7 +353,7 @@ class ShopScene(Overlay):
         elif Action.DOWN in actions:
             self.list.move(1)
         elif Action.CANCEL in actions:
-            self._top("ほかに何か？")
+            self._top(tr('ほかに何か？'))
         elif Action.OK in actions and not self.list.empty:
             if self.mode == "buy":
                 self._buy(self._goods[self.list.index])
@@ -361,11 +363,11 @@ class ShopScene(Overlay):
     def _item_detail(self, it: Item) -> list[tuple[str, Style]]:
         lines = [(it.desc or "", TEXT)] if it.desc else []
         if it.type == "equipment":
-            stat_txt = "  ".join(f"{STAT_NAMES.get(k, k)}+{v}" for k, v in it.stats.items() if v)
-            lines.append((f"［装備］{stat_txt}", HEAD_ST))
+            stat_txt = "  ".join(f"{tr(STAT_NAMES.get(k, k))}+{v}" for k, v in it.stats.items() if v)
+            lines.append((tr('［装備］{0}', stat_txt), HEAD_ST))
             for m in self.st.party:
                 if not m.can_equip(it.id, self.gd):
-                    lines.append((f"{m.name}：装備できない", DIM_TEXT))
+                    lines.append((tr('{0}：装備できない', m.name), DIM_TEXT))
                     continue
                 cur = m.equip.get(it.slot)
                 parts = []
@@ -373,11 +375,11 @@ class ShopScene(Overlay):
                     now = m.stat(k, self.gd)
                     after = now - (self.gd.items[cur].stats.get(k, 0) if cur else 0) + it.stats.get(k, 0)
                     if after != now:
-                        parts.append(f"{STAT_NAMES[k]} {now}→{after}")
-                mark = "（装備中）" if cur == it.id else ""
-                lines.append((f"{m.name}：{'  '.join(parts) or '変化なし'}{mark}", TEXT))
+                        parts.append(f"{tr(STAT_NAMES[k])} {now}→{after}")
+                mark = tr('（装備中）') if cur == it.id else ""
+                lines.append((tr('{0}：{1}{2}', m.name, '  '.join(parts) or tr('変化なし'), mark), TEXT))
         elif it.use:
-            lines.append((f"［使用］{'戦闘中も使える' if it.use.get('battle') else 'フィールドで使う'}", HEAD_ST))
+            lines.append((tr('［使用］{0}', tr('戦闘中も使える') if it.use.get('battle') else tr('フィールドで使う')), HEAD_ST))
         return lines
 
     def draw_ui(self, buf: Buffer) -> None:
@@ -387,7 +389,7 @@ class ShopScene(Overlay):
             return
         lrect, drect = self.columns(buf, 40)
         buying = self.mode in ("buy", "qty_buy")
-        self.list.draw(buf, lrect, title=f"{self.shop.name}（{'かう' if buying else 'うる'}）")
+        self.list.draw(buf, lrect, title=tr('{0}（{1}）', self.shop.name, tr('かう') if buying else tr('うる')))
         if not self.list.empty:
             it = self._goods[self.list.index] if buying else self._bag[self.list.index][0]
             self.draw_detail(buf, drect, it.name, self._item_detail(it))
@@ -399,12 +401,12 @@ class ShopScene(Overlay):
         unit = it.price if self.qty_kind == "buy" else self._sell_price(it)
         have = self.st.items.get(it.id, 0)
         rect = Rect(lrect.x + 2, min(lrect.bottom - 6, lrect.y + 2 + self.list.index), lrect.w - 4, 6)
-        inner = buf.box(rect, Style.of("bright_white"), title="いくつ？", chars=BOX_SINGLE)
+        inner = buf.box(rect, Style.of("bright_white"), title=tr('いくつ？'), chars=BOX_SINGLE)
         buf.fill(inner, " ")
-        buf.put(inner.x + 1, inner.y, f"{it.name}（持っている数 {have}）", TEXT, clip=inner)
-        buf.put(inner.x + 1, inner.y + 1, f"◀ {self.qty:>2} 個 ▶   合計 {unit * self.qty} G", GOLD_ST, clip=inner)
-        buf.put(inner.x + 1, inner.y + 2, f"↑↓：1 つずつ  ←→：10 ずつ（最大 {self.qty_max}）", DIM_TEXT, clip=inner)
-        buf.put(inner.x + 1, inner.y + 3, "Enter：決定  Esc：やめる", DIM_TEXT, clip=inner)
+        buf.put(inner.x + 1, inner.y, tr('{0}（持っている数 {1}）', it.name, have), TEXT, clip=inner)
+        buf.put(inner.x + 1, inner.y + 1, tr('◀ {0:>2} 個 ▶   合計 {1} G', self.qty, unit * self.qty), GOLD_ST, clip=inner)
+        buf.put(inner.x + 1, inner.y + 2, tr('↑↓：1 つずつ  ←→：10 ずつ（最大 {0}）', self.qty_max), DIM_TEXT, clip=inner)
+        buf.put(inner.x + 1, inner.y + 3, tr('Enter：決定  Esc：やめる'), DIM_TEXT, clip=inner)
 
 
 # ====================================================================== 宿屋
@@ -414,11 +416,11 @@ class InnScene(Overlay):
         self.price = price
         if self._all_rested():
             # 全員 HP・MP 満タンで状態異常もない → 泊まっても意味がないので断る（お金も取らない）
-            self.say(["旅人の宿へようこそ。", "……皆さん、とてもお元気そうですね。今はお休みにならなくても大丈夫ですよ。"],
+            self.say([tr('旅人の宿へようこそ。'), tr('……皆さん、とてもお元気そうですね。今はお休みにならなくても大丈夫ですよ。')],
                      then=self.close)
             return
-        self.ask(f"旅人の宿へようこそ。一晩 {price} G です。お泊まりになりますか？",
-                 ["泊まる", "やめる"], self._done, cancel_index=1)
+        self.ask(tr('旅人の宿へようこそ。一晩 {0} G です。お泊まりになりますか？', price),
+                 [tr('泊まる'), tr('やめる')], self._done, cancel_index=1)
 
     def _all_rested(self) -> bool:
         gd = self.gd
@@ -427,10 +429,10 @@ class InnScene(Overlay):
 
     def _done(self, i: int) -> None:
         if i != 0:
-            self.say("またお越しください。", then=self.close)
+            self.say(tr('またお越しください。'), then=self.close)
             return
         if self.st.gold < self.price:
-            self.say("お金が足りないようですね…。", then=self.close)
+            self.say(tr('お金が足りないようですね…。'), then=self.close)
             return
         self.st.gold -= self.price
 
@@ -440,8 +442,8 @@ class InnScene(Overlay):
                 m.fill_sp(self.gd)
                 m.status.clear()
             self.effect("fade_in", 600, lambda: self.say(
-                ["おはようございます。", "ゆっくり休んで、体力と魔力が回復した！"], then=self.close))
-        self.say("ごゆっくりどうぞ。", then=lambda: self.effect("fade_out", 600, rest))
+                [tr('おはようございます。'), tr('ゆっくり休んで、体力と魔力が回復した！')], then=self.close))
+        self.say(tr('ごゆっくりどうぞ。'), then=lambda: self.effect("fade_out", 600, rest))
 
     def draw_ui(self, buf: Buffer) -> None:
         self.draw_gold(buf)
@@ -454,12 +456,12 @@ class GuildScene(Overlay):
         self.mode = "top"
         self.list: Optional[ListWindow] = None
         self._quests: list[Quest] = []
-        self._top("冒険者協会へようこそ。ご用件は？")
+        self._top(tr('冒険者協会へようこそ。ご用件は？'))
 
     def _top(self, text: str) -> None:
         self.mode = "top"
         self.list = None
-        self.ask(text, ["依頼を受ける", "依頼を報告する", "受けている依頼", "やめる"], self._top_done, cancel_index=3)
+        self.ask(text, [tr('依頼を受ける'), tr('依頼を報告する'), tr('受けている依頼'), tr('やめる')], self._top_done, cancel_index=3)
 
     def _top_done(self, i: int) -> None:
         if i == 0:
@@ -467,16 +469,16 @@ class GuildScene(Overlay):
             self._quests = Q.available(self.st, self.gd, self.field._cond)
             self.list = ListWindow([(f"[{q.rank or '-'}] {q.name}", Q.reward_text(self.gd, q), True) for q in self._quests])
             if self.list.empty:
-                self._top("いまお願いできる依頼はありません。ほかにご用件は？")
+                self._top(tr('いまお願いできる依頼はありません。ほかにご用件は？'))
         elif i in (1, 2):
             self.mode = "report" if i == 1 else "view"
             self._quests = Q.active(self.st, self.gd)
-            self.list = ListWindow([(q.name, "達成！" if Q.goal_met(self.st, self.gd, q) else "", True)
+            self.list = ListWindow([(q.name, tr('達成！') if Q.goal_met(self.st, self.gd, q) else "", True)
                                     for q in self._quests])
             if self.list.empty:
-                self._top("受けている依頼はありません。ほかにご用件は？")
+                self._top(tr('受けている依頼はありません。ほかにご用件は？'))
         else:
-            self.say("お気をつけて。", then=self.close)
+            self.say(tr('お気をつけて。'), then=self.close)
 
     def on_ui_key(self, ev: KeyEvent, actions: frozenset[Action]) -> None:
         if self.list is None:
@@ -486,7 +488,7 @@ class GuildScene(Overlay):
         elif Action.DOWN in actions:
             self.list.move(1)
         elif Action.CANCEL in actions:
-            self._top("ほかにご用件は？")
+            self._top(tr('ほかにご用件は？'))
         elif Action.OK in actions and not self.list.empty:
             q = self._quests[self.list.index]
             if self.mode == "accept":
@@ -498,35 +500,35 @@ class GuildScene(Overlay):
         def yes(i: int) -> None:
             if i == 0:
                 Q.accept(self.st, q)
-                self._top(f"「{q.name}」をお願いします。終わったら報告に来てくださいね。")
-        self.ask(f"「{q.name}」を受けますか？", ["受ける", "やめる"], yes, cancel_index=1)
+                self._top(tr('「{0}」をお願いします。終わったら報告に来てくださいね。', q.name))
+        self.ask(tr('「{0}」を受けますか？', q.name), [tr('受ける'), tr('やめる')], yes, cancel_index=1)
 
     def _report(self, q: Quest) -> None:
         if not Q.goal_met(self.st, self.gd, q):
-            self.say(f"まだ達成していないようです。（{Q.goal_text(self.st, self.gd, q)}）")
+            self.say(tr('まだ達成していないようです。（{0}）', Q.goal_text(self.st, self.gd, q)))
             return
         res = Q.complete(self.st, self.gd, q)
         if res.label:
             self.field.pending_labels.append(res.label)
-        self.say(res.messages, then=lambda: self._top("お疲れさまでした。ほかにご用件は？"))
+        self.say(res.messages, then=lambda: self._top(tr('お疲れさまでした。ほかにご用件は？')))
 
     def draw_ui(self, buf: Buffer) -> None:
         a = self.area(buf)
         self.draw_gold(buf)
         if self.list is None:
             return
-        title = {"accept": "依頼掲示板", "report": "依頼の報告", "view": "受けている依頼"}[self.mode]
+        title = {"accept": tr('依頼掲示板'), "report": tr('依頼の報告'), "view": tr('受けている依頼')}[self.mode]
         lrect, drect = self.columns(buf, 48, 12)
         self.list.draw(buf, lrect, title=title)
         if self.list.empty:
             return
         q = self._quests[self.list.index]
         lines = [(q.desc, TEXT)] if q.desc else []
-        lines += [(f"目標：{Q.goal_text(self.st, self.gd, q)}", HEAD_ST),
-                  (f"報酬：{Q.reward_text(self.gd, q)}", GOLD_ST)]
+        lines += [(tr('目標：{0}', Q.goal_text(self.st, self.gd, q)), HEAD_ST),
+                  (tr('報酬：{0}', Q.reward_text(self.gd, q)), GOLD_ST)]
         if q.repeatable:
-            lines.append(("（何度でも受けられる）", DIM_TEXT))
-        self.draw_detail(buf, drect, f"ランク {q.rank or '-'}", lines)
+            lines.append((tr('（何度でも受けられる）'), DIM_TEXT))
+        self.draw_detail(buf, drect, tr('ランク {0}', q.rank or '-'), lines)
 
 
 # ====================================================================== 仲間選択
@@ -540,9 +542,9 @@ class RecruitScene(Overlay):
         self.list = ListWindow([])
         self._refresh()
         if self.left <= 0:
-            self.say("（仲間にできる人がいません）", then=self.close)
+            self.say(tr('（仲間にできる人がいません）'), then=self.close)
         else:
-            self.say(f"一緒に旅をする仲間を {self.left} 人選んでください。")
+            self.say(tr('一緒に旅をする仲間を {0} 人選んでください。', self.left))
 
     def _join_lv(self, c) -> int:
         """加入するときのレベル（lv= 指定があればそこまで上がる）。"""
@@ -563,7 +565,7 @@ class RecruitScene(Overlay):
         elif Action.DOWN in actions:
             self.list.move(1)
         elif Action.CANCEL in actions:
-            self.say(f"あと {self.left} 人選んでください。")
+            self.say(tr('あと {0} 人選んでください。', self.left))
         elif Action.OK in actions and not self.list.empty:
             cid = self.cands[self.list.index]
             c = self.gd.characters[cid]
@@ -579,15 +581,15 @@ class RecruitScene(Overlay):
                 self.left -= 1
                 self._refresh()
                 if self.left <= 0 or not self.cands:
-                    self.say(f"{c.name}が仲間になった！", then=self.close)
+                    self.say(tr('{0}が仲間になった！', c.name), then=self.close)
                 else:
-                    self.say([f"{c.name}が仲間になった！", f"あと {self.left} 人選んでください。"])
-            self.ask(f"{c.name}を仲間にしますか？", ["はい", "いいえ"], yes, cancel_index=1)
+                    self.say([tr('{0}が仲間になった！', c.name), tr('あと {0} 人選んでください。', self.left)])
+            self.ask(tr('{0}を仲間にしますか？', c.name), [tr('はい'), tr('いいえ')], yes, cancel_index=1)
 
     def draw_ui(self, buf: Buffer) -> None:
         a = self.area(buf)
         lrect, drect = self.columns(buf, 34, 10)
-        self.list.draw(buf, lrect, title=f"仲間を選ぶ（あと {self.left} 人）")
+        self.list.draw(buf, lrect, title=tr('仲間を選ぶ（あと {0} 人）', self.left))
         if self.list.empty:
             return
         c = self.gd.characters[self.cands[self.list.index]]
@@ -595,11 +597,11 @@ class RecruitScene(Overlay):
         s = c.stats
         lines = [
             (f"{job.name if job else c.job}  Lv {self._join_lv(c)}"
-             + ("（能力は Lv {} のとき）".format(c.lv) if self._join_lv(c) != c.lv else ""), HEAD_ST),
+             + (tr('（能力は Lv {} のとき）').format(c.lv) if self._join_lv(c) != c.lv else ""), HEAD_ST),
             (f"HP {s.get('hp', 0):>3}  MP {s.get('mp', 0):>3}", TEXT),
-            (f"攻撃 {s.get('atk', 0):>3}  防御 {s.get('def', 0):>3}", TEXT),
-            (f"魔力 {s.get('mag', 0):>3}  素早 {s.get('agi', 0):>3}", TEXT),
+            (tr('攻撃 {0:>3}  防御 {1:>3}', s.get('atk', 0), s.get('def', 0)), TEXT),
+            (tr('魔力 {0:>3}  素早 {1:>3}', s.get('mag', 0), s.get('agi', 0)), TEXT),
             ("", TEXT),
-            (f"「{c.recruit_text}」" if c.recruit_text else "", Style.of("bright_white")),
+            (tr('「{0}」', c.recruit_text) if c.recruit_text else "", Style.of("bright_white")),
         ]
         self.draw_detail(buf, drect, c.name, lines)

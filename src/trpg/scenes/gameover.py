@@ -1,6 +1,8 @@
 """全滅したときの画面（要件 F-65：セーブから / タイトルへ / 選択、はシナリオで設定）。"""
 from __future__ import annotations
 
+from ..i18n import tr
+
 from ..app import Scene
 from ..term import Action, Buffer, KeyEvent, Style
 from ..ui.widgets import CURSOR, DIM_TEXT, TEXT
@@ -16,11 +18,11 @@ class GameOverScene(Scene):
         self.index = 0
         self.notice = ""
         if self.mode == "retry_from_save":
-            self.options = ["セーブからやり直す"]
+            self.options = [tr('セーブからやり直す')]
         elif self.mode == "title":
-            self.options = ["タイトルへもどる"]
+            self.options = [tr('タイトルへもどる')]
         else:
-            self.options = ["セーブからやり直す", "タイトルへもどる"]
+            self.options = [tr('セーブからやり直す'), tr('タイトルへもどる')]
 
     def update(self, dt: float) -> None:
         self.t += dt
@@ -33,11 +35,11 @@ class GameOverScene(Scene):
         elif Action.DOWN in actions:
             self.index = (self.index + 1) % len(self.options)
         elif Action.OK in actions:
-            if self.options[self.index] == "セーブからやり直す":
+            if self.options[self.index] == tr('セーブからやり直す'):
                 if self._retry():
                     return
                 if not self.notice:
-                    self.notice = "セーブデータがありません。Enter でタイトルへ"
+                    self.notice = tr('セーブデータがありません。Enter でタイトルへ')
                     return
             self._to_title()
 
@@ -67,7 +69,7 @@ class GameOverScene(Scene):
         level = min(1.0, self.t / FADE_IN)
         st = Style.of("bright_red", bold=True) if level >= 0.6 else Style.of("red")
         if level > 0.2:
-            buf.put_center(y, "全滅してしまった……", st)
+            buf.put_center(y, tr('全滅してしまった……'), st)
         if self.t < FADE_IN:
             return
         for i, opt in enumerate(self.options):

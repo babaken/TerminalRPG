@@ -1,6 +1,8 @@
 """経験値とレベルアップ（基本設計 14 章）。"""
 from __future__ import annotations
 
+from ..i18n import tr
+
 import random
 from typing import Optional
 
@@ -44,10 +46,10 @@ def level_up(m: Member, gd: GameData, rng: Optional[random.Random] = None) -> li
             elif k == "mp":
                 m.mp += inc
             gains.append((k, inc))
-    msgs = [f"{m.name}はレベル {m.lv} に上がった！"]
+    msgs = [tr('{0}はレベル {1} に上がった！', m.name, m.lv)]
     for sid in skills_of(m, gd):
         if sid not in before:
-            msgs.append(f"{m.name}は{gd.skills[sid].name}を覚えた！")
+            msgs.append(tr('{0}は{1}を覚えた！', m.name, gd.skills[sid].name))
     return msgs
 
 
@@ -83,7 +85,7 @@ def gain_exp(st: GameState, gd: GameData, total: int, rng: Optional[random.Rando
     if not alive or total <= 0:
         return []
     share = max(1, total // len(alive))
-    msgs = [f"それぞれ {share} の経験値を得た。" if len(alive) > 1 else f"{alive[0].name}は {share} の経験値を得た。"]
+    msgs = [tr('それぞれ {0} の経験値を得た。', share) if len(alive) > 1 else tr('{0}は {1} の経験値を得た。', alive[0].name, share)]
     for m in alive:
         m.exp += share
         while m.lv < MAX_LV and m.exp >= exp_for_next(m.lv):

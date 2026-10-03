@@ -1,6 +1,8 @@
 """クエスト（冒険者協会の依頼）の判定と達成処理（基本設計 9 章）。"""
 from __future__ import annotations
 
+from ..i18n import tr
+
 from dataclasses import dataclass, field
 from typing import Callable, Optional
 
@@ -60,18 +62,18 @@ def goal_text(st: GameState, gd: GameData, q: Quest) -> str:
     t = g.get("type")
     if t == "deliver":
         it = gd.items.get(g.get("item", ""))
-        return f"{it.name if it else g.get('item')} を {need} 個納品（所持 {cur}）"
+        return tr('{0} を {1} 個納品（所持 {2}）', it.name if it else g.get('item'), need, cur)
     if t == "defeat":
         gid = g.get("group", "")
         name = gd.enemies[gid].name if gid in gd.enemies else gid
         if gid in gd.groups:
             names = {gd.enemies[e].name for e in gd.groups[gid].members if e in gd.enemies}
-            name = "・".join(sorted(names))
-        return f"{name} を {need} 体討伐（{cur}/{need}）"
+            name = tr('・').join(sorted(names))
+        return tr('{0} を {1} 体討伐（{2}/{3}）', name, need, cur, need)
     if t == "reach":
         mp = gd.maps.get(g.get("map", ""))
-        return f"{mp.name if mp else g.get('map')} へ行く（{'済' if cur else '未'}）"
-    return "依頼をこなす（" + ("済" if cur else "未") + "）"
+        return tr('{0} へ行く（{1}）', mp.name if mp else g.get('map'), tr('済') if cur else tr('未'))
+    return tr('依頼をこなす（') + (tr('済') if cur else tr('未')) + tr('）')
 
 
 def reward_text(gd: GameData, q: Quest) -> str:
@@ -80,11 +82,11 @@ def reward_text(gd: GameData, q: Quest) -> str:
     if r.get("gold"):
         parts.append(f"{r['gold']} G")
     if r.get("exp"):
-        parts.append(f"経験値 {r['exp']}")
+        parts.append(tr('経験値 {0}', r['exp']))
     for iid in r.get("items", []):
         it = gd.items.get(iid)
         parts.append(it.name if it else iid)
-    return "、".join(parts) or "なし"
+    return tr('、').join(parts) or tr('なし')
 
 
 @dataclass
@@ -102,14 +104,14 @@ def complete(st: GameState, gd: GameData, q: Quest) -> Completion:
     st.quests[q.id] = "done"
     st.quest_progress.pop(q.id, None)
     r = q.reward
-    res.messages.append(f"依頼「{q.name}」を達成した！")
+    res.messages.append(tr('依頼「{0}」を達成した！', q.name))
     if r.get("gold"):
         st.gold += r["gold"]
-        res.messages.append(f"報酬として {r['gold']} G を受け取った。")
+        res.messages.append(tr('報酬として {0} G を受け取った。', r['gold']))
     for iid in r.get("items", []):
         st.add_item(iid)
         it = gd.items.get(iid)
-        res.messages.append(f"{it.name if it else iid}を受け取った。")
+        res.messages.append(tr('{0}を受け取った。', it.name if it else iid))
     if r.get("exp"):
         from .growth import gain_exp
         res.messages += gain_exp(st, gd, r["exp"])

@@ -14,6 +14,8 @@
 """
 from __future__ import annotations
 
+from ..i18n import tr
+
 import random
 from dataclasses import dataclass, field
 from typing import Any, Iterator, Optional
@@ -301,9 +303,9 @@ class Battle:
         for b in self.enemies:
             names[b.enemy.name] = names.get(b.enemy.name, 0) + 1
         for n, c in names.items():
-            yield ("msg", f"{n}が {c} 匹あらわれた！" if c > 1 else f"{n}があらわれた！")
+            yield ("msg", tr('{0}が {1} 匹あらわれた！', n, c) if c > 1 else tr('{0}があらわれた！', n))
         for h in self.helpers:
-            yield ("msg", f"{h.name}がいっしょに戦う！")
+            yield ("msg", tr('{0}がいっしょに戦う！', h.name))
 
     def enemy_command(self, e: Battler) -> Command:
         acts = e.enemy.actions if e.enemy.ai != "attack_only" else []
@@ -386,16 +388,16 @@ class Battle:
         # 逃げる：行動順の前に判定（失敗するとこのターン味方は行動できない）
         if any(c.kind == "escape" for c in cmds.values()):
             yield ("clear", None)
-            yield ("msg", f"{self.party[0].name}たちは逃げ出した！")
+            yield ("msg", tr('{0}たちは逃げ出した！', self.party[0].name))
             if not self.can_escape:
-                yield ("msg", "しかし、逃げられない！")
+                yield ("msg", tr('しかし、逃げられない！'))
                 cmds = {}
             elif self.rng.random() < self.escape_rate():
-                yield ("msg", "うまく逃げ切れた！")
+                yield ("msg", tr('うまく逃げ切れた！'))
                 self.result = "escape"
                 return
             else:
-                yield ("msg", "しかし、回りこまれてしまった！")
+                yield ("msg", tr('しかし、回りこまれてしまった！'))
                 cmds = {}
         order: list[tuple[float, Battler, Command]] = []
         for b, c in cmds.items():
@@ -423,7 +425,7 @@ class Battle:
                 yield ("clear", None)
                 sname = next((self.gd.statuses[s].name for s in actor.status
                               if self.gd.statuses.get(s) and self.gd.statuses[s].skip_turn), "")
-                yield ("msg", f"{actor.name}は{sname}で動けない！")
+                yield ("msg", tr('{0}は{1}で動けない！', actor.name, sname))
                 continue
             yield ("clear", None)
             yield from self._act(actor, cmd)
@@ -453,30 +455,30 @@ class Battle:
         t.hp -= dmg
         yield ("hit", t)
         if t.side == "enemy":
-            yield ("msg", f"{t.name}に {dmg} のダメージ！")
+            yield ("msg", tr('{0}に {1} のダメージ！', t.name, dmg))
         else:
-            yield ("msg", f"{t.name}は {dmg} のダメージを受けた！")
+            yield ("msg", tr('{0}は {1} のダメージを受けた！', t.name, dmg))
         if t.hp <= 0:
             if t.side == "enemy":
                 self.defeated.append(t.enemy.id)
-                yield ("msg", f"{t.name}をたおした！")
+                yield ("msg", tr('{0}をたおした！', t.name))
             else:
                 t.status.clear()
-                yield ("msg", f"{t.name}はたおれてしまった…")
+                yield ("msg", tr('{0}はたおれてしまった…', t.name))
 
     def _act(self, a: Battler, c: Command) -> Iterator[Event]:
         if c.kind == "attack":
-            yield ("msg", f"{a.name}の攻撃！")
+            yield ("msg", tr('{0}の攻撃！', a.name))
             for t in self._targets(c.target, a, True)[:1]:
                 dmg, crit, miss = self.physical_damage(a, t)
                 if miss:
-                    yield ("msg", f"ミス！　{t.name}はひらりと身をかわした。")
+                    yield ("msg", tr('ミス！\u3000{0}はひらりと身をかわした。', t.name))
                     continue
                 if crit:
-                    yield ("msg", "会心の一撃！")
+                    yield ("msg", tr('会心の一撃！'))
                 yield from self._damage(t, dmg)
         elif c.kind == "defend":
-            yield ("msg", f"{a.name}は身を守っている。")
+            yield ("msg", tr('{0}は身を守っている。', a.name))
         elif c.kind == "skill":
             yield from self._skill(a, c)
         elif c.kind == "item":
@@ -489,29 +491,31 @@ class Battle:
         if sk is None:
             return
         if a.mp < sk.mp or (a.member is not None and a.sp < sk.sp):
-            yield ("msg", f"{a.name}は{sk.name}をつかおうとした！")
-            yield ("msg", f"しかし {'MP' if a.mp < sk.mp else 'SP'} が足りない！")
+            yield ("msg", tr('{0}は{1}をつかおうとした！', a.name, sk.name))
+            yield ("msg", tr('しかし {0} が足りない！', 'MP' if a.mp < sk.mp else 'SP'))
             return
         a.mp -= sk.mp
         if a.member is not None:
             a.sp -= sk.sp
-        verb = "をとなえた！" if sk.kind in ("magic", "heal", "buff", "debuff") else "！"
-        yield ("msg", f"{a.name}の{sk.name}{verb}" if verb == "！" else f"{a.name}は{sk.name}{verb}")
+        if sk.kind in ("magic", "heal", "buff", "debuff"):
+            yield ("msg", tr('{0}は{1}をとなえた！', a.name, sk.name))
+        else:
+            yield ("msg", tr('{0}の{1}！', a.name, sk.name))
         if sk.kind == "tame":
             yield from self._tame(a, c)
             return
         if sk.kind == "escape":
             if self.can_escape:
                 self.result = "escape"
-                yield ("msg", "うまく逃げ切れた！")
+                yield ("msg", tr('うまく逃げ切れた！'))
             else:
-                yield ("msg", "しかし、逃げられない！")
+                yield ("msg", tr('しかし、逃げられない！'))
             return
         hostile = sk.target in ("enemy_one", "enemy_all")
         tgt = "all" if sk.target in ("enemy_all", "ally_all") else (a if sk.target == "self" else c.target)
         targets = self._targets(tgt, a, hostile) if sk.target != "self" else [a]
         if not targets:
-            yield ("msg", "しかし、相手がいなかった。")
+            yield ("msg", tr('しかし、相手がいなかった。'))
             return
         if sk.anim:
             yield ("anim", (sk.anim, targets))
@@ -519,63 +523,63 @@ class Battle:
             if sk.kind == "physical":
                 dmg, _, miss = self.physical_damage(a, t, sk.power)
                 if miss:
-                    yield ("msg", f"ミス！　{t.name}はひらりと身をかわした。")
+                    yield ("msg", tr('ミス！\u3000{0}はひらりと身をかわした。', t.name))
                     continue
                 yield from self._damage(t, dmg)
             elif sk.kind == "magic":
                 rate = self._elem_rate(t, sk.element)
                 yield from self._damage(t, self.magic_damage(a, t, sk))
                 if rate > 1:
-                    yield ("msg", "効果はばつぐんだ！")
+                    yield ("msg", tr('効果はばつぐんだ！'))
                 elif rate < 1:
-                    yield ("msg", "あまり効いていないようだ…")
+                    yield ("msg", tr('あまり効いていないようだ…'))
             elif sk.kind == "heal":
                 yield from self._heal(t, self.heal_amount(a, sk.power))
             elif sk.kind in ("buff", "debuff"):
                 key = "atk" if sk.kind == "buff" else "def"
                 amount = max(1, sk.power or 5) * (1 if sk.kind == "buff" else -1)
                 t.mods[key] = [amount, 3]
-                word = "攻撃力が上がった！" if sk.kind == "buff" else "守備力が下がった！"
-                yield ("msg", f"{t.name}の{word}")
+                word = tr('攻撃力が上がった！') if sk.kind == "buff" else tr('守備力が下がった！')
+                yield ("msg", tr('{0}の{1}', t.name, word))
             if sk.status and t.alive:
                 yield from self._inflict(t, sk.status, sk.status_rate, verbose=sk.kind == "status")
 
     def _heal(self, t: Battler, amount: int) -> Iterator[Event]:
         if not t.alive:
-            yield ("msg", f"しかし、{t.name}はたおれている。")
+            yield ("msg", tr('しかし、{0}はたおれている。', t.name))
             return
         before = t.hp
         t.hp += amount
         yield ("heal", t)
-        yield ("msg", f"{t.name}の HP が {t.hp - before} 回復した！")
+        yield ("msg", tr('{0}の HP が {1} 回復した！', t.name, t.hp - before))
 
     def _inflict(self, t: Battler, sid: str, rate: float, verbose: bool = True) -> Iterator[Event]:
         """状態異常を与える。verbose=False（攻撃のおまけ効果）なら失敗しても何も言わない。"""
         sd = self.gd.statuses.get(sid)
         if sd is None or sid in t.status:
             if verbose and sd is not None:
-                yield ("msg", f"{t.name}はすでに{sd.name}になっている。")
+                yield ("msg", tr('{0}はすでに{1}になっている。', t.name, sd.name))
             return
         if t.enemy is not None and sid in t.enemy.immune_status:
             if verbose:
-                yield ("msg", f"{t.name}には効かなかった！")
+                yield ("msg", tr('{0}には効かなかった！', t.name))
             return
         if self.rng.random() >= rate:
             if verbose:
-                yield ("msg", f"しかし、{t.name}には効かなかった。")
+                yield ("msg", tr('しかし、{0}には効かなかった。', t.name))
             return
         t.status[sid] = self.rng.randint(*sd.turns)
-        yield ("msg", f"{t.name}は{sd.name}になった！")
+        yield ("msg", tr('{0}は{1}になった！', t.name, sd.name))
 
     def _item(self, a: Battler, c: Command) -> Iterator[Event]:
         it = self.gd.items.get(c.item)
         if it is None or self.st.items.get(it.id, 0) <= 0:
-            yield ("msg", f"{a.name}は道具をつかおうとしたが、もう持っていなかった。")
+            yield ("msg", tr('{0}は道具をつかおうとしたが、もう持っていなかった。', a.name))
             return
         use = it.use
         if use.get("consume", True):
             self.st.remove_item(it.id)
-        yield ("msg", f"{a.name}は{it.name}をつかった！")
+        yield ("msg", tr('{0}は{1}をつかった！', a.name, it.name))
         hostile = use.get("target", "ally_one").startswith("enemy")
         tgt = "all" if use.get("target", "").endswith("_all") else c.target
         for t in self._targets(tgt, a, hostile) if tgt != "self" else [a]:
@@ -585,20 +589,20 @@ class Battle:
             elif eff == "heal_mp":
                 before = t.mp
                 t.mp += int(use.get("power", 0))
-                yield ("msg", f"{t.name}の MP が {t.mp - before} 回復した！")
+                yield ("msg", tr('{0}の MP が {1} 回復した！', t.name, t.mp - before))
             elif eff == "cure":
                 sid = use.get("status", "")
                 if sid in t.status:
                     del t.status[sid]
-                    yield ("msg", f"{t.name}の{self.gd.statuses[sid].name}が治った！")
+                    yield ("msg", tr('{0}の{1}が治った！', t.name, self.gd.statuses[sid].name))
                 else:
-                    yield ("msg", "しかし、何も起こらなかった。")
+                    yield ("msg", tr('しかし、何も起こらなかった。'))
             elif eff == "revive":
                 if t.hp <= 0 and not t.gone:
                     t.hp = max(1, t.max_hp * max(1, int(use.get("power", 50))) // 100)
-                    yield ("msg", f"{t.name}が生き返った！")
+                    yield ("msg", tr('{0}が生き返った！', t.name))
                 else:
-                    yield ("msg", "しかし、何も起こらなかった。")
+                    yield ("msg", tr('しかし、何も起こらなかった。'))
             elif eff == "skill" and use.get("skill") in self.gd.skills:
                 yield from self._skill(a, Command("skill", target=t, skill=use["skill"]))
                 break
@@ -607,16 +611,16 @@ class Battle:
         t = self._retarget(a, c.target, True)
         if not isinstance(t, Battler):
             return
-        yield ("msg", f"{a.name}は{t.name}に手をさしのべた…")
+        yield ("msg", tr('{0}は{1}に手をさしのべた…', a.name, t.name))
         if self.rng.random() < self.tame_rate(t):
             t.gone = True
             old = self.gd.enemies.get(self.st.pet) if self.st.pet else None
             self.st.pet = t.enemy.id
-            yield ("msg", f"{t.name}はなついた！　仲間になった！")
+            yield ("msg", tr('{0}はなついた！\u3000仲間になった！', t.name))
             if old is not None:
-                yield ("msg", f"いままでの{old.name}は、野に帰っていった。")
+                yield ("msg", tr('いままでの{0}は、野に帰っていった。', old.name))
         else:
-            yield ("msg", f"{t.name}はそっぽを向いた。")
+            yield ("msg", tr('{0}はそっぽを向いた。', t.name))
 
     def _end_of_round(self) -> Iterator[Event]:
         cleared = False
@@ -638,7 +642,7 @@ class Battle:
                         yield ("clear", None)
                         cleared = True
                     dmg = max(1, int(b.max_hp * -rate))
-                    yield ("msg", f"{b.name}は{sd.name}で苦しんでいる！")
+                    yield ("msg", tr('{0}は{1}で苦しんでいる！', b.name, sd.name))
                     yield from self._damage(b, dmg)
                     if sid not in b.status:          # 倒れて状態異常が消えた
                         break
@@ -648,7 +652,7 @@ class Battle:
                     if not cleared:
                         yield ("clear", None)
                         cleared = True
-                    yield ("msg", f"{b.name}の{sd.name}が治った。")
+                    yield ("msg", tr('{0}の{1}が治った。', b.name, sd.name))
             for key in list(b.mods):
                 b.mods[key][1] -= 1
                 if b.mods[key][1] <= 0:
@@ -663,7 +667,7 @@ class Battle:
         if self.result != "win":
             return
         yield ("clear", None)
-        yield ("msg", "魔物たちをやっつけた！")
+        yield ("msg", tr('魔物たちをやっつけた！'))
         exp = gold = 0
         for eid in self.defeated:
             e = self.gd.enemies[eid]
@@ -671,12 +675,12 @@ class Battle:
             gold += e.gold
         if gold:
             self.st.gold += gold
-            yield ("msg", f"{gold} G を手に入れた。")
+            yield ("msg", tr('{0} G を手に入れた。', gold))
         for eid in self.defeated:
             for iid, rate in self.gd.enemies[eid].drops:
                 if iid in self.gd.items and self.rng.random() < rate:
                     self.st.add_item(iid)
-                    yield ("msg", f"{self.gd.enemies[eid].name}は{self.gd.items[iid].name}を落としていった！")
+                    yield ("msg", tr('{0}は{1}を落としていった！', self.gd.enemies[eid].name, self.gd.items[iid].name))
         Q.on_defeat(self.st, self.gd, self.defeated, self.group_id)
         for m in gain_exp(self.st, self.gd, exp, self.rng):
             yield ("msg", m)

@@ -59,6 +59,8 @@ def main(argv: list[str] | None = None) -> int:
                    help="曖昧幅文字（─ │ ■ など）の幅。表示が崩れる場合は 2 を試す")
     p.add_argument("--no-color", action="store_true", help="色を使わない")
     p.add_argument("--fps", type=int, default=30)
+    p.add_argument("--lang", choices=("ja", "en"),
+                   help="UI の言語（ja / en）。省略時はタイトル画面で選んだ言語（初めは日本語）")
     p.add_argument("--keylog", action="store_true",
                    help="不具合調査用: 受け取ったキーと画面の状態を trpg_debug.log に記録する")
     args = p.parse_args(argv)
@@ -69,6 +71,9 @@ def main(argv: list[str] | None = None) -> int:
         path = debuglog.enable()
         debuglog.log(f"trpg {__version__} python {platform.python_version()} {platform.platform()} args={argv or sys.argv[1:]}")
         print(f"キーログを記録します: {path}")
+
+    from .i18n import load_lang, set_lang
+    set_lang(args.lang or load_lang() or "ja")
 
     if args.check:
         return cmd_check(args.check)

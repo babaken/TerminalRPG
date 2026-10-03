@@ -34,6 +34,11 @@ GitHub Actions（`.github/workflows/test.yml`）が、プッシュとプルリ�
 - マイルストーンごとに `v0.x.0` のタグを付け、GitHub のリリースに FirstQuest の zip（パッケージツールで作成）を添付する。
 - 計画と進み具合は [開発計画](development_plan.md)。
 
+## UI の文を足すとき
+
+画面に出す文は `tr("…")` で包み、英語の訳を `src/trpg/i18n/en.py` に足します（日本語の文がそのまま見出し）。
+名前や数は `tr("{0}の攻撃！", name)` のように `{0}` `{1}` で渡します。比べるときは訳す前の日本語の見出しで比べます（訳した文で比べると英語のとき一致しない）。
+
 ## ソースの構成（`src/trpg/`）
 
 | 場所 | 役割 |
@@ -51,6 +56,7 @@ GitHub Actions（`.github/workflows/test.yml`）が、プッシュとプルリ�
 | `ui/` | 会話窓・選択肢窓（`widgets.py`）、本文の制御コード（`markup.py`）、AA の色（`aa.py`）、MP / SP の表示（`points.py`） |
 | `scenes/` | タイトル・フィールド・施設（ショップ・宿屋・協会・仲間選択）・メニュー・戦闘・全滅・セーブ／ロード・エンディング |
 | `save/` | セーブの形式・暗号化（AES-256-GCM）・スロット管理 |
+| `i18n/` | UI の言語：`tr("日本語の文", 引数…)` で今の言語の文にする。英語の訳は `en.py`（訳の抜けは `tests/test_i18n.py` が検出）。設定は `settings.json` |
 | `tools/` | パッケージツール（`pack.py`）、AA 変換（`aa_convert.py`）、マップエディタ（`map_editor.py`・`mapfile.py`・`objform.py`） |
 
 設計の詳細と経緯は [基本設計書](basic_design.md)、要件は [要件定義書](requirements.md)。

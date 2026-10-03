@@ -11,6 +11,8 @@
 """
 from __future__ import annotations
 
+from ..i18n import tr
+
 import json
 import os
 import time
@@ -111,7 +113,7 @@ def _aead(package_id: str):
         from cryptography.hazmat.primitives.ciphers.aead import AESGCM
         from cryptography.hazmat.primitives.kdf.hkdf import HKDF
     except ImportError:
-        raise SaveError("セーブ機能には cryptography が必要です（pip install cryptography）") from None
+        raise SaveError(tr('セーブ機能には cryptography が必要です（pip install cryptography）')) from None
     key = HKDF(algorithm=hashes.SHA256(), length=32, salt=package_id.encode("utf-8"),
                info=b"trpg-save-v1").derive(_SECRET)
     return AESGCM(key)
@@ -127,22 +129,22 @@ def encode(payload: dict, package_id: str) -> bytes:
 def decode(data: bytes, package_id: str) -> dict:
     head = len(MAGIC) + 1 + NONCE_LEN
     if len(data) < head + 16 or not data.startswith(MAGIC):
-        raise SaveError("セーブデータではありません")
+        raise SaveError(tr('セーブデータではありません'))
     if data[len(MAGIC)] != FORMAT:
-        raise SaveError("このエンジンでは読めない形式のセーブデータです")
+        raise SaveError(tr('このエンジンでは読めない形式のセーブデータです'))
     nonce = data[len(MAGIC) + 1:head]
     try:
         from cryptography.exceptions import InvalidTag
     except ImportError:
-        raise SaveError("セーブ機能には cryptography が必要です（pip install cryptography）") from None
+        raise SaveError(tr('セーブ機能には cryptography が必要です（pip install cryptography）')) from None
     try:
         plain = _aead(package_id).decrypt(nonce, data[head:], package_id.encode("utf-8"))
     except InvalidTag:
-        raise SaveError("セーブデータが壊れているか、別のシナリオのものです") from None
+        raise SaveError(tr('セーブデータが壊れているか、別のシナリオのものです')) from None
     try:
         return json.loads(zlib.decompress(plain).decode("utf-8"))
     except (zlib.error, ValueError):
-        raise SaveError("セーブデータが壊れています") from None
+        raise SaveError(tr('セーブデータが壊れています')) from None
 
 
 # ================================================================ スロット
@@ -162,11 +164,11 @@ class SlotInfo:
 
     def label(self) -> str:
         if not self.exists:
-            return "（空き）"
+            return tr('（空き）')
         if not self.ok:
-            return f"（読み込めません：{self.error}）"
+            return tr('（読み込めません：{0}）', self.error)
         t = int(self.playtime)
-        ch = f"第{self.chapter}章" if self.chapter else ""
+        ch = tr('第{0}章', self.chapter) if self.chapter else ""
         when = time.strftime("%m/%d %H:%M", time.localtime(self.saved_at))
         return f"{self.hero} Lv{self.lv}  {ch} {self.map_name}  {t // 3600:02}:{t // 60 % 60:02}  [{when}]"
 
@@ -200,19 +202,19 @@ class SaveStore:
             tmp.write_bytes(data)
             os.replace(tmp, self.path(slot))      # 書き込み途中で落ちても元のセーブは壊さない
         except OSError as e:
-            raise SaveError(f"セーブファイルを書き込めません（{e.strerror or e}）") from None
+            raise SaveError(tr('セーブファイルを書き込めません（{0}）', e.strerror or e)) from None
 
     def _read(self, slot: int) -> dict:
         p = self.path(slot)
         try:
             data = p.read_bytes()
         except FileNotFoundError:
-            raise SaveError("セーブデータがありません") from None
+            raise SaveError(tr('セーブデータがありません')) from None
         except OSError as e:
-            raise SaveError(f"セーブファイルを読めません（{e.strerror or e}）") from None
+            raise SaveError(tr('セーブファイルを読めません（{0}）', e.strerror or e)) from None
         payload = decode(data, self.package_id)
         if payload.get("package", {}).get("id") != self.package_id:
-            raise SaveError("別のシナリオのセーブデータです")
+            raise SaveError(tr('別のシナリオのセーブデータです'))
         return payload
 
     def load(self, slot: int) -> GameState:

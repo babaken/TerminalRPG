@@ -1,6 +1,8 @@
 """フィールド画面：マップ移動・NPC・ワープ・イベント・会話・スクリプト実行（基本設計 2.1 / 4.3 / 4.4）。"""
 from __future__ import annotations
 
+from ..i18n import tr
+
 import random
 from typing import Callable, Optional
 
@@ -149,15 +151,14 @@ class FieldScene(Scene):
             self.back_to_title()
             return
         if self.map is None:
-            self.error = ("開始スクリプトでマップが設定されていません。\n"
-                          f"*{self.game.manifest.start_label} の中で @map を実行してください。")
+            self.error = (tr('開始スクリプトでマップが設定されていません。\n*{0} の中で @map を実行してください。', self.game.manifest.start_label))
 
     def _script_error(self, e: ScriptError) -> None:
         self.vm.stop()
         self.req = None
         self.msg.close()
         self.choice = None
-        self.error = f"スクリプトの実行エラー\n{e}"
+        self.error = tr('スクリプトの実行エラー\n{0}', e)
 
     def local_message(self, text: str) -> None:
         """スクリプト外から会話窓を出す（スクリプト実行中でなければ閉じたら終わり）。"""
@@ -186,7 +187,7 @@ class FieldScene(Scene):
                 return None
             path = self.gd.face_path(pos[0], self.game.package.exists)
             if path is None:
-                raise ScriptError(ins, f"@face：「{pos[0]}」の顔 AA が見つかりません")
+                raise ScriptError(ins, tr('@face：「{0}」の顔 AA が見つかりません', pos[0]))
             self.face = self._aa_lines(path)
             return None
         if name == "aa":
@@ -211,7 +212,7 @@ class FieldScene(Scene):
             scene = EndingScene(self, kw.get("text", ""))
             self.app.push(scene)
             return scene
-        return MessageReq([("", f"（@{name} は未実装です）")])
+        return MessageReq([("", tr('（@{0} は未実装です）', name))])
 
     def _open_facility(self, name: str, pos: list[str], kw: dict):
         from .facility import GuildScene, InnScene, RecruitScene, ShopScene
@@ -232,7 +233,7 @@ class FieldScene(Scene):
                      turns: int = 0):
         from .battle import BattleScene
         if group not in self.gd.groups:
-            raise ScriptError(None, f"敵グループ「{group}」が定義されていません")
+            raise ScriptError(None, tr('敵グループ「{0}」が定義されていません', group))
         b = BattleScene(self, group, escape=escape, gameover=gameover, target_only=target_only,
                         lose=lose, from_script=from_script, members=members, turns=turns)
         if not from_script:
@@ -289,7 +290,7 @@ class FieldScene(Scene):
             target = kw.get("target", pos[0] if pos else "")
             nums = [int(p) for p in (pos[1:] if "target" not in kw else pos) if p.lstrip("-").isdigit()]
             if len(nums) < 2:
-                raise ScriptError(ins, "@effect move には 対象 dx dy を指定してください")
+                raise ScriptError(ins, tr('@effect move には 対象 dx dy を指定してください'))
             dx, dy = nums[0], nums[1]
             if target in self.overlays:                          # AA：セル単位でなめらかに動かす
                 lines, x, y = self.overlays[target]
@@ -304,7 +305,7 @@ class FieldScene(Scene):
             else:
                 npc = self._find_npc(target)
                 if npc is None:
-                    raise ScriptError(ins, f"@effect move：「{target}」という NPC・AA がいません")
+                    raise ScriptError(ins, tr('@effect move：「{0}」という NPC・AA がいません', target))
                 s = self.st.npc(self.st.map_id, npc.id)
                 x, y = self._npc_pos(npc)
                 path = self.find_path((x, y), (x + dx, y + dy), mover=npc)
@@ -316,7 +317,7 @@ class FieldScene(Scene):
             return None
         if name == "aa_show":
             if len(pos) < 3:
-                raise ScriptError(ins, "@effect aa_show には ファイル x y を指定してください")
+                raise ScriptError(ins, tr('@effect aa_show には ファイル x y を指定してください'))
             lines = self._aa_lines(pos[0])
             x, y = int(pos[1]), int(pos[2])
             key = kw.get("name", pos[0])
@@ -342,7 +343,7 @@ class FieldScene(Scene):
             if "file" in kw:
                 text = self.game.package.read_text(kw["file"])
                 if text is None:
-                    raise ScriptError(ins, f"@effect scroll_text：ファイル「{kw['file']}」がありません")
+                    raise ScriptError(ins, tr('@effect scroll_text：ファイル「{0}」がありません', kw['file']))
                 kw = dict(kw, _lines=[format_text(ln, self.st, self.gd) for ln in text.splitlines()])
         return self.effects.start(name, pos, kw)
 
@@ -380,7 +381,7 @@ class FieldScene(Scene):
     def _cmd_npc(self, ins: Instr, pos: list[str]) -> Optional[object]:
         npc = self._find_npc(pos[0])
         if npc is None:
-            raise ScriptError(ins, f"現在のマップ（{self.st.map_id}）に NPC「{pos[0]}」がいません")
+            raise ScriptError(ins, tr('現在のマップ（{0}）に NPC「{1}」がいません', self.st.map_id, pos[0]))
         s = self.st.npc(self.st.map_id, npc.id)
         act = pos[1]
         if act in ("show", "hide"):
@@ -453,7 +454,7 @@ class FieldScene(Scene):
     def change_map(self, map_id: str, x: int, y: int, d: Optional[str] = None,
                    transition: str = "none") -> Optional[Effect]:
         if map_id not in self.gd.maps:
-            raise ScriptError(None, f"マップ「{map_id}」が定義されていません")
+            raise ScriptError(None, tr('マップ「{0}」が定義されていません', map_id))
         self._set_map(map_id)
         Q.on_reach(self.st, self.gd, map_id)
         self.st.x, self.st.y = x, y
@@ -613,9 +614,9 @@ class FieldScene(Scene):
         self.app.push(MenuScene(self))
 
     def open_system_menu(self) -> None:
-        self.msg.open([("", "どうしますか？")])
+        self.msg.open([("", tr('どうしますか？'))])
         self.msg.shown = 10 ** 6
-        self.choice = ChoiceWindow(["つづける", "タイトルにもどる", "ゲームをおわる"], cancel_index=0)
+        self.choice = ChoiceWindow([tr('つづける'), tr('タイトルにもどる'), tr('ゲームをおわる')], cancel_index=0)
 
         def done(i: int) -> None:
             self.msg.close()
@@ -781,7 +782,7 @@ class FieldScene(Scene):
         map_inner = buf.box(map_rect, FRAME, title=title, chars=BOX_SINGLE)
         if self.map is not None:
             self._draw_map(buf, map_inner)
-        self._draw_panel(buf, buf.box(panel_rect, FRAME, title="パーティ", chars=BOX_SINGLE))
+        self._draw_panel(buf, buf.box(panel_rect, FRAME, title=tr('パーティ'), chars=BOX_SINGLE))
         dx, dy = self.effects.offset()
         if dx or dy:
             copy = buf.copy()
@@ -802,7 +803,7 @@ class FieldScene(Scene):
             self.msg.draw(buf, msg_rect, show_cursor=self.choice is None)
         elif not self.effects.faded:
             inner = buf.box(msg_rect, FRAME, chars=BOX_SINGLE)
-            buf.put(inner.x + 1, inner.bottom - 1, "移動: 矢印/WASD   話す・調べる: Enter/Z   メニュー: Esc/M",
+            buf.put(inner.x + 1, inner.bottom - 1, tr('移動: 矢印/WASD   話す・調べる: Enter/Z   メニュー: Esc/M'),
                     Style.of("gray"), clip=inner)
         if self.choice is not None:
             self.choice.draw(buf, W - 1, H - self.MSG_H + 1)
@@ -856,9 +857,9 @@ class FieldScene(Scene):
                 st = Style.of(tile.color) if tile.color else Style()
                 buf.put(px + tx * 2, py + ty, tile.glyph, st, clip=area)
         for tx_, ty_, kind, shown in self.st.traps.get(m.id, []):     # 見えるようになった罠
-            tr = self.gd.traps.get(kind)
-            if shown and tr and ox <= tx_ < ox + cols and oy <= ty_ < oy + rows and visible(tx_, ty_):
-                buf.put(px + (tx_ - ox) * 2, py + (ty_ - oy), tr.glyph, Style.of(tr.color or "bright_red"), clip=area)
+            trap = self.gd.traps.get(kind)
+            if shown and trap and ox <= tx_ < ox + cols and oy <= ty_ < oy + rows and visible(tx_, ty_):
+                buf.put(px + (tx_ - ox) * 2, py + (ty_ - oy), trap.glyph, Style.of(trap.color or "bright_red"), clip=area)
         for n in m.npcs:
             if not self.npc_visible(n) or self.effects.hidden(n.id):
                 continue
@@ -888,9 +889,9 @@ class FieldScene(Scene):
         pet = self.gd.enemies.get(self.st.pet) if self.st.pet else None
         fams = [self.gd.enemies[c.familiar].name for m in self.st.party
                 if (c := self.gd.characters.get(m.id)) and c.familiar in self.gd.enemies]
-        info = [f"使い魔 {n}" for n in fams] + ([f"ペット {pet.name}"] if pet else []) + [f"G {self.st.gold:>8}"]
+        info = [tr('使い魔 {0}', n) for n in fams] + ([tr('ペット {0}', pet.name)] if pet else []) + [f"G {self.st.gold:>8}"]
         if self.st.chapter:
-            info.append(f"第{self.st.chapter}章 {self.st.chapter_title}")
+            info.append(tr('第{0}章 {1}', self.st.chapter, self.st.chapter_title))
         t = int(self.st.playtime)
         info.append(f"TIME {t // 3600:02}:{t // 60 % 60:02}:{t % 60:02}")
         if self.game.dev:
@@ -906,9 +907,9 @@ class FieldScene(Scene):
         lines = []
         for para in self.error.split("\n"):
             lines += wrap(para, w - 4)
-        lines += ["", "（Enter で閉じる）"]
+        lines += ["", tr('（Enter で閉じる）')]
         h = len(lines) + 2
         rect = Rect((buf.width - w) // 2, max(0, (buf.height - h) // 2), w, h)
-        inner = buf.box(rect, Style.of("bright_red"), title="エラー", chars=BOX_SINGLE)
+        inner = buf.box(rect, Style.of("bright_red"), title=tr('エラー'), chars=BOX_SINGLE)
         for i, line in enumerate(lines):
             buf.put(inner.x + 1, inner.y + i, line, Style.of("bright_white"), clip=inner)
