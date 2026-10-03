@@ -2,7 +2,7 @@
 #  FirstQuest+  scenario.sco
 #  元テキスト: docs/scenario/FirstQuestPlus_story.md（1・2章は FirstQuest_story.md に伏線の差分を加えたもの）
 #  FirstQuest をもとに、伏線（夢・老婆テラ・黒い閃光・手加減する魔物・母の秘密）を加えている。伏線のフラグは p_ で始まる
-#  現在: 第1章、第2章（ch2.sco）。第3・4章は差し替え中（M8 8-3・8-4）
+#  現在: 第1章、第2章（ch2.sco）、第3章（ch3.sco）。第4章は差し替え中（M8 8-4）
 # ============================================================
 
 # ------------------------------------------------------------
@@ -57,6 +57,10 @@
 @end
 
 *ch1_mother_talk
+@if flag.p_family_accept
+  母「いってらっしゃい、{hero}。……あなたの帰る場所は、ここよ」
+  @end
+@endif
 @if flag.ch1_farewell
   母「体に気をつけるのよ。……いってらっしゃい」
 @elif flag.ch1_raid
@@ -75,6 +79,10 @@
 @end
 
 *ch1_mina_talk
+@if flag.p_family_accept
+  ミナ「おにいちゃんは、おにいちゃんだもん！」
+  @end
+@endif
 @if flag.ch1_farewell
   ミナ「おにいちゃん、ぜったい かえってきてね！」
 @elif flag.ch1_raid
@@ -92,6 +100,17 @@
 
 # ---- 老婆テラ（村の東の小屋。15年前、森で赤子の{hero}を見つけた）
 *p1_tera_talk
+@if flag.p3_tera_done
+  テラ「森の祠、村の丘、ベルンの協会。……一人で行くんだよ」
+  @end
+@endif
+@if flag.p_family_accept
+  @goto *p3_tera
+@endif
+@if flag.p3_home_open
+  テラ「まずは家にお帰り。エマが待ってるよ」
+  @end
+@endif
 @if flag.ch1_raid_done
   テラ「……とうとう、来ちまったんだね」
   テラ「坊や。何があっても、お前さんはロイとエマの子だよ。それだけは忘れるんじゃない」
@@ -235,6 +254,10 @@
 
 # ---- 家の人々（夜以降）----
 *ch1_father_talk
+@if flag.p_family_accept
+  父「……剣の手入れを、怠るな」
+  @end
+@endif
 @if flag.ch1_farewell
   父「振り返るな。前だけ見て進め」
 @elif flag.ch1_raid
@@ -375,7 +398,7 @@
 #  1-3 旅立ち（街道）
 # ------------------------------------------------------------
 *ch1_road_north
-@if flag.ch4_kai
+@if flag.p3_home_open
   @map village_lito 15 16 dir=up
   @end
 @endif
@@ -595,11 +618,6 @@
 # ---- ロードしたとき（つづきから・全滅からの「セーブから」） ----
 # 1章の最後のセーブは 2 章を始める前に保存されるので、そこから再開したら 2 章を始める
 *on_load
-# 3 章でガルザに敗れたあとなら、洞穴前の東の落石はどけてある（古い版で医務室の場面を通ったセーブのため）
-@if flag.ch3_lost
-  @tile 27 8 . map=field_blackrock
-  @tile 29 8 = map=field_blackrock
-@endif
 @if flag.ch1_done and !flag.ch2_rumor
   @goto *ch2_start
 @endif

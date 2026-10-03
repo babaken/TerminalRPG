@@ -35,6 +35,8 @@ id = "default"
 "|" = { glyph = "柱", pass = false, color = "white",        name = "柱" }
 "+" = { glyph = "鏡", pass = false, color = "bright_cyan",  name = "鏡" }
 "K" = { glyph = "檻", pass = false, color = "gray",         name = "檻の残骸" }      # FirstQuest+
+"h" = { glyph = "丘", pass = true,  color = "bright_green", name = "丘" }            # FirstQuest+
+"Y" = { glyph = "座", pass = false, color = "bright_magenta", name = "玉座" }        # FirstQuest+
 
 # ===== 見えない罠 =====
 # 踏むまで見えない。踏むと作動して文字が見えるようになる（見えたあとも踏めば作動する）
@@ -76,7 +78,7 @@ tileset = "default"
 rows = [
   "TTTTTTTTTTTTTTT.TTTTTTTTTTTTTTTT",
   "T..............................T",
-  "T..HHH.........................T",
+  "T..HHH......................h..T",
   "T..HDH.......HHH.....~~~~......T",
   "T............HDH.....~~~~......T",
   "T....................~~~~......T",
@@ -230,75 +232,19 @@ y = 16
 talk = "ch1_kai_gate_talk"
 when = "flag.ch1_farewell and !flag.ch1_left_village"
 
-[[map.npc]]
-id = "home_chief"
-glyph = "長"
-color = "white"
-x = 13
-y = 13
-talk = "ch4_home_talk"
-when = "flag.ch4_kai"
-
-[[map.npc]]
-id = "home_mother"
-glyph = "母"
-color = "bright_yellow"
-x = 14
-y = 14
-talk = "ch4_home_talk"
-when = "flag.ch4_kai"
-
-[[map.npc]]
-id = "home_father"
-glyph = "父"
-color = "yellow"
-x = 16
-y = 14
-talk = "ch4_home_talk"
-when = "flag.ch4_kai"
-
-[[map.npc]]
-id = "home_mina"
-glyph = "妹"
-color = "bright_magenta"
-x = 15
-y = 13
-talk = "ch4_home_talk"
-when = "flag.ch4_kai"
-
-[[map.npc]]
-id = "home_villager_a"
-glyph = "人"
-color = "white"
-x = 12
-y = 15
-talk = "ch4_home_talk"
-when = "flag.ch4_kai"
-
-[[map.npc]]
-id = "home_villager_b"
-glyph = "人"
-color = "white"
-x = 18
-y = 15
-talk = "ch4_home_talk"
-when = "flag.ch4_kai"
-
-[[map.npc]]
-id = "home_kai"
-glyph = "友"
-color = "cyan"
-x = 17
-y = 13
-talk = "ch4_home_talk"
-when = "flag.ch4_kai"
-
-[[map.event]]
+[[map.event]]         # 3 章：里帰り（村の人は家に隠れている）
 x = 15
 y = 16
 trigger = "auto"
-label = "ch4_village"
-when = "flag.ch4_kai and !flag.ch4_home"
+label = "p3_home"
+when = "flag.p3_home_open and !flag.p_family_accept"
+
+[[map.event]]         # 3 章：記憶の場所「リト村の丘」
+x = 28
+y = 2
+trigger = "touch"
+label = "p3_mem_hill"
+when = "flag.p3_tera_done and !flag.p3_mem2"
 
 [[map]]
 id = "house_hero"
@@ -423,7 +369,7 @@ y = 1
 trigger = "check"
 label = "ch1_find_sword"
 once = true
-when = "flag.lost_friend"
+when = "flag.lost_friend and !flag.found_sword"   # 3 章の「記憶の場所」と同じマス
 
 [[map.npc]]
 id = "kai"
@@ -433,6 +379,13 @@ x = 16
 y = 13
 talk = "ch1_kai_forest_talk"
 when = "!flag.ch1_forest_done"
+
+[[map.event]]         # 3 章：記憶の場所「囁きの森の祠」
+x = 20
+y = 1
+trigger = "check"
+label = "p3_mem_forest"
+when = "flag.p3_tera_done and !flag.p3_mem1"
 
 [[map]]
 id = "house_chief"
@@ -767,14 +720,19 @@ y = 2
 talk = "ch2_dorgan_talk"
 when = "flag.ch2_map_reported"
 
-[[map.npc]]
-id = "kai_guild"
-glyph = "友"
-color = "cyan"
+[[map.event]]         # 3 章：記憶の場所「ベルンの協会」（初めて仲間ができた日。机）
+x = 3
+y = 6
+trigger = "check"
+label = "p3_mem_guild"
+when = "flag.p3_tera_done and !flag.p3_mem3"
+
+[[map.event]]         # 3 章：記憶の場所を巡り終えたら、離れた仲間が待っている
 x = 10
 y = 8
-talk = "ch4_kai_guild_talk"
-when = "flag.ch4_returned and !flag.ch4_home"
+trigger = "auto"
+label = "p3_return"
+when = "flag.p3_mem1 and flag.p3_mem2 and flag.p3_mem3 and !flag.p3_returned"
 
 [[map]]
 id = "bern_inn"
@@ -1030,27 +988,13 @@ x = 15
 y = 3
 when = "!flag.ch2_guard_done"
 
-[[map.warp]]
-x = 29
-y = 8
-to = "field_mountain"
-tx = 1
-ty = 10
-dir = "right"
 
 [[map.event]]
 x = 26
 y = 8
 trigger = "check"
-label = "ch3_rockslide"
-when = "!flag.ch3_lost"
+label = "p_rockslide"
 
-[[map.event]]
-x = 1
-y = 8
-trigger = "auto"
-label = "ch3_snow_off"
-when = "flag.ch3_lost"
 
 [[map]]
 id = "dungeon_b01"
@@ -1675,7 +1619,7 @@ dir = "down"
 x = 17
 y = 14
 trigger = "check"
-label = "ch3_b12_wall"
+label = "p3_b12_note"
 
 [[map]]
 id = "dungeon_b13"
@@ -1722,14 +1666,14 @@ tx = 13
 ty = 5
 dir = "down"
 
-[[map.npc]]
-id = "rod"
-glyph = "人"
-color = "white"
+[[map.npc]]           # 子供の姿のなりそこない（倒すか、逃がすか）
+id = "nari_child"
+glyph = "子"
+color = "bright_magenta"
 x = 21
 y = 5
-talk = "ch3_b13_rod"
-when = "!flag.rod_rescued"
+talk = "p3_b13_child"
+when = "!flag.p3_child_met"
 
 [[map.event]]
 x = 19
@@ -1747,7 +1691,7 @@ dark = true
 dungeon = true
 rows = [
   "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
-  "RRRRRRRRRRRRRRRRRRRRG_______RR",
+  "RRRWRRRRRRRRRRRRRRRRG_______RR",
   "R_____RRRRRRRRRRRRRR________RR",
   "R_____RRRRRRRRRRRRRR________RR",
   "R____________<______________RR",
@@ -1786,7 +1730,13 @@ dir = "down"
 x = 20
 y = 1
 trigger = "check"
-label = "ch3_b14_door"
+label = "p3_b14_door"
+
+[[map.event]]         # 壁画の全体
+x = 3
+y = 1
+trigger = "check"
+label = "p3_b14_mural"
 
 [[map]]
 id = "dungeon_b15"
@@ -1835,13 +1785,13 @@ dir = "up"
 
 [[map]]
 id = "dungeon_altar"
-name = "儀式の間"
+name = "玉座の間"
 tileset = "default"
 dungeon = true
 rows = [
   "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
   "RRRRRRRRRRRFFFFFFFFRRRRRRRRRRR",
-  "RRRRRRRRRRF___AA___FRRRRRRRRRR",
+  "RRRRRRRRRRF___Y____FRRRRRRRRRR",
   "RRRRRRRR_____________RRRRRRRRR",
   "RRRRRR_________________RRRRRRR",
   "RRRRR___________________RRRRRR",
@@ -1871,297 +1821,22 @@ dir = "up"
 x = 14
 y = 13
 trigger = "auto"
-label = "ch3_garza"
-when = "!flag.ch3_lost"
+label = "p3_naive"
+when = "flag.p3_started and !flag.p3_revealed"
 
 [[map.npc]]
-id = "garza"
-glyph = "灰"
-color = "bright_white"
+id = "naive"
+glyph = "魔"
+color = "bright_magenta"
 x = 14
-y = 3
-when = "!flag.ch3_lost"
-
-[[map.event]]
-x = 14
-y = 13
-trigger = "auto"
-label = "ch4_garza2"
-when = "flag.ch4_started and !flag.ch4_done"
+y = 4
+when = "flag.p3_started and !flag.p3_revealed"
 
 [[map.npc]]
-id = "garza2"
-glyph = "灰"
-color = "bright_white"
-x = 14
-y = 3
-when = "flag.ch4_started and !flag.ch4_done"
+id = "grey"
+glyph = "研"
+color = "bright_cyan"
+x = 12
+y = 4
+when = "flag.p3_started and !flag.p3_revealed"
 
-[[map]]
-id = "guild_infirmary"
-name = "冒険者協会・医務室"
-tileset = "default"
-indoor = true
-rows = [
-  "############",
-  "#..........#",
-  "#.Z..Z..Z..#",
-  "#..........#",
-  "#.Z..Z.....#",
-  "#..........#",
-  "######D#####",
-]
-
-[[map.warp]]
-x = 6
-y = 6
-to = "guild_bern"
-tx = 10
-ty = 8
-dir = "down"
-
-[[map]]
-id = "field_mountain"
-name = "風見の山道"
-tileset = "default"
-encounter = "mountain"
-rows = [
-  "^^^^^^^^^^^^^^^^^^^^^^^=^^^^^^",
-  "^^^^^^^^^^^^^^^^^^^sss=sss^^^^",
-  "^^^^^^^^^^^^^^^sssssss=ssss^^^",
-  "^^^^^^^^^^^^sssssTsss==sssss^^",
-  "^^^^^^^^^ssssssssss==sssssss^^",
-  "^^^^^^^ssssssssss==sssssTsss^^",
-  "^^^^^ssssTsssss===sssssssss^^^",
-  "^^^^ssssssssss=sssssssssss^^^^",
-  "^^^sssssssss===ssssssTsss^^^^^",
-  "^^sssssssss=sssssssssss^^^^^^^",
-  "=========sssssssssss^^^^^^^^^^",
-  "^ssssTssssssssssss^^^^^^^^^^^^",
-  "^^sssssssssssssss^^^^^^^^^^^^^",
-  "^^^^ssssssssss^^^^^^^^^^^^^^^^",
-  "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^",
-]
-
-[[map.warp]]
-x = 0
-y = 10
-to = "field_blackrock"
-tx = 28
-ty = 8
-dir = "left"
-
-[[map.warp]]
-x = 23
-y = 0
-to = "temple_kazami"
-tx = 14
-ty = 10
-dir = "up"
-
-[[map.event]]
-x = 1
-y = 10
-trigger = "auto"
-label = "ch3_mountain_enter"
-
-[[map]]
-id = "temple_kazami"
-name = "風見の神殿"
-tileset = "default"
-rows = [
-  "##############################",
-  "#####D##########D##########D##",
-  "#####o##########o##########o##",
-  "#oooooooooooooooooooooooooooo#",
-  "#o|oooo|oooo|oooooo|oooo|ooo|#",
-  "#oooooooooooooooooooooooooooo#",
-  "#oooooooooooooSoooooooooooooo#",
-  "#o|oooo|oooooooooooo|oooo|ooo#",
-  "#oooooooooooooooooooooooooooo#",
-  "#oooooooooooooooooooooooooooo#",
-  "#oooooooooooooooooooooooooooo#",
-  "##############D###############",
-]
-
-[[map.warp]]
-x = 14
-y = 11
-to = "field_mountain"
-tx = 23
-ty = 1
-dir = "down"
-
-[[map.warp]]
-x = 5
-y = 1
-to = "trial_1"
-tx = 9
-ty = 6
-dir = "up"
-
-[[map.warp]]
-x = 16
-y = 1
-to = "trial_2"
-tx = 9
-ty = 6
-dir = "up"
-
-[[map.warp]]
-x = 27
-y = 1
-to = "trial_3"
-tx = 9
-ty = 6
-dir = "up"
-
-[[map.event]]
-x = 14
-y = 10
-trigger = "auto"
-label = "ch3_temple"
-when = "flag.ch3_lost and !flag.ch3_temple_met"
-
-[[map.event]]
-x = 14
-y = 6
-trigger = "check"
-label = "ch3_altar_talk"
-
-[[map.event]]
-x = 5
-y = 2
-trigger = "touch"
-label = "ch3_trial_door"
-when = "!flag.ch3_temple_met"
-
-[[map.event]]
-x = 16
-y = 2
-trigger = "touch"
-label = "ch3_trial_door"
-when = "!flag.ch3_temple_met"
-
-[[map.event]]
-x = 27
-y = 2
-trigger = "touch"
-label = "ch3_trial_door"
-when = "!flag.ch3_temple_met"
-
-[[map.npc]]
-id = "ord"
-glyph = "司"
-color = "bright_white"
-x = 14
-y = 5
-talk = "ch3_ord_talk"
-
-[[map.npc]]
-id = "acolyte"
-glyph = "僧"
-color = "white"
-x = 4
-y = 8
-move = "random"
-talk = "ch3_acolyte_talk"
-
-[[map]]
-id = "trial_1"
-name = "勇気の間"
-tileset = "default"
-indoor = true
-rows = [
-  "####################",
-  "#oooooooo+ooooooooo#",
-  "#oooooooooooooooooo#",
-  "#o|oooooooooooooo|o#",
-  "#oooooooooooooooooo#",
-  "#o|oooooooooooooo|o#",
-  "#oooooooooooooooooo#",
-  "#########D##########",
-]
-
-[[map.warp]]
-x = 9
-y = 7
-to = "temple_kazami"
-tx = 5
-ty = 2
-dir = "down"
-
-[[map.event]]
-x = 9
-y = 1
-trigger = "check"
-label = "ch3_trial_1"
-
-[[map]]
-id = "trial_2"
-name = "慈愛の間"
-tileset = "default"
-indoor = true
-rows = [
-  "####################",
-  "#oooooooooooooooooo#",
-  "#oooooooooooooooooo#",
-  "#o|oooooooooooooo|o#",
-  "#oooooooooooooooooo#",
-  "#o|oooooooooooooo|o#",
-  "#oooooooooooooooooo#",
-  "#########D##########",
-]
-
-[[map.warp]]
-x = 9
-y = 7
-to = "temple_kazami"
-tx = 16
-ty = 2
-dir = "down"
-
-[[map.event]]
-x = 9
-y = 2
-trigger = "touch"
-label = "ch3_trial_2"
-when = "!flag.trial2_done"
-
-[[map.npc]]
-id = "pup"
-glyph = "仔"
-color = "yellow"
-x = 9
-y = 1
-when = "!flag.trial2_done"
-
-[[map]]
-id = "trial_3"
-name = "絆の間"
-tileset = "default"
-indoor = true
-rows = [
-  "####################",
-  "#oooooooo+ooooooooo#",
-  "#oooooooooooooooooo#",
-  "#o|oooooooooooooo|o#",
-  "#oooooooooooooooooo#",
-  "#o|oooooooooooooo|o#",
-  "#oooooooooooooooooo#",
-  "#########D##########",
-]
-
-[[map.warp]]
-x = 9
-y = 7
-to = "temple_kazami"
-tx = 27
-ty = 2
-dir = "down"
-
-[[map.event]]
-x = 9
-y = 1
-trigger = "check"
-label = "ch3_trial_3"
