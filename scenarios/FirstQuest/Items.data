@@ -198,6 +198,17 @@ id = "town_weapon"
 name = "ベルンの武具屋"
 goods = ["copper_sword", "dagger", "whip", "stone_axe", "leather_armor", "wood_shield"]
 
+# 4 章からの品ぞろえ（ポーション・鎖帷子が増える）
+[[shop]]
+id = "town_item_4"
+name = "ベルンの道具屋"
+goods = ["potion", "herb", "antidote", "bread"]
+
+[[shop]]
+id = "town_weapon_4"
+name = "ベルンの武具屋"
+goods = ["chain_mail", "copper_sword", "dagger", "whip", "stone_axe", "leather_armor", "wood_shield"]
+
 # ===== 2章 =====
 [[item]]
 id = "old_map"

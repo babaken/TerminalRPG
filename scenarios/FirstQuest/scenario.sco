@@ -420,13 +420,23 @@
   {item.package}を預かった。
 @else
   道具屋「いらっしゃい！」
-  @shop town_item
+  @if chapter >= 4
+    道具屋「国の倉庫から、よく効く薬が入ったよ！」
+    @shop town_item_4
+  @else
+    @shop town_item
+  @endif
 @endif
 @end
 
 *ch1_weapon_keeper
 武具屋「冒険者なら装備はケチるなよ。命あっての物種だ」
-@shop town_weapon
+@if chapter >= 4
+  武具屋「国の注文で鎖帷子を打ったんだ。決戦に行くなら持っていけ」
+  @shop town_weapon_4
+@else
+  @shop town_weapon
+@endif
 @end
 
 *ch1_cat
@@ -547,11 +557,6 @@
 @if flag.ch3_lost
   @tile 27 8 . map=field_blackrock
   @tile 29 8 = map=field_blackrock
-@endif
-# 4 章の支給品を受け取る前に 4 章になっていたセーブ
-@if flag.ch4_started and !flag.ch4_supplied
-  協会から、国の支給品が届いた！
-  @call *ch4_supplies
 @endif
 @if flag.ch1_done and !flag.ch2_rumor
   @goto *ch2_start

@@ -48,11 +48,7 @@ def test_chapter4_to_ending(game):
     talk = " ".join(d.talk(17, 2, "right", choose=0))
     assert st.chapter == 4 and "ch4_started" in st.flags and st.items.get("elixir") == 3
     assert "蝕王ヴェルム" in talk and "ランク B" in talk
-    # 支給品：鎖帷子（着られる人は装備。魔法使いはローブのまま）、やくそう → ポーション
-    assert all(st.member(c).equip["armor"] == "chain_mail" for c in ("hero", "garo", "noa"))
-    assert st.member("mia").equip["armor"] == "robe"
-    assert "herb" not in st.items and st.items["potion"] == 20 + 5
-    assert "ポーション（HP 100 回復）に取りかえて" in talk
+    assert "chain_mail" not in st.items and "potion" not in st.items     # 支給はしない（お店で買う）
 
     # ---- B14F の大扉はまた開く → 儀式の間
     from test_chapter2 import check_tile, find_in
@@ -105,21 +101,21 @@ def test_road_to_village_still_closed_before_kai(game):
     assert any("今は戻れない" in t for t in talk) and f.st.map_id == "field_road"
 
 
-def test_supplies_for_save_already_in_chapter4(game):
-    """支給品を足す前の版で 4 章になったセーブは、ロードしたときに一度だけ受け取る。"""
-    from trpg.scenes.title import start_field
+@pytest.mark.parametrize("chapter, shop", [(3, "town_item"), (4, "town_item_4")])
+def test_item_shop_lineup_by_chapter(game, chapter, shop):
+    """4 章からは道具屋にポーション、武具屋に鎖帷子が並ぶ。"""
+    from trpg.scenes.facility import ShopScene
     d = after_chapter3(game)
-    st = d.field.st
-    st.chapter = 4
-    st.flags.add("ch4_started")
-    st.items.update(herb=4, elixir=3)
-    game.saves().save(1, st)
-    loaded = game.saves().load(1)
-    start_field(d.app, game, loaded)
-    talk = " ".join(d.settle())
-    assert "国の支給品が届いた" in talk and "ch4_supplied" in loaded.flags
-    assert loaded.hero.equip["armor"] == "chain_mail" and loaded.items["potion"] == 4 + 5
-    game.saves().save(2, loaded)
-    again = game.saves().load(2)
-    start_field(d.app, game, again)
-    assert d.settle() == [] and again.items["potion"] == 9                 # 二度は受け取らない
+    f = d.field
+    f.st.chapter = chapter
+    f.change_map("town_bern", 14, 12, "up")
+    f.pending_auto = False
+    f.start_script("ch1_item_keeper")
+    d.settle()
+    assert isinstance(d.scene, ShopScene) and d.scene.shop.id == shop
+    goods = d.scene.shop.goods
+    assert ("potion" in goods) == (chapter >= 4)
+    d.app.pop()
+    f.start_script("ch1_weapon_keeper")
+    d.settle()
+    assert ("chain_mail" in d.scene.shop.goods) == (chapter >= 4)

@@ -18,49 +18,10 @@
 @item add elixir 3
 @effect flash white
 冒険者ランク B になった！　{item.elixir}を 3 つ受け取った！
-協会長ドルガン「それと、国からの支給品だ。装備を整えていけ」
-@call *ch4_supplies
+協会長ドルガン「街の店にも、国の倉庫から新しい品を回させた。装備を整えていけ」
 協会長ドルガン「行ってこい、冒険者」
 @flag set ch4_started
 @end
-
-# 国からの支給品：鎖帷子・やくそう → ポーション（4 章の始まり、またはその前に 4 章になっていたセーブのロード時。一度だけ）
-*ch4_supplies
-@flag set ch4_supplied
-# 防具：着られる仲間は鎖帷子に（外した防具は袋へ）。魔法使いはローブのまま
-@if party.has(hero)
-  @item add chain_mail
-  @equip hero chain_mail
-@endif
-@if party.has(garo)
-  @item add chain_mail
-  @equip garo chain_mail
-@endif
-@if party.has(rina)
-  @item add chain_mail
-  @equip rina chain_mail
-@endif
-@if party.has(jack)
-  @item add chain_mail
-  @equip jack chain_mail
-@endif
-@if party.has(zara)
-  @item add chain_mail
-  @equip zara chain_mail
-@endif
-@if party.has(noa)
-  @item add chain_mail
-  @equip noa chain_mail
-@endif
-仲間たちは{item.chain_mail}を身につけた！
-# 薬：やくそうを同じ数のポーション（HP 100）に
-@if item.herb > 0
-  @item replace herb potion
-  持っていた{item.herb}は、すべて{item.potion}（HP 100 回復）に取りかえてもらった！
-@endif
-@item add potion 5
-{item.potion}を 5 つ受け取った！
-@return
 
 # ------------------------------------------------------------
 #  4-2 ボスとの対決（儀式の間）
