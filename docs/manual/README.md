@@ -10,7 +10,7 @@ TRPG エンジンで遊べるシナリオ（物語・マップ・敵・アイテ
 | [3. エフェクト](03_effects.md) | 画面演出（光る・揺れる・暗転・天気・スタッフロールなど） |
 | [4. よくある作り方](04_recipes.md) | 宝箱・NPC の出し分け・依頼・仲間・負けイベント・ダンジョン・章の区切り など |
 
-データファイル（Friends.data / Enemy.data / Items.data / Map.data / Quests.data / manifest.toml）の全項目は、データ仕様書（M6 6-2 で作成予定）にまとめます。それまでは [基本設計書](../basic_design.md) の 3〜9 章を見てください。
+データファイル（manifest.toml / Friends.data / Enemy.data / Items.data / Map.data / Quests.data / AA）の全項目は [データ仕様書](../data_spec.md) にあります。
 
 ## シナリオの中身
 

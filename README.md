@@ -174,6 +174,7 @@ python -m trpg.tools.map_editor scenarios/FirstQuest --map town_bern
 | ファイル | 内容 |
 |---|---|
 | `manual/` | **シナリオ作成マニュアル**（チュートリアル・スクリプトリファレンス・エフェクト・よくある作り方。見本 `manual/sample/HelloQuest`） |
+| `data_spec.md` | **データ仕様書**（シナリオパッケージの全ファイル・全項目。読み込み処理との食い違いはテストで検出） |
 | `requirements.md` | 要件定義書 v1.1 |
 | `basic_design.md` | 基本設計書 v0.2（データ仕様・スクリプト構文・計算式。【済】【未】で実装状況を表示） |
 | `development_plan.md` | 開発計画（マイルストーン M1〜M7、GitHub での管理方針） |
