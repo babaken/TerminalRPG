@@ -31,7 +31,9 @@ def ui_keys() -> set[str]:
     from trpg.app import IME_NOTICE
     from trpg.scenes.facility import STAT_NAMES
     from trpg.scenes.menu import SLOT_NAMES, TOP
-    return keys | set(TOP) | set(SLOT_NAMES.values()) | set(STAT_NAMES.values()) | {IME_NOTICE}
+    from trpg.settings import TEXT_SPEED_NAMES
+    return (keys | set(TOP) | set(SLOT_NAMES.values()) | set(STAT_NAMES.values()) | {IME_NOTICE}
+            | set(TEXT_SPEED_NAMES.values()))
 
 
 def test_every_ui_text_has_english():

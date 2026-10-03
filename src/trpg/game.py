@@ -31,13 +31,19 @@ class Game:
         self.package.close()
 
 
-def load_game(path: Path | str, report: Optional[Report] = None, dev: bool = False) -> Game:
+def load_game(path: Path | str, report: Optional[Report] = None, dev: bool = False,
+              lang: Optional[str] = None) -> Game:
     """パッケージを開いて全データとスクリプトを読み、検証する。
+
+    本文は ``lang``（省略時は UI の言語）の言語別ファイル（lang/<言語>/）があればそれを使う。
 
     エラーがあれば DataError（report 付き）。開けない場合は PackageError。
     """
     rep = report if report is not None else Report()
-    pkg = open_package(path, rep)
+    if lang is None:
+        from .i18n import get_lang
+        lang = get_lang()
+    pkg = open_package(path, rep, lang)
     try:
         gd = load_game_data(pkg, rep)
         text = pkg.read_text("scenario.sco") or ""

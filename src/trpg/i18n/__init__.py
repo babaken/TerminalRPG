@@ -7,8 +7,6 @@
 """
 from __future__ import annotations
 
-import json
-from pathlib import Path
 from typing import Any, Optional
 
 LANGS = ("ja", "en")
@@ -38,34 +36,16 @@ def tr(src: str, *args: Any) -> str:
     return text.format(*args) if args else text
 
 
-# ---- 設定ファイル（選んだ言語を次の起動でも使う）。場所はセーブと同じフォルダの settings.json
-def settings_path() -> Path:
-    from ..save import default_dir
-    return default_dir() / "settings.json"
-
-
+# ---- 選んだ言語を次の起動でも使う（settings.json の "lang"）
 def load_lang() -> Optional[str]:
-    try:
-        lang = json.loads(settings_path().read_text(encoding="utf-8")).get("lang")
-    except (OSError, ValueError, AttributeError):
-        return None
+    from .. import settings
+    lang = settings.get("lang")
     return lang if lang in LANGS else None
 
 
 def save_lang(lang: str) -> None:
-    path = settings_path()
-    try:
-        data = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
-        if not isinstance(data, dict):
-            data = {}
-    except (OSError, ValueError):
-        data = {}
-    data["lang"] = lang
-    try:
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
-    except OSError:
-        pass                                   # 書けなくても遊べる（次の起動で元の言語になるだけ）
+    from .. import settings
+    settings.save(lang=lang)
 
 
 def lang_label() -> str:

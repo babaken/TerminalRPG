@@ -7,6 +7,7 @@ from ..term import Buffer, Rect, Style, text_width, wrap
 from ..term.buffer import BOX_SINGLE
 from . import markup
 from .markup import Glyph
+from ..settings import text_speed_factor
 
 FRAME = Style.of("white")
 TEXT = Style.of("bright_white")
@@ -98,9 +99,11 @@ class MessageWindow:
             self._budget = 0.0
             return
         self._budget += dt
+        factor = text_speed_factor()          # 設定の文字の速さ（0 なら一気に表示）
         while self.shown < len(glyphs):
             g = glyphs[int(self.shown)]
-            cost = g.wait + (0.0 if g.speed <= 0 else 1.0 / (self.CHARS_PER_SEC * g.speed))
+            speed = g.speed * factor
+            cost = g.wait + (0.0 if speed <= 0 else 1.0 / (self.CHARS_PER_SEC * speed))
             if self._budget < cost:
                 break
             self._budget -= cost

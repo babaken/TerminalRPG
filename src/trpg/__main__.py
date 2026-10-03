@@ -47,6 +47,21 @@ def cmd_list() -> int:
     return 0
 
 
+def load_keymap():
+    """settings.json の "keys" でキー割当を変える（要件 6.5）。誤りがあれば理由を出して None。"""
+    from . import settings
+    from .term import KeyMap
+    conf = settings.get("keys") or {}
+    try:
+        if not isinstance(conf, dict) or not all(isinstance(v, list) and all(isinstance(t, str) for t in v)
+                                                 for v in conf.values()):
+            raise ValueError('"keys" は {"ok": ["ENTER", "z"]} のように、アクション名とキーの配列で書いてください')
+        return KeyMap.from_config(conf)
+    except ValueError as e:
+        print(f"キー割当の設定に誤りがあります（{settings.path()}）:\n  {e}", file=sys.stderr)
+        return None
+
+
 def main(argv: list[str] | None = None) -> int:
     _stdout_utf8()
     p = argparse.ArgumentParser(prog="trpg", description="コンソール RPG エンジン")
@@ -73,7 +88,9 @@ def main(argv: list[str] | None = None) -> int:
         print(f"キーログを記録します: {path}")
 
     from .i18n import load_lang, set_lang
+    from . import settings
     set_lang(args.lang or load_lang() or "ja")
+    settings.load_text_speed()
 
     if args.check:
         return cmd_check(args.check)
@@ -89,7 +106,10 @@ def main(argv: list[str] | None = None) -> int:
         scene = _first_scene(args)
         if scene is None:
             return 1
-    app = App(scene, fps=args.fps, use_color=not args.no_color)
+    keymap = load_keymap()
+    if keymap is None:
+        return 1
+    app = App(scene, fps=args.fps, use_color=not args.no_color, keymap=keymap)
     try:
         app.run()
     except TerminalError as e:
