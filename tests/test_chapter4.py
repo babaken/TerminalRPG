@@ -103,3 +103,23 @@ def test_road_to_village_still_closed_before_kai(game):
     d.walk_to(15, 0)
     talk = d.settle()
     assert any("今は戻れない" in t for t in talk) and f.st.map_id == "field_road"
+
+
+def test_supplies_for_save_already_in_chapter4(game):
+    """支給品を足す前の版で 4 章になったセーブは、ロードしたときに一度だけ受け取る。"""
+    from trpg.scenes.title import start_field
+    d = after_chapter3(game)
+    st = d.field.st
+    st.chapter = 4
+    st.flags.add("ch4_started")
+    st.items.update(herb=4, elixir=3)
+    game.saves().save(1, st)
+    loaded = game.saves().load(1)
+    start_field(d.app, game, loaded)
+    talk = " ".join(d.settle())
+    assert "国の支給品が届いた" in talk and "ch4_supplied" in loaded.flags
+    assert loaded.hero.equip["armor"] == "chain_mail" and loaded.items["potion"] == 4 + 5
+    game.saves().save(2, loaded)
+    again = game.saves().load(2)
+    start_field(d.app, game, again)
+    assert d.settle() == [] and again.items["potion"] == 9                 # 二度は受け取らない

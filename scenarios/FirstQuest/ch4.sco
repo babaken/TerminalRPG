@@ -19,6 +19,14 @@
 @effect flash white
 冒険者ランク B になった！　{item.elixir}を 3 つ受け取った！
 協会長ドルガン「それと、国からの支給品だ。装備を整えていけ」
+@call *ch4_supplies
+協会長ドルガン「行ってこい、冒険者」
+@flag set ch4_started
+@end
+
+# 国からの支給品：鎖帷子・やくそう → ポーション（4 章の始まり、またはその前に 4 章になっていたセーブのロード時。一度だけ）
+*ch4_supplies
+@flag set ch4_supplied
 # 防具：着られる仲間は鎖帷子に（外した防具は袋へ）。魔法使いはローブのまま
 @if party.has(hero)
   @item add chain_mail
@@ -52,9 +60,7 @@
 @endif
 @item add potion 5
 {item.potion}を 5 つ受け取った！
-協会長ドルガン「行ってこい、冒険者」
-@flag set ch4_started
-@end
+@return
 
 # ------------------------------------------------------------
 #  4-2 ボスとの対決（儀式の間）

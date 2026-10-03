@@ -548,6 +548,11 @@
   @tile 27 8 . map=field_blackrock
   @tile 29 8 = map=field_blackrock
 @endif
+# 4 章の支給品を受け取る前に 4 章になっていたセーブ
+@if flag.ch4_started and !flag.ch4_supplied
+  協会から、国の支給品が届いた！
+  @call *ch4_supplies
+@endif
 @if flag.ch1_done and !flag.ch2_rumor
   @goto *ch2_start
 @endif
