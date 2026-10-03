@@ -1,0 +1,32 @@
+# ===== 敵 =====
+[[enemy]]
+id = "slime"
+name = "スライム"
+aa = "aa/slime.txt"
+stats = { hp = 8, atk = 5, def = 2, agi = 3, luk = 1 }
+exp = 4
+gold = 3
+drops = [ { item = "herb", rate = 0.2 } ]
+
+[[enemy]]
+id = "big_slime"
+name = "大スライム"
+aa = "aa/slime.txt"
+stats = { hp = 30, atk = 7, def = 3, agi = 2, luk = 1 }
+exp = 20
+gold = 15
+
+# ===== 敵グループ =====
+[[group]]
+id = "slime_2"
+members = ["slime", "slime"]
+
+[[group]]
+id = "boss"
+members = ["big_slime"]
+
+# ===== 出現表（ランダムエンカウント） =====
+[[encounter]]
+id = "meadow"
+steps = [10, 20]
+table = [ { group = "slime_2", weight = 1 } ]

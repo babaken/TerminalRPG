@@ -1,0 +1,33 @@
+# ===== アイテム =====
+[[item]]
+id = "herb"
+name = "やくそう"
+type = "consumable"
+price = 8
+desc = "HP を 30 回復する。"
+use = { field = true, battle = true, target = "ally_one", effect = "heal", power = 30 }
+
+[[item]]
+id = "wood_sword"
+name = "木の剣"
+type = "equipment"
+slot = "weapon"
+category = "sword"
+price = 20
+stats = { atk = 3 }
+
+# ===== スキル =====
+[[skill]]
+id = "power_slash"
+name = "強撃"
+sp = 6
+target = "enemy_one"
+kind = "physical"
+power = 8
+anim = "shake:2"
+
+# ===== ショップ =====
+[[shop]]
+id = "village_shop"
+name = "村の道具屋"
+goods = ["herb", "wood_sword"]

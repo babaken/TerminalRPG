@@ -1,0 +1,18 @@
+# ===== 職業 =====
+[[job]]
+id = "hero"
+name = "勇者"
+growth = { hp = 7, mp = 2, atk = 2, def = 2, mag = 1, agi = 2, luk = 1 }
+equip = ["sword", "light_armor"]
+skills = [ { lv = 2, skill = "power_slash" } ]
+sp = { base = 8, growth = 2 }
+
+# ===== キャラクター =====
+[[character]]
+id = "hero"
+name = "ユウ"
+name_input = true
+job = "hero"
+lv = 1
+stats = { hp = 30, mp = 5, atk = 8, def = 6, mag = 3, agi = 6, luk = 5 }
+equip = { weapon = "wood_sword" }

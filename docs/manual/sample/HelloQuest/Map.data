@@ -1,0 +1,82 @@
+# ===== タイルセット =====
+[[tileset]]
+id = "default"
+[tileset.tiles]
+"#" = { glyph = "＃", pass = false, color = "gray",         name = "壁" }
+"." = { glyph = "．", pass = true,  color = "green",        name = "地面" }
+"T" = { glyph = "木", pass = false, color = "bright_green", name = "木" }
+"H" = { glyph = "家", pass = false, color = "yellow",       name = "家" }
+"=" = { glyph = "：", pass = true,  color = "yellow",       name = "道" }
+
+# ===== マップ =====
+[[map]]
+id = "village"
+name = "はじまりの村"
+tileset = "default"
+rows = [
+  "TTTTTTTTT=TTTTTTTTTT",
+  "T........=.........T",
+  "T..HHH...=...HHH...T",
+  "T..HHH...=...HHH...T",
+  "T........=.........T",
+  "T..................T",
+  "T..................T",
+  "TTTTTTTTTTTTTTTTTTTT",
+]
+
+[[map.warp]]           # 北の出口 → 草原
+x = 9
+y = 0
+to = "meadow"
+tx = 9
+ty = 8
+dir = "up"
+
+[[map.npc]]
+id = "elder"
+glyph = "長"
+color = "white"
+x = 9
+y = 5
+talk = "elder_talk"
+
+[[map.npc]]
+id = "shopkeeper"
+glyph = "商"
+color = "yellow"
+x = 14
+y = 4
+talk = "shop_talk"
+
+[[map]]
+id = "meadow"
+name = "草原"
+tileset = "default"
+encounter = "meadow"
+rows = [
+  "TTTTTTTTTTTTTTTTTTTT",
+  "T..................T",
+  "T....T.......T.....T",
+  "T..................T",
+  "T........=.........T",
+  "T........=.........T",
+  "T....T...=....T....T",
+  "T........=.........T",
+  "T........=.........T",
+  "TTTTTTTTT=TTTTTTTTTT",
+]
+
+[[map.warp]]           # 南の出口 → 村
+x = 9
+y = 9
+to = "village"
+tx = 9
+ty = 1
+dir = "down"
+
+[[map.event]]          # 草原の奥：大スライム（一度きり）
+x = 9
+y = 2
+trigger = "touch"
+label = "boss"
+once = true

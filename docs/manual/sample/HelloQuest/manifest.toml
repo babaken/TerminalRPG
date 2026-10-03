@@ -1,0 +1,23 @@
+# HelloQuest：シナリオ作成マニュアルのチュートリアルで作る、いちばん小さなシナリオ
+[package]
+id = "helloquest"
+title = "HelloQuest"
+version = "1.0.0"
+author = "あなたの名前"
+engine = ">=1.0"
+languages = ["ja"]
+
+[title_screen]
+aa = "aa/title.txt"
+effect = "starfall"
+
+[rules]
+gameover = "choose"
+save = "anywhere"
+party_max = 4
+start_label = "start"
+
+[start]
+party = ["hero"]
+gold = 20
+items = ["herb"]
