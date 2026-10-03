@@ -182,3 +182,14 @@ def test_tame(game):
     out = msgs(b._tame(b.party[0], Command("tame", target=b.enemies[0])))
     assert st.pet == "slime" and b.enemies[0].gone
     assert "スライムＡはなついた！　仲間になった！" in out
+
+
+def test_poison_kills_ally_at_end_of_round(game):
+    """毒で味方が倒れても、ターンの終わりの処理が止まらない（以前は KeyError）。"""
+    st = new_state(game)
+    b = Battle(game.data, st, "slime_2", rng=random.Random(0))
+    hero = b.party[0]
+    hero.status["poison"] = 3
+    hero.hp = 1
+    out = msgs(b._end_of_round())
+    assert not hero.alive and any("たおれてしまった" in m for m in out) and hero.status == {}

@@ -296,3 +296,12 @@ name = "手なずける"
 mp = 0
 target = "enemy_one"
 kind = "tame"
+
+# ===== 3 章 =====
+[[skill]]
+id = "ash_wave"
+name = "灰の衝撃波"
+target = "enemy_all"
+kind = "magic"
+power = 18
+anim = "flash:white,shake:3"

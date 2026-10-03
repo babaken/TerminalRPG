@@ -155,8 +155,19 @@
 
 # ---- 協会長ドルガン（地図の報告のあとは協会にいる。マップでは「会」）
 *ch2_dorgan_talk
-@if flag.ch2_done
-  協会長ドルガン「次はあの洞穴の奥だ。……準備ができたら声をかけろ」
+@if flag.ch3_lost
+  協会長ドルガン「風見の神殿は北東の山の上だ。……{away.injured}のことは任せておけ」
+@elif flag.ch3_started
+  協会長ドルガン「B11F の東の壁の奥だ。……生きて戻れよ」
+@elif flag.ch2_done
+  協会長ドルガン「次はあの洞穴の奥だ。……準備はいいか？」
+  @choice
+    - 行ける
+    - まだだ
+  @if choice == 1
+    @goto *ch3_start
+  @endif
+  協会長ドルガン「そうか。準備ができたら声をかけろ」
 @elif flag.ch2_found_scroll
   協会長ドルガン「戻ったか。まずはセラに報告してこい」
 @else
@@ -368,5 +379,5 @@
 @flag set ch2_done
 @effect typewriter "第2章　完"
 @save_point
-（第3章「灰の影」は制作中です。このまま街やダンジョンを自由に歩けます）
+協会長に声をかければ、第3章が始まる。
 @end

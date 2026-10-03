@@ -134,7 +134,7 @@ def test_tile_lint(sample_dir):
 @tile 99 0 # map=house_hero
 @tile 1 1 Q map=house_hero
 @tile 1 1 . map=nowhere
-@tile 1 1 Z
+@tile 1 1 %
 @end
 ''', encoding="utf-8")
     rep = Report()
@@ -144,7 +144,7 @@ def test_tile_lint(sample_dir):
         lint_script(sc, gd, rep, pkg)
     text = rep.format()
     assert "マップ house_hero の外" in text and "「Q」はマップ house_hero" in text
-    assert "nowhere" in text and "「Z」はどのタイルセットにもありません" in text
+    assert "nowhere" in text and "「%」はどのタイルセットにもありません" in text
 
 
 def test_warp_item_data_checks(sample_dir):
