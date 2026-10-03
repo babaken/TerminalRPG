@@ -14,7 +14,7 @@ ASCII アートで表現する、ターミナル用の RPG エンジンです。
 | タイトル・名前入力・フィールド移動・会話・選択肢 `src/trpg/scenes/` | 実装済み |
 | エフェクト `src/trpg/effects/` | flash / fade_in / fade_out / shake / tint（invert 含む）/ typewriter / wait / rain / snow / starfall / wipe / blink / move / aa_show / aa_hide / scroll_text（全 16 種） |
 | ショップ・宿屋・冒険者協会（依頼）・仲間選択 `src/trpg/scenes/facility.py` | 実装済み |
-| ダンジョン（`dungeon = true` の階名表示・`map` 条件式・ワープアイテム・`@tile` でタイルを書き換え） | 実装済み |
+| ダンジョン（`dungeon = true` の階名表示・`map` 条件式・ワープアイテム・`@tile` でタイルを書き換え・見えない罠） | 実装済み |
 | 戦闘（ターン制・スキル・道具・状態異常・逃走・テイム＝ペットが一緒に戦う・経験値とレベルアップ） `src/trpg/battle/` `scenes/battle.py` | 実装済み |
 | 全滅時の画面（タイトルへ／セーブから） `scenes/gameover.py` | 実装済み |
 | FirstQuest `scenarios/FirstQuest/` | 1章「出会いと旅立ち」すべて、2章「影を追う者たち」すべて（`ch2.sco`）、3章「灰の影」はガルザに敗れて医務室で目覚めるところまで（`ch3.sco`） |

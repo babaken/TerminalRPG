@@ -157,6 +157,8 @@ def test_chapter2_blackrock_cave(game):
     for m in st.party:
         raise_to_level(m, gd, 8)
         m.hp, m.mp = m.max_hp, m.max_mp
+    for mid in gd.maps:                                       # 罠は tests/test_traps.py で確認するので置かない
+        st.traps[mid] = []
 
     # ---- 東門 → 洞穴前 → 見張り
     d.walk_to(10, 9)

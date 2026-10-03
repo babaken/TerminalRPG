@@ -347,6 +347,8 @@ encounter = "forest_1"           # 省略時エンカウントなし
 dark = false
 indoor = false                    # true：屋内。雨・雪を表示しない（天気の状態は保ったまま）
 dungeon = false                   # true：ダンジョンの階。入ったときにマップ名を 2 秒表示、条件式 map.dungeon が真【済】
+traps = [2, 3]                    # 見えない罠の数 [最小, 最大]。初めて入ったときにランダムな床に置く（セーブに残る）【済】
+trap_kinds = ["arrow", "bomb"]    # 置く罠の種類（省略時はすべての [[trap]]）【済】
 rows = [ "TTTTT…", … ]            # 1 文字 = 1 タイル。全行同じ長さ
 bgm = ""                          # 予約（音なし）
 
@@ -377,6 +379,20 @@ route = ["right", "right", "wait", "left", "left", "wait"]   # move = "route" �
 talk = "ch1_kai_talk"
 when = "!flag.ch1_forest_done"    # 条件を満たすときだけ出現（@npc show/hide が優先）
 ```
+- 見えない罠【済】：
+```toml
+[[trap]]
+id = "arrow"
+name = "矢の罠"
+glyph = "矢"                      # 踏んで見えるようになったときの文字（表示幅 2）
+color = "bright_yellow"
+target = "one"                    # one：仲間 1 人（ランダム）/ all：全員
+damage_rate = 0.2                 # 最大 HP に対する割合（最低 1。罠では HP は 1 より下がらない）
+status = ""                       # かかる状態異常（例 poison）
+message = "壁から矢が飛んできた！"
+```
+  - 置かない場所：通れないマス・ワープ・イベント・NPC の初期位置・ほかのマップからのワープで着くマス。
+  - 踏むと作動して見えるようになる（赤く光る）。見えたあとも、踏めばまた作動する。
 - タイルの glyph は表示幅 2。全角文字（East Asian Width が F/W）を使う。曖昧幅の文字は警告（端末でずれるため）。
 - ワープ先が通行できないタイル、NPC が壁の上、などは警告。マップ外の座標はエラー。
 - 道順（route）の NPC は、ふさがれていると空くまで待つ（何歩目かはセーブされる）。道順が壁にぶつかればエラー、1 周で元の位置に戻らなければ警告。
