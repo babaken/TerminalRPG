@@ -1,6 +1,8 @@
 """フィールドでのアイテム・スキルの使用（メニューの「どうぐ」「スキル」）。戦闘中の使用は battle.core。"""
 from __future__ import annotations
 
+from ..i18n import tr
+
 from dataclasses import dataclass, field
 from typing import Optional
 
@@ -34,72 +36,73 @@ def usable_on_field(it: Item) -> bool:
 
 def _heal(m: Member, amount: int) -> Optional[str]:
     if not m.alive:
-        return f"{m.name}はたおれている。"
+        return tr('{0}はたおれている。', m.name)
     if m.hp >= m.max_hp:
-        return f"{m.name}の HP はもう満タンだ。"
+        return tr('{0}の HP はもう満タンだ。', m.name)
     before = m.hp
     m.hp = min(m.max_hp, m.hp + amount)
-    return None if m.hp == before else f"{m.name}の HP が {m.hp - before} 回復した！"
+    return None if m.hp == before else tr('{0}の HP が {1} 回復した！', m.name, m.hp - before)
 
 
 def use_item(st: GameState, gd: GameData, iid: str, target: Optional[Member]) -> UseResult:
     it = gd.items[iid]
     if st.items.get(iid, 0) <= 0:
-        return UseResult(False, [f"{it.name}を持っていない。"])
+        return UseResult(False, [tr('{0}を持っていない。', it.name)])
     if not usable_on_field(it):
-        return UseResult(False, [f"{it.name}はここでは使えない。"])
+        return UseResult(False, [tr('{0}はここでは使えない。', it.name)])
     use = it.use
     if use.get("when") and not _cond(use["when"], st):
-        return UseResult(False, ["ここでは使えない。"])
+        return UseResult(False, [tr('ここでは使えない。')])
     eff = use.get("effect")
     targets = st.party if use.get("target") == "ally_all" else [target or st.hero]
-    res = UseResult(False, [f"{st.hero.name if target is None else target.name}に{it.name}を使った。"
-                            if target is not None else f"{it.name}を使った。"])
+    res = UseResult(False, [tr('{0}に{1}を使った。', st.hero.name if target is None else target.name, it.name)
+                            if target is not None else tr('{0}を使った。', it.name)])
     if eff == "script":
         res.used = True
         res.messages = []
         res.label = use.get("label", "")
     if eff == "warp":
         res.used = True
-        res.messages = [f"{it.name}を使った！"]
+        res.messages = [tr('{0}を使った！', it.name)]
         res.warp = (use["to"], int(use.get("x", 0)), int(use.get("y", 0)), use.get("dir", ""))
         targets = []
     for m in targets:
         if m is None:
             continue
         if eff == "heal":
+            before = m.hp
             msg = _heal(m, int(use.get("power", 0)))
-            if msg and "回復した" in msg:
+            if m.hp > before:
                 res.used = True
             res.messages.append(msg or "")
         elif eff == "heal_mp":
             if m.mp >= m.max_mp:
-                res.messages.append(f"{m.name}の MP はもう満タンだ。")
+                res.messages.append(tr('{0}の MP はもう満タンだ。', m.name))
             else:
                 before = m.mp
                 m.mp = min(m.max_mp, m.mp + int(use.get("power", 0)))
                 res.used = True
-                res.messages.append(f"{m.name}の MP が {m.mp - before} 回復した！")
+                res.messages.append(tr('{0}の MP が {1} 回復した！', m.name, m.mp - before))
         elif eff == "cure":
             sid = use.get("status", "")
             if sid in m.status:
                 m.status.remove(sid)
                 res.used = True
                 name = gd.statuses[sid].name if sid in gd.statuses else sid
-                res.messages.append(f"{m.name}の{name}が治った！")
+                res.messages.append(tr('{0}の{1}が治った！', m.name, name))
             else:
-                res.messages.append("しかし、何も起こらなかった。")
+                res.messages.append(tr('しかし、何も起こらなかった。'))
         elif eff == "revive":
             if m.hp <= 0:
                 m.hp = max(1, m.max_hp * max(1, int(use.get("power", 50))) // 100)
                 res.used = True
-                res.messages.append(f"{m.name}が生き返った！")
+                res.messages.append(tr('{0}が生き返った！', m.name))
             else:
-                res.messages.append("しかし、何も起こらなかった。")
+                res.messages.append(tr('しかし、何も起こらなかった。'))
     if res.used and use.get("consume", it.type == "consumable"):
         st.remove_item(iid)
     if not res.used and eff not in ("script", "warp"):
-        res.messages = [m for m in res.messages[1:] if m] or ["しかし、何も起こらなかった。"]
+        res.messages = [m for m in res.messages[1:] if m] or [tr('しかし、何も起こらなかった。')]
     res.messages = [m for m in res.messages if m]
     return res
 
@@ -112,17 +115,18 @@ def field_skills(m: Member, gd: GameData) -> list[Skill]:
 
 def use_skill(gd: GameData, user: Member, sk: Skill, target: Optional[Member], party: list[Member]) -> UseResult:
     if user.mp < sk.mp:
-        return UseResult(False, ["MP が足りない！"])
+        return UseResult(False, [tr('MP が足りない！')])
     targets = party if sk.target == "ally_all" else [target or user]
     amount = int(sk.power + user.stat("mag", gd) * 0.5)
-    msgs = [f"{user.name}は{sk.name}をとなえた！"]
+    msgs = [tr('{0}は{1}をとなえた！', user.name, sk.name)]
     healed = False
     for m in targets:
+        before = m.hp
         msg = _heal(m, amount)
-        healed = healed or bool(msg and "回復した" in msg)
+        healed = healed or m.hp > before
         if msg:
             msgs.append(msg)
     if not healed:
-        return UseResult(False, msgs[1:] or ["しかし、何も起こらなかった。"])
+        return UseResult(False, msgs[1:] or [tr('しかし、何も起こらなかった。')])
     user.mp -= sk.mp
     return UseResult(True, msgs)

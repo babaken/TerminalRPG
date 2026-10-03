@@ -1,6 +1,8 @@
 """エンディング画面（@ending）：タイトル・おわりの言葉・パーティ・プレイ時間を出し、Enter でタイトルへ。"""
 from __future__ import annotations
 
+from ..i18n import tr
+
 from typing import TYPE_CHECKING
 
 from ..app import Scene
@@ -17,7 +19,7 @@ READY_SECONDS = 1.0           # これより前のキーは受け付けない（
 class EndingScene(Scene):
     def __init__(self, field: "FieldScene", text: str = ""):
         self.field = field
-        self.text = text or "―― おわり ――"
+        self.text = text or tr('―― おわり ――')
         self.t = 0.0
         self.closed = False
 
@@ -33,19 +35,19 @@ class EndingScene(Scene):
         st = self.field.st
         gd = self.field.gd
         t = int(st.playtime)
-        party = "　".join(f"{m.name} Lv{m.lv}" for m in st.party)
+        party = tr('\u3000').join(f"{m.name} Lv{m.lv}" for m in st.party)
         out = [
             (self.field.game.manifest.title, Style.of("bright_white", bold=True)),
             ("", Style()),
             (format_text(self.text, st, gd), Style.of("bright_yellow")),
             ("", Style()),
             (party, Style.of("white")),
-            (f"プレイ時間 {t // 3600:02}:{t // 60 % 60:02}:{t % 60:02}", Style.of("white")),
+            (tr('プレイ時間 {0:02}:{1:02}:{2:02}', t // 3600, t // 60 % 60, t % 60), Style.of("white")),
             ("", Style()),
-            ("遊んでくれて、ありがとう。", Style.of("bright_white")),
+            (tr('遊んでくれて、ありがとう。'), Style.of("bright_white")),
         ]
         if self.t >= READY_SECONDS:
-            out += [("", Style()), ("Enter でタイトルへ", Style.of("gray"))]
+            out += [("", Style()), (tr('Enter でタイトルへ'), Style.of("gray"))]
         return out
 
     def draw(self, buf: Buffer) -> None:

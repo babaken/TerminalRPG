@@ -5,6 +5,8 @@ Esc でひとつ戻る（最上位で Esc ならメニューを閉じる）。
 """
 from __future__ import annotations
 
+from ..i18n import tr
+
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Callable, Optional
 
@@ -41,7 +43,7 @@ class MenuScene(Overlay):
         super().__init__(field)
         self.views: list[View] = []
         self.status_member: Optional[Member] = None
-        self._push(View("メニュー", ListWindow([(t, "", True) for t in TOP]), self._top_ok))
+        self._push(View(tr('メニュー'), ListWindow([(tr(name), "", True) for name in TOP]), self._top_ok))
 
     # ================================================================ ビュー操作
     def _push(self, v: View) -> None:
@@ -91,7 +93,7 @@ class MenuScene(Overlay):
     def _member_rows(self) -> list[tuple[str, str, bool]]:
         rows = []
         for m in self.st.party:
-            hp = f"HP {m.hp:>3}/{m.max_hp:<3}" if m.alive else "たおれている"
+            hp = f"HP {m.hp:>3}/{m.max_hp:<3}" if m.alive else tr('たおれている')
             rows.append((pad(m.name, 10), f"{hp} {points_text(m.mp, m.max_mp, max(0, m.sp), m.max_sp(self.gd))}", True))
         return rows
 
@@ -101,27 +103,27 @@ class MenuScene(Overlay):
 
     def _member_detail(self, m: Member) -> list[tuple[str, Style]]:
         job = self.gd.jobs.get(m.job)
-        st_names = "・".join(self.gd.statuses[s].name for s in m.status if s in self.gd.statuses)
+        st_names = tr('・').join(self.gd.statuses[s].name for s in m.status if s in self.gd.statuses)
         lines = [(f"{job.name if job else m.job}  Lv {m.lv}", HEAD_ST),
                  (f"HP {m.hp}/{m.max_hp}   {self._mpsp(m)}", TEXT)]
         if st_names:
-            lines.append((f"状態：{st_names}", Style.of("bright_magenta")))
+            lines.append((tr('状態：{0}', st_names), Style.of("bright_magenta")))
         return lines
 
     # ================================================================ 最上位
     def _top_ok(self, i: int) -> None:
         name = TOP[i]
-        if name == "どうぐ":
+        if name == 'どうぐ':
             self._open_items()
-        elif name == "スキル":
-            self._pick_member("だれのスキル？", self._open_skills)
-        elif name == "そうび":
-            self._pick_member("だれのそうび？", self._open_equip)
-        elif name == "つよさ":
+        elif name == 'スキル':
+            self._pick_member(tr('だれのスキル？'), self._open_skills)
+        elif name == 'そうび':
+            self._pick_member(tr('だれのそうび？'), self._open_equip)
+        elif name == 'つよさ':
             self.status_member = self.st.party[0]
-        elif name == "いらい":
+        elif name == 'いらい':
             self._open_quests()
-        elif name == "システム":
+        elif name == 'システム':
             self._open_system()
         else:
             self.close()
@@ -141,9 +143,9 @@ class MenuScene(Overlay):
     def _open_items(self) -> None:
         rows, ids = self._item_rows()
         if not rows:
-            self.say("何も持っていない。")
+            self.say(tr('何も持っていない。'))
             return
-        self._push(View("どうぐ", ListWindow(rows, 12), self._item_ok, self._item_detail, ids))
+        self._push(View(tr('どうぐ'), ListWindow(rows, 12), self._item_ok, self._item_detail, ids))
 
     def _reload_items(self) -> None:
         rows, ids = self._item_rows()
@@ -156,32 +158,32 @@ class MenuScene(Overlay):
         it = self.gd.items[self.views[-1].payload[i]]
         lines = [(it.desc, TEXT)] if it.desc else []
         if it.type == "equipment":
-            stat = "  ".join(f"{STAT_NAMES.get(k, k)}+{v}" for k, v in it.stats.items() if v)
-            lines.append((f"［装備品・{SLOT_NAMES.get(it.slot, it.slot)}］{stat}", HEAD_ST))
+            stat = "  ".join(f"{tr(STAT_NAMES.get(k, k))}+{v}" for k, v in it.stats.items() if v)
+            lines.append((tr('［装備品・{0}］{1}', tr(SLOT_NAMES.get(it.slot, it.slot)), stat), HEAD_ST))
         elif it.type == "key":
-            lines.append(("［だいじなもの］", HEAD_ST))
+            lines.append((tr('［だいじなもの］'), HEAD_ST))
         if it.use:
-            where = "フィールド・戦闘" if it.use.get("field") and it.use.get("battle") else \
-                ("フィールド" if it.use.get("field") else "戦闘中のみ")
-            lines.append((f"［使用］{where}", DIM_TEXT))
+            where = tr('フィールド・戦闘') if it.use.get("field") and it.use.get("battle") else \
+                (tr('フィールド') if it.use.get("field") else tr('戦闘中のみ'))
+            lines.append((tr('［使用］{0}', where), DIM_TEXT))
         return lines
 
     def _item_ok(self, i: int) -> None:
         iid = self.views[-1].payload[i]
         it = self.gd.items[iid]
-        opts = ["つかう", "すてる", "やめる"]
+        opts = [tr('つかう'), tr('すてる'), tr('やめる')]
 
         def chosen(k: int) -> None:
             if k == 0:
                 self._use_item(iid)
             elif k == 1:
                 self._discard(iid)
-        self.ask(f"{it.name}をどうする？", opts, chosen, cancel_index=2)
+        self.ask(tr('{0}をどうする？', it.name), opts, chosen, cancel_index=2)
 
     def _use_item(self, iid: str) -> None:
         it = self.gd.items[iid]
         if not I.usable_on_field(it):
-            self.say("ここでは使えない。" if it.use else f"{it.name}は使うものではない。")
+            self.say(tr('ここでは使えない。') if it.use else tr('{0}は使うものではない。', it.name))
             return
 
         def apply(target: Optional[Member]) -> None:
@@ -202,29 +204,29 @@ class MenuScene(Overlay):
             self._reload_items()
             self.say(res.messages)
         if I.needs_target(it):
-            self._pick_member(f"だれに{it.name}を使う？", apply)
+            self._pick_member(tr('だれに{0}を使う？', it.name), apply)
         else:
             apply(None)
 
     def _discard(self, iid: str) -> None:
         it = self.gd.items[iid]
         if it.type == "key":
-            self.say("それを捨てるなんて とんでもない！")
+            self.say(tr('それを捨てるなんて とんでもない！'))
             return
 
         def yes(k: int) -> None:
             if k == 0:
                 self.st.remove_item(iid)
                 self._reload_items()
-                self.say(f"{it.name}を捨てた。")
-        self.ask(f"{it.name}を 1 つ捨てますか？", ["はい", "いいえ"], yes, cancel_index=1)
+                self.say(tr('{0}を捨てた。', it.name))
+        self.ask(tr('{0}を 1 つ捨てますか？', it.name), [tr('はい'), tr('いいえ')], yes, cancel_index=1)
 
     # ================================================================ スキル
     def _open_skills(self, m: Member) -> None:
         sks = I.field_skills(m, self.gd)
         all_sk = [self.gd.skills[s] for s in skills_of(m, self.gd)]
         if not all_sk:
-            self.say(f"{m.name}はスキルを覚えていない。")
+            self.say(tr('{0}はスキルを覚えていない。', m.name))
             return
         rows = [(sk.name, cost_text(sk), sk in sks and m.mp >= sk.mp and m.alive) for sk in all_sk]
 
@@ -238,7 +240,7 @@ class MenuScene(Overlay):
                 v.list.rows = [(s.name, cost_text(s), s in sks and m.mp >= s.mp) for s in all_sk]
                 self.say(res.messages)
             if sk.target == "ally_one":
-                self._pick_member(f"だれに{sk.name}を使う？", apply)
+                self._pick_member(tr('だれに{0}を使う？', sk.name), apply)
             else:
                 apply(m)
 
@@ -246,23 +248,23 @@ class MenuScene(Overlay):
             sk = all_sk[i]
             lines = [(sk.desc, TEXT)] if sk.desc else []
             if sk not in sks:
-                lines.append(("戦闘中に使うスキル", DIM_TEXT))
+                lines.append((tr('戦闘中に使うスキル'), DIM_TEXT))
             return lines
-        self._push(View(f"{m.name}のスキル", ListWindow(rows), ok, detail))
+        self._push(View(tr('{0}のスキル', m.name), ListWindow(rows), ok, detail))
 
     # ================================================================ そうび
     def _slot_rows(self, m: Member) -> list[tuple[str, str, bool]]:
         rows = []
         for slot in EQUIP_SLOTS:
             iid = m.equip.get(slot)
-            name = self.gd.items[iid].name if iid in self.gd.items else "（なし）"
-            rows.append((f"{SLOT_NAMES[slot]}：{name}", "", True))
+            name = self.gd.items[iid].name if iid in self.gd.items else tr('（なし）')
+            rows.append((tr('{0}：{1}', tr(SLOT_NAMES[slot]), name), "", True))
         return rows
 
     def _open_equip(self, m: Member) -> None:
         def ok(i: int) -> None:
             self._open_equip_slot(m, EQUIP_SLOTS[i])
-        self._push(View(f"{m.name}のそうび", ListWindow(self._slot_rows(m)), ok,
+        self._push(View(tr('{0}のそうび', m.name), ListWindow(self._slot_rows(m)), ok,
                         lambda i: self._status_lines(m, short=True)))
 
     def _open_equip_slot(self, m: Member, slot: str) -> None:
@@ -271,20 +273,20 @@ class MenuScene(Overlay):
         rows = [(self.gd.items[iid].name, f"×{self.st.items[iid]}", True) for iid in cands]
         payload: list = list(cands)
         if m.equip.get(slot):
-            rows.append(("はずす", "", True))
+            rows.append((tr('はずす'), "", True))
             payload.append(None)
         if not rows:
-            self.say("装備できるものを持っていない。")
+            self.say(tr('装備できるものを持っていない。'))
             return
 
         def ok(i: int) -> None:
             iid = payload[i]
             if iid is None:
                 old = self.st.unequip(m, slot)
-                msg = f"{m.name}は{self.gd.items[old].name}をはずした。"
+                msg = tr('{0}は{1}をはずした。', m.name, self.gd.items[old].name)
             else:
                 old = self.st.equip(m, iid, self.gd)
-                msg = f"{m.name}は{self.gd.items[iid].name}を装備した。"
+                msg = tr('{0}は{1}を装備した。', m.name, self.gd.items[iid].name)
             self.views.pop()
             self._refresh(self._slot_rows(m))
             self.say(msg)
@@ -298,11 +300,11 @@ class MenuScene(Overlay):
                 after = now - (self.gd.items[cur].stats.get(k, 0) if cur else 0) + \
                     (self.gd.items[iid].stats.get(k, 0) if iid else 0)
                 st = Style.of("bright_green") if after > now else (Style.of("bright_red") if after < now else TEXT)
-                lines.append((f"{pad(STAT_NAMES[k], 4)} {now:>3} → {after:>3}", st))
+                lines.append((f"{pad(tr(STAT_NAMES[k]), 4)} {now:>3} → {after:>3}", st))
             if iid and self.gd.items[iid].desc:
                 lines.insert(0, (self.gd.items[iid].desc, DIM_TEXT))
             return lines
-        self._push(View(f"{SLOT_NAMES[slot]}を選ぶ", ListWindow(rows), ok, detail, payload))
+        self._push(View(tr('{0}を選ぶ', tr(SLOT_NAMES[slot])), ListWindow(rows), ok, detail, payload))
 
     # ================================================================ つよさ
     def _status_lines(self, m: Member, short: bool = False) -> list[tuple[str, Style]]:
@@ -310,60 +312,60 @@ class MenuScene(Overlay):
         lines = [(f"{job.name if job else m.job}  Lv {m.lv}", HEAD_ST)]
         if not short:
             nxt = exp_for_next(m.lv)
-            lines.append((f"経験値 {m.exp}（次の Lv まで {max(0, nxt - m.exp)}）", TEXT))
+            lines.append((tr('経験値 {0}（次の Lv まで {1}）', m.exp, max(0, nxt - m.exp)), TEXT))
         lines.append((f"HP {m.hp}/{m.max_hp}   {self._mpsp(m)}", TEXT))
         for k in ("atk", "def", "mag", "agi", "luk"):
             bonus = m.equip_bonus(k, self.gd)
-            extra = f"（+{bonus}）" if bonus > 0 else (f"（{bonus}）" if bonus < 0 else "")
-            lines.append((f"{pad(STAT_NAMES[k], 4)} {m.stat(k, self.gd):>3}{extra}", TEXT))
+            extra = tr('（+{0}）', bonus) if bonus > 0 else (tr('（{0}）', bonus) if bonus < 0 else "")
+            lines.append((f"{pad(tr(STAT_NAMES[k]), 4)} {m.stat(k, self.gd):>3}{extra}", TEXT))
         if short:
             return lines
         lines.append(("", TEXT))
         for slot in EQUIP_SLOTS:
             iid = m.equip.get(slot)
-            lines.append((f"{SLOT_NAMES[slot]}：{self.gd.items[iid].name if iid in self.gd.items else '（なし）'}", TEXT))
+            lines.append((tr('{0}：{1}', tr(SLOT_NAMES[slot]), self.gd.items[iid].name if iid in self.gd.items else tr('（なし）')), TEXT))
         sks = [self.gd.skills[s].name for s in skills_of(m, self.gd)]
-        lines.append((f"スキル：{'、'.join(sks) if sks else 'なし'}", TEXT))
+        lines.append((tr('スキル：{0}', tr('、').join(sks) if sks else tr('なし')), TEXT))
         if m.status:
-            names = "・".join(self.gd.statuses[s].name for s in m.status if s in self.gd.statuses)
-            lines.append((f"状態：{names}", Style.of("bright_magenta")))
+            names = tr('・').join(self.gd.statuses[s].name for s in m.status if s in self.gd.statuses)
+            lines.append((tr('状態：{0}', names), Style.of("bright_magenta")))
         return lines
 
     # ================================================================ いらい
     def _open_quests(self) -> None:
         qs = Q.active(self.st, self.gd)
         if not qs:
-            self.say("受けている依頼はない。")
+            self.say(tr('受けている依頼はない。'))
             return
-        rows = [(q.name, "達成！" if Q.goal_met(self.st, self.gd, q) else "", True) for q in qs]
+        rows = [(q.name, tr('達成！') if Q.goal_met(self.st, self.gd, q) else "", True) for q in qs]
 
         def detail(i: int) -> list[tuple[str, Style]]:
             q = qs[i]
             out = [(q.desc, TEXT)] if q.desc else []
-            out += [(f"目標：{Q.goal_text(self.st, self.gd, q)}", HEAD_ST), (f"報酬：{Q.reward_text(self.gd, q)}", GOLD_ST)]
+            out += [(tr('目標：{0}', Q.goal_text(self.st, self.gd, q)), HEAD_ST), (tr('報酬：{0}', Q.reward_text(self.gd, q)), GOLD_ST)]
             if Q.goal_met(self.st, self.gd, q):
-                out.append(("協会に報告しよう。", Style.of("bright_green")))
+                out.append((tr('協会に報告しよう。'), Style.of("bright_green")))
             return out
-        self._push(View("受けている依頼", ListWindow(rows), lambda i: None, detail))
+        self._push(View(tr('受けている依頼'), ListWindow(rows), lambda i: None, detail))
 
     # ================================================================ システム
     def _open_system(self) -> None:
-        opts = ["セーブ", "タイトルにもどる", "ゲームをおわる", "やめる"]
+        opts = [tr('セーブ'), tr('タイトルにもどる'), tr('ゲームをおわる'), tr('やめる')]
 
         def chosen(k: int) -> None:
             if k == 0:
                 if self.game_manifest().save == "save_point_only":
-                    self.say("ここではセーブできない。（セーブできる場所で行ってください）")
+                    self.say(tr('ここではセーブできない。（セーブできる場所で行ってください）'))
                 else:
                     from .saveload import SaveLoadScene
                     self.app.push(SaveLoadScene(self.field.game, "save", field=self.field))
             elif k == 1:
-                self.ask("タイトルにもどりますか？（セーブしていない進行は失われます）", ["はい", "いいえ"],
+                self.ask(tr('タイトルにもどりますか？（セーブしていない進行は失われます）'), [tr('はい'), tr('いいえ')],
                          lambda j: self._to_title() if j == 0 else None, cancel_index=1)
             elif k == 2:
-                self.ask("ゲームをおわりますか？（セーブしていない進行は失われます）", ["はい", "いいえ"],
+                self.ask(tr('ゲームをおわりますか？（セーブしていない進行は失われます）'), [tr('はい'), tr('いいえ')],
                          lambda j: self.app.quit() if j == 0 else None, cancel_index=1)
-        self.ask("システム", opts, chosen, cancel_index=3)
+        self.ask(tr('システム'), opts, chosen, cancel_index=3)
 
     def game_manifest(self):
         return self.field.game.manifest
@@ -378,12 +380,12 @@ class MenuScene(Overlay):
         buf.fill(a, " ")                 # 下のフィールドが透けないように消す
         self.draw_gold(buf)
         top = self.views[0]
-        top.list.draw(buf, Rect(a.x + 1, a.y, MENU_W, len(TOP) + 2), title="メニュー")
+        top.list.draw(buf, Rect(a.x + 1, a.y, MENU_W, len(TOP) + 2), title=tr('メニュー'))
         x0 = a.x + 1 + MENU_W + 1
         if self.status_member is not None:
             m = self.status_member
             rect = Rect(x0, a.y + 3, min(56, a.right - x0 - 1), min(a.h - 3, 20))
-            self.draw_detail(buf, rect, f"{m.name}のつよさ（←→ で切替）", self._status_lines(m))
+            self.draw_detail(buf, rect, tr('{0}のつよさ（←→ で切替）', m.name), self._status_lines(m))
             return
         if len(self.views) == 1:
             self._draw_party(buf, Rect(x0, a.y + 3, min(60, a.right - x0 - 1), min(a.h - 3, 3 * len(self.st.party) + 2)))
@@ -397,7 +399,7 @@ class MenuScene(Overlay):
             self.draw_detail(buf, drect, "", v.detail(v.list.index))
 
     def _draw_party(self, buf: Buffer, rect: Rect) -> None:
-        inner = buf.box(rect, FRAME, title="パーティ", chars=BOX_SINGLE)
+        inner = buf.box(rect, FRAME, title=tr('パーティ'), chars=BOX_SINGLE)
         y = inner.y
         for m in self.st.party:
             if y + 1 >= inner.bottom + 1:
@@ -406,7 +408,7 @@ class MenuScene(Overlay):
             buf.put(inner.x + 1, y, f"{pad(m.name, 10)}{pad(job.name if job else '', 10)}Lv {m.lv}",
                     Style.of("bright_white", bold=True), clip=inner)
             hp_st = Style.of("bright_red") if m.hp * 4 <= m.max_hp else TEXT
-            st_names = "・".join(self.gd.statuses[s].name for s in m.status if s in self.gd.statuses)
+            st_names = tr('・').join(self.gd.statuses[s].name for s in m.status if s in self.gd.statuses)
             buf.put(inner.x + 2, y + 1, f"HP {m.hp:>3}/{m.max_hp:<3}  {points_text(m.mp, m.max_mp, max(0, m.sp), m.max_sp(self.gd))}  {st_names}",
                     hp_st, clip=inner)
             y += 3

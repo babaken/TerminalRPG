@@ -8,6 +8,8 @@
 """
 from __future__ import annotations
 
+from ..i18n import tr
+
 import random
 from typing import Optional
 
@@ -141,7 +143,7 @@ class Typewriter(Effect):
         if n >= len(self.text):
             if int(self.t * 3) % 2 == 0:
                 buf.put(buf.width // 2, y + 2, "▼", Style.of("yellow"))
-            buf.put_center(y + 4, "Enter / Z で続ける", Style.of("gray"))
+            buf.put_center(y + 4, tr("Enter / Z で続ける"), Style.of("gray"))
 
 
 class Wait(Effect):

@@ -6,6 +6,8 @@
 """
 from __future__ import annotations
 
+from ..i18n import tr
+
 from typing import TYPE_CHECKING, Callable, Optional
 
 from ..app import Scene
@@ -96,7 +98,7 @@ class SaveLoadScene(Scene):
     def _select(self, info: SlotInfo) -> None:
         if self.mode == "save":
             if info.exists:
-                self.ask(f"スロット {info.slot} に上書きしますか？", ["はい", "いいえ"],
+                self.ask(tr('スロット {0} に上書きしますか？', info.slot), [tr('はい'), tr('いいえ')],
                          lambda i: self._do_save(info.slot) if i == 0 else None)
             else:
                 self._do_save(info.slot)
@@ -106,7 +108,7 @@ class SaveLoadScene(Scene):
         if not info.ok:
             self.say(info.error)
             return
-        self.ask(f"スロット {info.slot} のデータで再開しますか？", ["はい", "いいえ"],
+        self.ask(tr('スロット {0} のデータで再開しますか？', info.slot), [tr('はい'), tr('いいえ')],
                  lambda i: self._do_load(info.slot) if i == 0 else None)
 
     def _do_save(self, slot: int) -> None:
@@ -117,10 +119,10 @@ class SaveLoadScene(Scene):
         try:
             self.store.save(slot, st, map_name)
         except SaveError as e:
-            self.say(f"セーブできませんでした。{e}")
+            self.say(tr('セーブできませんでした。{0}', e))
             return
         self.infos = self.store.infos()
-        self.say(f"スロット {slot} にセーブしました。", then=self.close)
+        self.say(tr('スロット {0} にセーブしました。', slot), then=self.close)
 
     def _do_load(self, slot: int) -> None:
         try:
@@ -140,20 +142,20 @@ class SaveLoadScene(Scene):
         w = min(88, buf.width - 4)
         h = SLOTS * 3 + 3
         rect = Rect((buf.width - w) // 2, max(1, (buf.height - msg_h - h) // 2), w, h)
-        title = "セーブ" if self.mode == "save" else "つづきから"
+        title = tr('セーブ') if self.mode == "save" else tr('つづきから')
         inner = buf.box(rect, FRAME, title=title, chars=BOX_SINGLE)
         for i, info in enumerate(self.infos):
             sel = i == self.index
             y = inner.y + i * 3
             disabled = self.mode == "load" and not (info.exists and info.ok)
             st = CURSOR if sel else (DIM_TEXT if disabled else TEXT)
-            buf.put(inner.x + 1, y, ("▶ " if sel else "  ") + f"スロット {info.slot}", st, clip=inner)
+            buf.put(inner.x + 1, y, ("▶ " if sel else "  ") + tr('スロット {0}', info.slot), st, clip=inner)
             line = info.label()
             if info.exists and info.ok and info.chapter_title:
-                line = line.replace(f"第{info.chapter}章", f"第{info.chapter}章「{info.chapter_title}」")
+                line = line.replace(tr('第{0}章', info.chapter), tr('第{0}章「{1}」', info.chapter, info.chapter_title))
             lst = Style.of("bright_red") if info.exists and not info.ok else (DIM_TEXT if not info.exists else TEXT)
             buf.put(inner.x + 4, y + 1, truncate(line, inner.w - 6), lst, clip=inner)
-        hint = "Enter: 決定  Esc: もどる"
+        hint = tr('Enter: 決定  Esc: もどる')
         buf.put(inner.right - len(hint) - 8, inner.bottom, hint, DIM_TEXT)
         mrect = Rect(0, buf.height - msg_h, buf.width, msg_h)
         if self.msg.active:

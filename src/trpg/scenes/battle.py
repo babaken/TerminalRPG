@@ -1,6 +1,8 @@
 """戦闘画面（基本設計 2.2 / 4.5）。進行と計算は battle.core に任せ、ここは入力と表示だけを受け持つ。"""
 from __future__ import annotations
 
+from ..i18n import tr
+
 from typing import TYPE_CHECKING, Callable, Iterator, Optional
 
 from ..app import Scene
@@ -140,8 +142,8 @@ class BattleScene(Scene):
         a = self.actor
         has_skill = bool(a.skills())
         has_item = any(self._battle_items())
-        return [("たたかう", True), ("スキル", has_skill), ("どうぐ", has_item),
-                ("ぼうぎょ", True), ("にげる", self.battle.can_escape)]
+        return [(tr('たたかう'), True), (tr('スキル'), has_skill), (tr('どうぐ'), has_item),
+                (tr('ぼうぎょ'), True), (tr('にげる'), self.battle.can_escape)]
 
     def _battle_items(self):
         for iid, n in self.st.items.items():
@@ -228,22 +230,22 @@ class BattleScene(Scene):
                 label, enabled = items[self.menu_i]
                 if not enabled:
                     return
-                if label == "たたかう":
+                if label == tr('たたかう'):
                     self._choose_target(Command("attack"), "enemy")
-                elif label == "スキル":
+                elif label == tr('スキル'):
                     self.list_kind = "skill"
                     a = self.actor
                     self.list_items = [(sk.name, cost_text(sk), a.mp >= sk.mp and a.sp >= sk.sp, sk) for sk in a.skills()]
                     self.list_i = 0
                     self.mode = "list"
-                elif label == "どうぐ":
+                elif label == tr('どうぐ'):
                     self.list_kind = "item"
                     self.list_items = [(it.name, f"×{n}", True, it) for it, n in self._battle_items()]
                     self.list_i = 0
                     self.mode = "list"
-                elif label == "ぼうぎょ":
+                elif label == tr('ぼうぎょ'):
                     self._set_cmd(Command("defend"))
-                elif label == "にげる":
+                elif label == tr('にげる'):
                     self._set_cmd(Command("escape"))
             return
         if self.mode == "list":
@@ -391,13 +393,13 @@ class BattleScene(Scene):
             sel = targeting and self.targets[self.target_i] is b
             hit = id(b) in self.blink and int(self.t * 20) % 2 == 0
             frame = Style.of("bright_red") if hit else (CURSOR if sel or b is cur else FRAME)
-            title = "" if not b.pet else ("使い魔" if b.owner is not None else "ペット")
+            title = "" if not b.pet else (tr('使い魔') if b.owner is not None else tr('ペット'))
             inner = buf.box(rect, frame, title=title, chars=BOX_SINGLE)
             name_st = CURSOR if b is cur else Style.of("bright_white", bold=True)
             label = ("▶" if b is cur else "") + b.name
             buf.put(inner.x, inner.y, truncate(label, inner.w), name_st, clip=inner)
             if not b.alive:
-                buf.put(inner.x, inner.y + 1, "たおれている", Style.of("bright_red"), clip=inner)
+                buf.put(inner.x, inner.y + 1, tr('たおれている'), Style.of("bright_red"), clip=inner)
                 continue
             hp_st = Style.of("bright_red") if b.hp * 4 <= b.max_hp else (Style.of("yellow") if b.hp * 2 <= b.max_hp else TEXT)
             buf.put(inner.x, inner.y + 1, f"HP {b.hp:>3}/{b.max_hp:<3}", hp_st, clip=inner)
@@ -417,16 +419,16 @@ class BattleScene(Scene):
         inner = buf.box(rect, FRAME, chars=BOX_SINGLE)
         lines = self.log
         if self.mode == "target":
-            lines = ["だれに？（←→ で選ぶ　Enter で決定　Esc でもどる）"]
+            lines = [tr('だれに？（←→ で選ぶ\u3000Enter で決定\u3000Esc でもどる）')]
         elif self.mode in ("command", "list") and not lines:
-            lines = [f"{self.actor.name}はどうする？"]
+            lines = [tr('{0}はどうする？', self.actor.name)]
         for i, line in enumerate(lines[-inner.h:]):
             buf.put(inner.x + 1, inner.y + i, truncate(line, inner.w - 2), TEXT, clip=inner)
         if self.mode == "done" and int(self.t * 3) % 2 == 0:
             buf.put(inner.right - 2, inner.bottom - 1, "▽", CURSOR, clip=inner)
 
     def _draw_list(self, buf: Buffer, rect: Rect) -> None:
-        title = "スキル" if self.list_kind == "skill" else "どうぐ"
+        title = tr('スキル') if self.list_kind == "skill" else tr('どうぐ')
         inner = buf.box(rect, FRAME, title=title, chars=BOX_SINGLE)
         top = max(0, self.list_i - inner.h + 2)
         for row, (name, right, enabled, _) in enumerate(self.list_items[top:top + inner.h - 1]):

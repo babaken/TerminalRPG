@@ -24,3 +24,12 @@ def edit(path: Path, old: str, new: str) -> None:
 def _save_dir(tmp_path, monkeypatch):
     """セーブはテストごとの一時フォルダへ（リポジトリに saves/ を作らない）。"""
     monkeypatch.setenv("TRPG_SAVE_DIR", str(tmp_path / "saves"))
+
+
+@pytest.fixture(autouse=True)
+def _lang_ja():
+    """UI の言語はテストごとに日本語に戻す（英語のテストが他に影響しないように）。"""
+    from trpg.i18n import set_lang
+    set_lang("ja")
+    yield
+    set_lang("ja")

@@ -7,6 +7,8 @@
 """
 from __future__ import annotations
 
+from ..i18n import tr
+
 import random
 from typing import Optional
 
@@ -43,20 +45,20 @@ def trap_at(st: GameState, map_id: str, x: int, y: int) -> Optional[list]:
 def trigger(st: GameState, gd: GameData, trap: list, rng: Optional[random.Random] = None) -> list[str]:
     """罠を作動させる。見えるようにして、ダメージ・状態異常を与え、表示する文を返す。"""
     rng = rng or random
-    tr: Trap = gd.traps[trap[2]]
+    kind: Trap = gd.traps[trap[2]]
     trap[3] = True
     alive = [m for m in st.party if m.alive]
     if not alive:
         return []
-    targets = alive if tr.target == "all" else [rng.choice(alive)]
-    msgs = [tr.message or f"{tr.name}だ！"]
+    targets = alive if kind.target == "all" else [rng.choice(alive)]
+    msgs = [kind.message or tr('{0}だ！', kind.name)]
     for m in targets:
-        dmg = max(1, int(m.max_hp * tr.damage_rate)) if tr.damage_rate > 0 else 0
+        dmg = max(1, int(m.max_hp * kind.damage_rate)) if kind.damage_rate > 0 else 0
         if dmg:
             before = m.hp
             m.hp = max(1, m.hp - dmg)
-            msgs.append(f"{m.name}は {before - m.hp} のダメージを受けた！")
-        if tr.status and tr.status in gd.statuses and tr.status not in m.status:
-            m.status.append(tr.status)
-            msgs.append(f"{m.name}は{gd.statuses[tr.status].name}になった！")
+            msgs.append(tr('{0}は {1} のダメージを受けた！', m.name, before - m.hp))
+        if kind.status and kind.status in gd.statuses and kind.status not in m.status:
+            m.status.append(kind.status)
+            msgs.append(tr('{0}は{1}になった！', m.name, gd.statuses[kind.status].name))
     return msgs
