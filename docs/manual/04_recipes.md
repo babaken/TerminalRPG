@@ -193,3 +193,12 @@ Enemy.data で `copy = "hero"` の敵を作ると、主人公と同じ能力値�
 
 - テイマーの「手なずける」（スキルの `kind = "tame"`）で仲間にした魔物は、次の戦闘から自動で戦います。`@pet 敵ID` でも渡せます。
 - Friends.data のキャラに `familiar = "pipi"` と書くと、そのキャラが戦うとき一緒に戦う使い魔になります。強さは敵データの `growth` と主人の Lv で決まります。
+
+## 英語の本文を付ける
+
+UI は `--lang en` やタイトル画面の「言語 / Language」で英語になりますが、シナリオの本文はシナリオ側で用意します。
+1. manifest.toml に `languages = ["ja", "en"]` と書く
+2. 訳したファイルを `lang/en/` に同じ名前で置く（`lang/en/scenario.sco`、`lang/en/Items.data` など。全部でなくてよい）
+
+UI が英語のときは `lang/en/` のファイルを、ないものは元のファイルを使います。ID・ラベル・フラグは元のファイルとそろえてください（セーブは両方の言語で共通です）。
+`--check` は `lang/en/` に差し替えた形でも検証し、誤りを `lang/en/scenario.sco:12` のように表示します。

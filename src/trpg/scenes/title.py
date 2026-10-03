@@ -33,14 +33,17 @@ class TitleScene(Scene):
         self.game = game
         self.index = 0
         self.notice = ""
+        if game.package.has_translations() and game.package.lang != get_lang():
+            self._reload_game()                     # ゲーム中に言語を変えてタイトルに戻ったとき
         try:
-            has_save = game.saves().any_save()
+            has_save = self.game.saves().any_save()
         except Exception:
             has_save = False
         self.has_save = has_save
         self._make_items()
         # 背景エフェクト（manifest の title_screen.effect）
-        self.bg_kind = game.manifest.title_effect if game.manifest.title_effect not in ("", "none") else ""
+        m = self.game.manifest
+        self.bg_kind = m.title_effect if m.title_effect not in ("", "none") else ""
         self.bg = None
         self._make_bg()
         if has_save:
@@ -57,6 +60,20 @@ class TitleScene(Scene):
         set_lang("en" if get_lang() == "ja" else "ja")
         save_lang(get_lang())
         self._make_items()
+        if self.game.package.has_translations():
+            self._reload_game()
+
+    def _reload_game(self) -> None:
+        """シナリオに言語別の本文（lang/<言語>/）があれば、選んだ言語で読み直す。"""
+        old = self.game
+        try:
+            new = load_game(old.package.path, dev=old.dev)
+        except (PackageError, DataError):
+            self.notice = tr('この言語のシナリオの文に誤りがあります。--check で確認してください')
+            return
+        new.save_dir = old.save_dir
+        old.close()
+        self.game = new
 
     def on_key(self, ev: KeyEvent, actions: frozenset[Action]) -> None:
         self.notice = ""

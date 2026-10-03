@@ -1,3 +1,4 @@
+import os
 import shutil
 from pathlib import Path
 
@@ -30,6 +31,15 @@ def _save_dir(tmp_path, monkeypatch):
 def _lang_ja():
     """UI の言語はテストごとに日本語に戻す（英語のテストが他に影響しないように）。"""
     from trpg.i18n import set_lang
-    set_lang("ja")
+    set_lang(os.environ.get("TRPG_TEST_LANG", "ja"))   # TRPG_TEST_LANG=en で英語の UI のまま全テストを流せる（落ちないかの確認用）
     yield
     set_lang("ja")
+
+
+@pytest.fixture(autouse=True)
+def _text_speed_normal():
+    """文字の速さもテストごとに「ふつう」に戻す。"""
+    from trpg import settings
+    settings.set_text_speed("normal")
+    yield
+    settings.set_text_speed("normal")

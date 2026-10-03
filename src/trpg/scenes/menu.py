@@ -350,9 +350,13 @@ class MenuScene(Overlay):
 
     # ================================================================ システム
     def _open_system(self) -> None:
-        opts = [tr('セーブ'), tr('タイトルにもどる'), tr('ゲームをおわる'), tr('やめる')]
+        opts = [tr('セーブ'), tr('設定'), tr('タイトルにもどる'), tr('ゲームをおわる'), tr('やめる')]
 
         def chosen(k: int) -> None:
+            if k == 1:
+                self._open_settings()
+                return
+            k -= 1 if k > 1 else 0
             if k == 0:
                 if self.game_manifest().save == "save_point_only":
                     self.say(tr('ここではセーブできない。（セーブできる場所で行ってください）'))
@@ -365,7 +369,30 @@ class MenuScene(Overlay):
             elif k == 2:
                 self.ask(tr('ゲームをおわりますか？（セーブしていない進行は失われます）'), [tr('はい'), tr('いいえ')],
                          lambda j: self.app.quit() if j == 0 else None, cancel_index=1)
-        self.ask(tr('システム'), opts, chosen, cancel_index=3)
+        self.ask(tr('システム'), opts, chosen, cancel_index=4)
+
+    def _open_settings(self) -> None:
+        """文字の速さ・言語（要件 4.8）。選ぶたびに切り替わり、settings.json に覚える。"""
+        from .. import settings
+        from ..i18n import get_lang, lang_label, save_lang, set_lang
+        names = list(settings.TEXT_SPEEDS)
+        opts = [tr('文字の速さ：{0}', tr(settings.TEXT_SPEED_NAMES[settings.text_speed()])), lang_label(), tr('やめる')]
+
+        def chosen(k: int) -> None:
+            if k == 0:
+                i = names.index(settings.text_speed())
+                settings.set_text_speed(names[(i + 1) % len(names)], store=True)
+            elif k == 1:
+                set_lang("en" if get_lang() == "ja" else "ja")
+                save_lang(get_lang())
+                self.views[0].list.rows = [(tr(name), "", True) for name in TOP]
+                if self.field.game.package.has_translations():
+                    self.say(tr('シナリオの文の言語は、タイトル画面にもどると切り替わります。'), self._open_settings)
+                    return
+            else:
+                return
+            self._open_settings()
+        self.ask(tr('設定'), opts, chosen, cancel_index=2)
 
     def game_manifest(self):
         return self.field.game.manifest

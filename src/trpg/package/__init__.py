@@ -14,11 +14,15 @@ REQUIRED_FILES = ("scenario.sco", "Map.data", "Enemy.data", "Friends.data")
 OPTIONAL_FILES = ("Items.data", "Quests.data")
 
 
+LANG_DIR = "lang"          # 言語別のファイル：lang/<言語>/scenario.sco などが、その言語のとき元のファイルの代わりになる
+
+
 @dataclass
 class Package:
     path: Path
     source: Source
     manifest: Manifest
+    lang: str = ""                     # 本文の言語（manifest.languages の 2 番目以降のときだけ lang/ のファイルを使う）
 
     @property
     def id(self) -> str:
@@ -27,8 +31,23 @@ class Package:
     def exists(self, path: str) -> bool:
         return self.source.exists(path)
 
+    def resolve(self, path: str) -> str:
+        """実際に読むファイル（言語別のファイルがあればそちら）。"""
+        if self.lang and self.lang != self.manifest.languages[0] and self.lang in self.manifest.languages:
+            alt = f"{LANG_DIR}/{self.lang}/{path}"
+            if self.source.exists(alt):
+                return alt
+        return path
+
     def read_text(self, path: str) -> Optional[str]:
-        return read_text(self.source, path)
+        return read_text(self.source, self.resolve(path))
+
+    def lang_dirs(self) -> list[str]:
+        """lang/ の下にある言語。"""
+        return sorted({f.split("/")[1] for f in self.files() if f.startswith(LANG_DIR + "/") and f.count("/") >= 2})
+
+    def has_translations(self) -> bool:
+        return any(l in self.manifest.languages[1:] for l in self.lang_dirs())
 
     def files(self) -> list[str]:
         return self.source.files()
@@ -43,7 +62,7 @@ class Package:
         self.close()
 
 
-def open_package(path: Path | str, report: Optional[Report] = None) -> Package:
+def open_package(path: Path | str, report: Optional[Report] = None, lang: str = "") -> Package:
     """パッケージを開いて manifest と必須ファイルを検証する。
 
     エラーがあれば DataError（report つき）を送出する。``report`` を渡すと警告もそこに集まる。
@@ -63,7 +82,7 @@ def open_package(path: Path | str, report: Optional[Report] = None) -> Package:
     except BaseException:
         src.close()
         raise
-    return Package(Path(path), src, manifest)
+    return Package(Path(path), src, manifest, lang)
 
 
 @dataclass

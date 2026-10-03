@@ -314,4 +314,13 @@ EN: dict[str, str] = {
     "（能力は Lv {} のとき）": "(stats at Lv {})",
     "攻撃 {0:>3}  防御 {1:>3}": "ATK {0:>3}  DEF {1:>3}",
     "魔力 {0:>3}  素早 {1:>3}": "MAG {0:>3}  AGI {1:>3}",
+    # 設定（フィールドメニュー → システム → 設定）
+    "設定": "Settings",
+    "文字の速さ：{0}": "Text speed: {0}",
+    "おそい": "Slow",
+    "ふつう": "Normal",
+    "はやい": "Fast",
+    "一瞬": "Instant",
+    "この言語のシナリオの文に誤りがあります。--check で確認してください": "The scenario text for this language has errors. Run --check to see them.",
+    "シナリオの文の言語は、タイトル画面にもどると切り替わります。": "The scenario text switches language when you return to the title screen.",
 }

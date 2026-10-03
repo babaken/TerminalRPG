@@ -126,9 +126,14 @@ class KeyMap:
         bindings = {a: list(t) for a, t in DEFAULT_BINDINGS.items()}
         for name, tokens in conf.items():
             try:
-                bindings[Action(name)] = list(tokens)
+                action = Action(name)
             except ValueError:
-                raise ValueError(f"不明なアクション名です: {name}") from None
+                names = " / ".join(a.value for a in Action)
+                raise ValueError(f"不明なアクション名です: {name}（{names}）") from None
+            for t in tokens:
+                if len(t) != 1 and t.upper() not in Key.__members__:
+                    raise ValueError(f"不明なキー名です: {t}（1 文字か、UP / ENTER / ESC / F1 などのキー名）")
+            bindings[action] = list(tokens)
         return cls(bindings)
 
     def actions(self, ev: KeyEvent) -> frozenset[Action]:

@@ -19,6 +19,7 @@ python -m pytest            # pyproject.toml で pythonpath = src を設定済�
 - 乱数は固定しているので、結果は毎回同じです。
 - セーブは各テストの一時フォルダに作ります（`TRPG_SAVE_DIR`）。
 - データ仕様書（`docs/data_spec.md`）が読み込み処理と食い違っていないかも確かめます。
+- `TRPG_TEST_LANG=en python -m pytest` で英語の UI のまま流せます（日本語の文を確かめるテストは失敗・待ち続けるので、`timeout` を付けてファイルごとに流し、`AssertionError` 以外の例外が出ていないかを見ます）。
 
 ## CI
 
