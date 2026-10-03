@@ -204,3 +204,17 @@ def test_chapter3_temple_trials_and_return(game):
     assert "ch3_done" in st.flags and st.effects.get("snow") in (None, "off")
     from trpg.scenes.saveload import SaveLoadScene
     assert isinstance(d.scene, SaveLoadScene)
+
+
+def test_old_save_after_defeat_opens_rockslide(game):
+    """医務室の場面を古い版で通ったセーブ（落石の @tile がない）でも、ロードすると東へ行ける。"""
+    from trpg.scenes.title import start_field
+    d = after_chapter2(game)
+    st = d.field.st
+    st.flags |= {"ch3_started", "ch3_lost"}
+    st.tiles.pop("field_blackrock", None)
+    game.saves().save(1, st)
+    loaded = game.saves().load(1)
+    start_field(d.app, game, loaded)
+    d.settle()
+    assert loaded.tile_override("field_blackrock", 27, 8) == "." and loaded.tile_override("field_blackrock", 29, 8) == "="
