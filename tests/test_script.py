@@ -192,7 +192,7 @@ def test_lint(sample_dir):
 @goto *nowhere
 @map forest_1 99 99
 @map forest_1 0 0
-@item add potion
+@item add mega_potion
 @battle group=nogroup
 @npc ghost hide
 @if flag.never_set
@@ -204,7 +204,7 @@ def test_lint(sample_dir):
         sc = parse_script(sco.read_text(encoding="utf-8"), rep, "scenario.sco", loader=pkg.read_text)
         lint_script(sc, gd, rep, pkg)
     text = rep.format()
-    for frag in ("*nowhere", "(99, 99) がマップ外", "(0, 0) は通行できない", "アイテム「potion」",
+    for frag in ("*nowhere", "(99, 99) がマップ外", "(0, 0) は通行できない", "アイテム「mega_potion」",
                  "敵グループ「nogroup」", "NPC「ghost」", "*extra_unused はどこからも使われていません",
                  "フラグ never_set"):
         assert frag in text, frag

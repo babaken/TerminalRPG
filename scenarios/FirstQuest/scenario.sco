@@ -1,7 +1,7 @@
 # ============================================================
 #  FirstQuest  scenario.sco
 #  元テキスト: docs/scenario/FirstQuest_story.md
-#  現在: 第1章（出会いと旅立ち）すべて、第2章（ch2.sco）、第3章（ch3.sco）の途中まで
+#  現在: 第1章（出会いと旅立ち）すべて、第2章（ch2.sco）、第3章（ch3.sco）、第4章（ch4.sco）
 # ============================================================
 
 # ------------------------------------------------------------
@@ -333,6 +333,10 @@
 #  1-3 旅立ち（街道）
 # ------------------------------------------------------------
 *ch1_road_north
+@if flag.ch4_kai
+  @map village_lito 15 16 dir=up
+  @end
+@endif
 ……今は戻れない。
 @hero move 0 1
 @end
@@ -416,13 +420,23 @@
   {item.package}を預かった。
 @else
   道具屋「いらっしゃい！」
-  @shop town_item
+  @if chapter >= 4
+    道具屋「国の倉庫から、よく効く薬が入ったよ！」
+    @shop town_item_4
+  @else
+    @shop town_item
+  @endif
 @endif
 @end
 
 *ch1_weapon_keeper
 武具屋「冒険者なら装備はケチるなよ。命あっての物種だ」
-@shop town_weapon
+@if chapter >= 4
+  武具屋「国の注文で鎖帷子を打ったんだ。決戦に行くなら持っていけ」
+  @shop town_weapon_4
+@else
+  @shop town_weapon
+@endif
 @end
 
 *ch1_cat
@@ -565,3 +579,4 @@
 
 @include "ch2.sco"
 @include "ch3.sco"
+@include "ch4.sco"

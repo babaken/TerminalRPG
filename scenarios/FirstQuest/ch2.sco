@@ -155,9 +155,20 @@
 
 # ---- 協会長ドルガン（地図の報告のあとは協会にいる。マップでは「会」）
 *ch2_dorgan_talk
-@if flag.ch3_done
+@if flag.ch4_done
+  協会長ドルガン「封剣の勇者さまのお帰りか。……嵐王と渇王のことは、こっちでも探っておく」
+@elif flag.ch4_started
+  協会長ドルガン「儀式の間は洞穴の一番奥だ。……必ず帰ってこい」
+@elif flag.ch3_done
   協会長ドルガン「戻ったか。……その剣、前とは顔つきが違うな」
-  （第4章は制作中です）
+  協会長ドルガン「準備はいいか？」
+  @choice
+    - 行ける
+    - まだだ
+  @if choice == 1
+    @goto *ch4_start
+  @endif
+  協会長ドルガン「そうか。準備ができたら声をかけろ」
 @elif flag.ch3_lost
   協会長ドルガン「風見の神殿は北東の山の上だ。……{away.injured}のことは任せておけ」
 @elif flag.ch3_started

@@ -59,6 +59,7 @@ class Character:
     face: str = ""
     name_input: bool = False
     recruit_text: str = ""
+    familiar: str = ""        # 使い魔（敵 ID）：このキャラが戦闘に出ていると一緒に戦う。強さはこのキャラの Lv で決まる
 
 
 @dataclass
@@ -86,6 +87,7 @@ class Enemy:
     ai: str = "attack_only"
     actions: list[EnemyAction] = field(default_factory=list)
     copy: str = ""            # キャラクター ID：戦闘開始時のそのキャラの能力値を写す（試練の「影」など）
+    growth: Stats = field(default_factory=dict)   # 使い魔のとき：主人の Lv が 1 上がるごとに増える能力値
 
 
 @dataclass

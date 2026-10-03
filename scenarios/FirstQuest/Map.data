@@ -222,6 +222,76 @@ y = 16
 talk = "ch1_kai_gate_talk"
 when = "flag.ch1_farewell and !flag.ch1_left_village"
 
+[[map.npc]]
+id = "home_chief"
+glyph = "長"
+color = "white"
+x = 13
+y = 13
+talk = "ch4_home_talk"
+when = "flag.ch4_kai"
+
+[[map.npc]]
+id = "home_mother"
+glyph = "母"
+color = "bright_yellow"
+x = 14
+y = 14
+talk = "ch4_home_talk"
+when = "flag.ch4_kai"
+
+[[map.npc]]
+id = "home_father"
+glyph = "父"
+color = "yellow"
+x = 16
+y = 14
+talk = "ch4_home_talk"
+when = "flag.ch4_kai"
+
+[[map.npc]]
+id = "home_mina"
+glyph = "妹"
+color = "bright_magenta"
+x = 15
+y = 13
+talk = "ch4_home_talk"
+when = "flag.ch4_kai"
+
+[[map.npc]]
+id = "home_villager_a"
+glyph = "人"
+color = "white"
+x = 12
+y = 15
+talk = "ch4_home_talk"
+when = "flag.ch4_kai"
+
+[[map.npc]]
+id = "home_villager_b"
+glyph = "人"
+color = "white"
+x = 18
+y = 15
+talk = "ch4_home_talk"
+when = "flag.ch4_kai"
+
+[[map.npc]]
+id = "home_kai"
+glyph = "友"
+color = "cyan"
+x = 17
+y = 13
+talk = "ch4_home_talk"
+when = "flag.ch4_kai"
+
+[[map.event]]
+x = 15
+y = 16
+trigger = "auto"
+label = "ch4_village"
+when = "flag.ch4_kai and !flag.ch4_home"
+
 [[map]]
 id = "house_hero"
 name = "{hero}の家"
@@ -658,6 +728,15 @@ x = 18
 y = 2
 talk = "ch2_dorgan_talk"
 when = "flag.ch2_map_reported"
+
+[[map.npc]]
+id = "kai_guild"
+glyph = "友"
+color = "cyan"
+x = 10
+y = 8
+talk = "ch4_kai_guild_talk"
+when = "flag.ch4_returned and !flag.ch4_home"
 
 [[map]]
 id = "bern_inn"
@@ -1736,6 +1815,21 @@ color = "bright_white"
 x = 14
 y = 3
 when = "!flag.ch3_lost"
+
+[[map.event]]
+x = 14
+y = 13
+trigger = "auto"
+label = "ch4_garza2"
+when = "flag.ch4_started and !flag.ch4_done"
+
+[[map.npc]]
+id = "garza2"
+glyph = "灰"
+color = "bright_white"
+x = 14
+y = 3
+when = "flag.ch4_started and !flag.ch4_done"
 
 [[map]]
 id = "guild_infirmary"

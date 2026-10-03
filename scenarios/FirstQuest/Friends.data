@@ -119,3 +119,4 @@ lv = 3
 stats = { hp = 32, mp = 12, atk = 9, def = 6, mag = 6, agi = 9, luk = 8 }
 equip = { weapon = "whip", armor = "cloth" }
 recruit_text = "魔物だって話せばわかる子もいるんだよ。"
+familiar = "pipi"            # 使い魔の小鳥ピピ（ノアと一緒に戦い、ノアの Lv で強くなる）

@@ -38,7 +38,8 @@ class Battler:
         self.gd = gd
         self.member = member
         self.enemy = enemy
-        self.pet = pet                            # テイムした魔物（味方側。自動で行動する）
+        self.pet = pet                            # テイムした魔物・使い魔（味方側。自動で行動する）
+        self.owner: Optional["Battler"] = None    # 使い魔のとき：主人
         self.side = "party" if member is not None or pet else "enemy"
         self.name = name or (member.name if member else enemy.name)
         self.status: dict[str, int] = {}          # 状態異常 ID → 残りターン
@@ -170,6 +171,15 @@ class Battle:
         # テイムした魔物（パーティ枠の外で 1 体）。毎回 HP 満タンで参加し、経験値はもらわない
         pet = gd.enemies.get(st.pet) if st.pet and (not members or "pet" in members) else None
         self.pet: Optional[Battler] = Battler(gd, enemy=pet, pet=True) if pet else None
+        # 使い魔：主人（Friends.data の familiar）が戦闘に出ていれば一緒に戦う。強さは主人の Lv で決まる
+        self.familiars: list[Battler] = []
+        for b in self.party:
+            ch = gd.characters.get(b.member.id)
+            fam = gd.enemies.get(ch.familiar) if ch and ch.familiar else None
+            if fam is not None:
+                fb = Battler(gd, enemy=self._grown(fam, b.member.lv), pet=True)
+                fb.owner = b
+                self.familiars.append(fb)
         ids = gd.groups[group_id].members
         counts = {e: ids.count(e) for e in ids}
         seen: dict[str, int] = {}
@@ -182,6 +192,17 @@ class Battle:
                 seen[eid] = seen.get(eid, 0) + 1
             self.enemies.append(Battler(gd, enemy=e, name=name))
         self._cond_cache: dict[str, Any] = {}
+
+    @staticmethod
+    def _grown(e: Enemy, lv: int) -> Enemy:
+        """使い魔の能力値：基本値 + growth ×（主人の Lv − 1）。"""
+        if not e.growth or lv <= 1:
+            return e
+        from dataclasses import replace
+        stats = {k: v + e.growth.get(k, 0) * (lv - 1) for k, v in e.stats.items()}
+        for k, g in e.growth.items():
+            stats.setdefault(k, g * (lv - 1))
+        return replace(e, stats=stats)
 
     def _copied(self, e: Enemy) -> Enemy:
         """copy = キャラID の敵は、戦闘開始時のそのキャラの能力値（装備込み）になる。"""
@@ -197,8 +218,13 @@ class Battle:
     # ---- 状態
     @property
     def allies(self) -> list[Battler]:
-        """味方全員（パーティ＋ペット）。"""
-        return self.party + ([self.pet] if self.pet else [])
+        """味方全員（パーティ＋使い魔＋ペット）。"""
+        return self.party + self.familiars + ([self.pet] if self.pet else [])
+
+    @property
+    def helpers(self) -> list[Battler]:
+        """自動で戦う味方（使い魔とペット）。"""
+        return self.familiars + ([self.pet] if self.pet else [])
 
     def alive(self, side: str) -> list[Battler]:
         lst = self.allies if side == "party" else self.enemies
@@ -276,8 +302,8 @@ class Battle:
             names[b.enemy.name] = names.get(b.enemy.name, 0) + 1
         for n, c in names.items():
             yield ("msg", f"{n}が {c} 匹あらわれた！" if c > 1 else f"{n}があらわれた！")
-        if self.pet is not None:
-            yield ("msg", f"{self.pet.name}がいっしょに戦う！")
+        for h in self.helpers:
+            yield ("msg", f"{h.name}がいっしょに戦う！")
 
     def enemy_command(self, e: Battler) -> Command:
         acts = e.enemy.actions if e.enemy.ai != "attack_only" else []
@@ -377,11 +403,12 @@ class Battle:
                 if c.kind == "defend":
                     b.defending = True      # 防御は行動順に関係なくすぐ有効
                 order.append((b.stat("agi") * self._rand(0.8, 1.2), b, c))
-        if self.pet is not None and self.pet.can_act() and cmds:
-            c = self.pet_command(self.pet)
-            if c.kind == "defend":
-                self.pet.defending = True
-            order.append((self.pet.stat("agi") * self._rand(0.8, 1.2), self.pet, c))
+        for h in self.helpers:
+            if h.can_act() and cmds:
+                c = self.pet_command(h)
+                if c.kind == "defend":
+                    h.defending = True
+                order.append((h.stat("agi") * self._rand(0.8, 1.2), h, c))
         for e in self.enemies:
             if e.can_act():
                 c = self.enemy_command(e)

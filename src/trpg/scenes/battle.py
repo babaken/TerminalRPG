@@ -378,18 +378,21 @@ class BattleScene(Scene):
 
     def _draw_party(self, buf: Buffer, area: Rect) -> None:
         allies = self.battle.allies
-        n = max(4, len(self.battle.party)) + (1 if self.battle.pet else 0)
+        base = max(4, len(self.battle.party))
+        extras = self.battle.helpers                  # 使い魔・ペットは右側に並べる
+        n = base + len(extras)
         w = area.w // n
         targeting = self.mode == "target" and self.targets and self.targets[0].side == "party"
         cur = self.actor if self.mode in ("command", "list", "target") and self.actors else None
         for i, b in enumerate(allies):
             if b.pet:
-                i = n - 1                                   # ペットは右端
+                i = base + extras.index(b)
             rect = Rect(area.x + i * w, area.y, w if i < n - 1 else area.w - i * w, area.h)
             sel = targeting and self.targets[self.target_i] is b
             hit = id(b) in self.blink and int(self.t * 20) % 2 == 0
             frame = Style.of("bright_red") if hit else (CURSOR if sel or b is cur else FRAME)
-            inner = buf.box(rect, frame, title="ペット" if b.pet else "", chars=BOX_SINGLE)
+            title = "" if not b.pet else ("使い魔" if b.owner is not None else "ペット")
+            inner = buf.box(rect, frame, title=title, chars=BOX_SINGLE)
             name_st = CURSOR if b is cur else Style.of("bright_white", bold=True)
             label = ("▶" if b is cur else "") + b.name
             buf.put(inner.x, inner.y, truncate(label, inner.w), name_st, clip=inner)

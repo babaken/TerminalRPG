@@ -59,7 +59,7 @@
 @end
 
 *ch3_b14_door
-@if flag.ch3_lost
+@if flag.ch3_lost and !flag.ch4_started
   大扉は固く閉ざされている。……剣は、何も応えない。
   @end
 @endif
@@ -358,5 +358,5 @@
 @flag set ch3_done
 @effect typewriter "第3章　完"
 @save_point
-（第4章「終わりの始まり」は制作中です。協会長ドルガンに報告する場面から続きます）
+協会長ドルガンのもとへ戻ろう。
 @end
