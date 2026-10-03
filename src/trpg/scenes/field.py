@@ -75,6 +75,8 @@ class FieldScene(Scene):
         self.game = game
         self.gd = game.data
         self.st = state
+        from ..world.items import personalize
+        personalize(game.data, state.hero.name)
         self.effects = EffectManager(state.effects)
         self.vm = VM(game.script, state, game.data, self)
         self.msg = MessageWindow()

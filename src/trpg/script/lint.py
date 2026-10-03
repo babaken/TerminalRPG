@@ -67,6 +67,8 @@ def lint_script(script: Script, gd: GameData, rep: Report, pkg: Optional["Packag
         if ins.op in ("goto", "call"):
             label_ref(a["label"], ins.file, ins.line)
         elif ins.op == "choice":
+            for cond in a.get("conds", {}).values():
+                collect_flags(cond, ins.file, ins.line)
             for text, label, line in a["options"]:
                 if label:
                     label_ref(label, ins.file, line)
