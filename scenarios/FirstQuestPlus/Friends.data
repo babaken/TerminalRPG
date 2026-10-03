@@ -1,0 +1,122 @@
+# ===== 職業 =====
+# growth: レベルアップ時の平均上昇量
+
+[[job]]
+id = "hero"
+name = "勇者"
+growth = { hp = 7, mp = 2, atk = 2, def = 2, mag = 1, agi = 2, luk = 1 }
+equip = ["sword", "light_armor", "shield", "accessory"]
+skills = [ { lv = 4, skill = "power_slash" } ]
+sp = { base = 8, growth = 2 }       # 技に使う SP（Lv1 の最大と、Lv ごとの増え方）
+
+[[job]]
+id = "warrior"
+name = "戦士"
+growth = { hp = 9, mp = 0, atk = 3, def = 3, mag = 0, agi = 1, luk = 1 }
+equip = ["sword", "axe", "light_armor", "heavy_armor", "shield", "accessory"]
+skills = [ { lv = 3, skill = "power_slash" } ]
+sp = { base = 10, growth = 3 }       # 技に使う SP（Lv1 の最大と、Lv ごとの増え方）
+
+[[job]]
+id = "mage"
+name = "魔法使い"
+growth = { hp = 4, mp = 5, atk = 1, def = 1, mag = 4, agi = 2, luk = 1 }
+equip = ["staff", "robe", "accessory"]
+skills = [ { lv = 1, skill = "fire" } ]
+
+[[job]]
+id = "priest"
+name = "僧侶"
+growth = { hp = 5, mp = 4, atk = 1, def = 2, mag = 3, agi = 1, luk = 2 }
+equip = ["staff", "mace", "robe", "light_armor", "accessory"]
+skills = [ { lv = 1, skill = "heal" } ]
+
+[[job]]
+id = "gambler"
+name = "遊び人"
+growth = { hp = 6, mp = 2, atk = 2, def = 1, mag = 1, agi = 3, luk = 4 }
+equip = ["dagger", "light_armor", "accessory"]
+skills = [ { lv = 1, skill = "gamble" } ]
+sp = { base = 8, growth = 2 }       # 技に使う SP（Lv1 の最大と、Lv ごとの増え方）
+
+[[job]]
+id = "amazon"
+name = "アマゾネス"
+growth = { hp = 8, mp = 1, atk = 3, def = 2, mag = 0, agi = 2, luk = 1 }
+equip = ["axe", "sword", "light_armor", "shield", "accessory"]
+skills = [ { lv = 1, skill = "war_cry" }, { lv = 5, skill = "power_slash" } ]
+sp = { base = 10, growth = 3 }       # 技に使う SP（Lv1 の最大と、Lv ごとの増え方）
+
+[[job]]
+id = "tamer"
+name = "テイマー"
+growth = { hp = 6, mp = 3, atk = 2, def = 2, mag = 2, agi = 2, luk = 2 }
+equip = ["whip", "light_armor", "robe", "accessory"]
+skills = [ { lv = 1, skill = "tame" } ]
+sp = { base = 6, growth = 2 }       # 技に使う SP（Lv1 の最大と、Lv ごとの増え方）
+
+# ===== キャラクター =====
+
+[[character]]
+id = "hero"
+name = "ユウ"
+name_input = true
+job = "hero"
+lv = 1
+stats = { hp = 30, mp = 5, atk = 8, def = 6, mag = 3, agi = 6, luk = 5 }
+equip = { armor = "cloth" }
+
+[[character]]
+id = "garo"
+name = "ガロ"
+job = "warrior"
+lv = 3
+stats = { hp = 48, mp = 0, atk = 14, def = 11, mag = 0, agi = 5, luk = 4 }
+equip = { weapon = "copper_sword", armor = "leather_armor" }
+recruit_text = "力なら任せろ。前に立つのは俺の役目だ。"
+
+[[character]]
+id = "mia"
+name = "ミア"
+job = "mage"
+lv = 3
+stats = { hp = 24, mp = 22, atk = 5, def = 5, mag = 14, agi = 8, luk = 6 }
+equip = { armor = "robe" }
+recruit_text = "魔法の研究費を稼ぎたいの。危なくなったら…頼りにしてるわ。"
+
+[[character]]
+id = "rina"
+name = "リナ"
+job = "priest"
+lv = 3
+stats = { hp = 30, mp = 18, atk = 6, def = 7, mag = 11, agi = 6, luk = 9 }
+equip = { armor = "robe" }
+recruit_text = "傷ついた人を放っておけません。どうか一緒に。"
+
+[[character]]
+id = "jack"
+name = "ジャック"
+job = "gambler"
+lv = 3
+stats = { hp = 34, mp = 10, atk = 10, def = 6, mag = 4, agi = 10, luk = 16 }
+equip = { weapon = "dagger", armor = "cloth" }
+recruit_text = "ツキは俺の味方さ。たぶんね。"
+
+[[character]]
+id = "zara"
+name = "ザラ"
+job = "amazon"
+lv = 3
+stats = { hp = 44, mp = 6, atk = 15, def = 8, mag = 1, agi = 9, luk = 5 }
+equip = { weapon = "stone_axe", armor = "leather_armor" }
+recruit_text = "弱い奴には興味がない。お前は…まあ、見込みはある。"
+
+[[character]]
+id = "noa"
+name = "ノア"
+job = "tamer"
+lv = 3
+stats = { hp = 32, mp = 12, atk = 9, def = 6, mag = 6, agi = 9, luk = 8 }
+equip = { weapon = "whip", armor = "cloth" }
+recruit_text = "魔物だって話せばわかる子もいるんだよ。"
+familiar = "pipi"            # 使い魔の小鳥ピピ（ノアと一緒に戦い、ノアの Lv で強くなる）

@@ -1,0 +1,74 @@
+# ===== 冒険者協会の依頼 =====
+# when: 掲示板に出る条件  on_complete: 達成報告のあとに実行するスクリプトのラベル
+
+[[quest]]
+id = "q_herb"
+name = "やくそう集め"
+rank = "F"
+desc = "協会の救護室で使うやくそうが足りません。3 つ納品してください。"
+goal = { type = "deliver", item = "herb", count = 3 }
+reward = { gold = 30 }
+repeatable = true
+when = "flag.guild_registered"
+on_complete = "ch1_quest_done"
+
+[[quest]]
+id = "q_slime"
+name = "街道のスライム退治"
+rank = "F"
+desc = "街道にスライムが増えて旅人が困っています。5 体退治してください。"
+goal = { type = "defeat", group = "slime", count = 5 }
+reward = { gold = 60, exp = 10 }
+when = "flag.guild_registered"
+on_complete = "ch1_quest_done"
+
+[[quest]]
+id = "q_lost_cat"
+name = "迷子の猫さがし"
+rank = "F"
+desc = "パン屋の飼い猫ミケがいなくなりました。街のどこかにいるはずです。"
+goal = { type = "flag", flag = "found_cat" }
+reward = { gold = 40, items = ["cat_collar"] }
+when = "flag.guild_registered"
+on_complete = "ch1_quest_done"
+
+[[quest]]
+id = "q_delivery"
+name = "荷物の配達"
+rank = "F"
+desc = "道具屋の荷物を、宿屋「旅鳥亭」の主人に届けてください。"
+goal = { type = "flag", flag = "package_delivered" }
+reward = { gold = 30 }
+when = "flag.guild_registered"
+on_complete = "ch1_quest_done"
+
+# ===== 2章 =====
+[[quest]]
+id = "q_mole"
+name = "カブラ村の畑荒らし"
+rank = "E"
+desc = "カブラ村の畑を荒らすモグラのような魔物を退治してください。村はベルンの南門を出てすぐです。"
+goal = { type = "flag", flag = "mole_defeated" }
+reward = { gold = 200, exp = 30 }
+when = "flag.ch2_rumor"
+on_complete = "ch2_report_map"
+
+[[quest]]
+id = "q_blackrock"
+name = "黒岩の洞穴の調査（指名）"
+rank = "D"
+desc = "協会長からの指名依頼。ベルンの東の黒岩の洞穴を調べ、わかったことを必ず報告すること。"
+goal = { type = "flag", flag = "ch2_found_scroll" }
+reward = { gold = 300, exp = 100 }
+when = "flag.ch2_map_reported"
+on_complete = "ch2_report"
+
+# ===== 3 章 =====
+[[quest]]
+id = "q_blackrock_deep"
+name = "黒岩の洞穴の奥（指名）"
+rank = "C"
+desc = "B11F より先へ進み、魔物たちの『目的』を突き止めること。……生きて戻れ。"
+goal = { type = "flag", flag = "ch4_done" }
+reward = { gold = 1000, exp = 300 }
+when = "flag.ch3_started"

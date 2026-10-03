@@ -35,14 +35,14 @@ def test_pyproject_bundles_firstquest():
 def test_find_scenarios_falls_back_to_bundled(tmp_path, monkeypatch):
     monkeypatch.setattr(pkg, "bundled_dirs", lambda: [ROOT / "scenarios"])
     found = pkg.find_scenarios(tmp_path)
-    assert [c.id for c in found] == ["firstquest"]
+    assert "firstquest" in [c.id for c in found]
 
 
 def test_find_scenarios_prefers_local_copy(tmp_path, monkeypatch):
     import shutil
     shutil.copytree(ROOT / "scenarios/FirstQuest", tmp_path / "scenarios/FirstQuest")
     monkeypatch.setattr(pkg, "bundled_dirs", lambda: [ROOT / "scenarios"])
-    found = pkg.find_scenarios(tmp_path)
+    found = [c for c in pkg.find_scenarios(tmp_path) if c.id == "firstquest"]
     assert len(found) == 1
     assert found[0].path.parent == tmp_path / "scenarios"
 
