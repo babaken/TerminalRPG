@@ -15,7 +15,7 @@ python -m venv .venv
 ```sh
 python -m pytest            # pyproject.toml で pythonpath = src を設定済み
 ```
-- 端末なしで画面にキーを送る通しプレイ（FirstQuest の各章・マニュアルの見本 HelloQuest）を含みます。
+- 端末なしで画面にキーを送る通しプレイ（FirstQuest・FirstQuest+ の各章・マニュアルの見本 HelloQuest）を含みます。
 - 乱数は固定しているので、結果は毎回同じです。
 - セーブは各テストの一時フォルダに作ります（`TRPG_SAVE_DIR`）。
 - データ仕様書（`docs/data_spec.md`）が読み込み処理と食い違っていないかも確かめます。
@@ -24,20 +24,20 @@ python -m pytest            # pyproject.toml で pythonpath = src を設定済�
 ## CI
 
 GitHub Actions（`.github/workflows/test.yml`）が、プッシュとプルリクエストごとに Windows / Linux × Python 3.11 / 3.14 で次を実行します。
-1. `python -m trpg --check scenarios/FirstQuest`
-2. `python -m trpg.tools.pack scenarios/FirstQuest --strict`（警告があると失敗）
+1. `python -m trpg --check scenarios/FirstQuest`（FirstQuestPlus も）
+2. `python -m trpg.tools.pack scenarios/FirstQuest --strict`（FirstQuestPlus も。警告があると失敗）
 3. `python -m pytest`
 
 ### 配布物のビルド
 
 `.github/workflows/build.yml` が、プルリクエスト（`src/` `scenarios/` `packaging/` `pyproject.toml` を変えたとき）・手動実行・`v*` のタグで次を作ります。
-- Windows：PyInstaller（`packaging/trpg.spec`）で `TRPG.exe` を作り、空のフォルダで `--list` して FirstQuest が見えるか確かめ、`TRPG-windows-<版>.zip`（exe と `packaging/README_windows.txt`）にする
+- Windows：PyInstaller（`packaging/trpg.spec`）で `TRPG.exe` を作り、空のフォルダで `--list` して FirstQuest と FirstQuest+ が見えるか確かめ、`TRPG-windows-<版>.zip`（exe と `packaging/README_windows.txt`）にする
 - wheel：`python -m build --wheel` → 新しい仮想環境に入れて、空のフォルダで `trpg --list` を確かめる
 
 どちらも Actions の成果物（Artifacts）に残り、タグのときはリリースに添付します。
 手元で作るときは `pip install build pyinstaller` のあと `python -m build --wheel`（→ `dist/`）／`pyinstaller packaging/trpg.spec`（→ `dist/TRPG`、その OS 用）。
 
-- wheel には FirstQuest を `trpg/bundled/FirstQuest/` として入れます（`pyproject.toml` の `package-dir`）。exe では PyInstaller の展開先の `scenarios/FirstQuest`。
+- wheel には `scenarios/` のシナリオ（FirstQuest・FirstQuestPlus）を `trpg/bundled/<名前>/` として入れます（`pyproject.toml` の `package-dir`）。exe では PyInstaller の展開先の `scenarios/<名前>`。シナリオを足したら `pyproject.toml` と `packaging/trpg.spec` にも足します（`tests/test_distribution.py` が確かめます）。
 - シナリオは `find_scenarios()`（`src/trpg/package/__init__.py`）が「起動フォルダ・`scenarios/`」→「同梱」の順に探し、同じ ID は起動フォルダ側を使います。
 - `src/trpg/` にサブパッケージを足したら `pyproject.toml` の `packages` にも足します（`tests/test_distribution.py` が確かめます）。
 
@@ -45,7 +45,7 @@ GitHub Actions（`.github/workflows/test.yml`）が、プッシュとプルリ�
 
 - リポジトリ：https://github.com/babaken/TRPG（private）
 - `main` は常に動く状態に保つ。作業は `feature/<内容>`（ドキュメントは `docs/<内容>`、修正は `fix/<内容>`）のブランチ → プルリクエストで取り込む。
-- マイルストーンごとに `v0.x.0` のタグを付け、GitHub のリリースに FirstQuest の zip（パッケージツールで作成）を添付する。
+- マイルストーンごとに `v0.x.0` のタグを付け、GitHub のリリースに FirstQuest・FirstQuest+ の zip（パッケージツールで作成）を添付する。
 - 計画と進み具合は [開発計画](development_plan.md)。
 
 ## UI の文を足すとき

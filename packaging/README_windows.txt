@@ -1,7 +1,8 @@
 TRPG（コンソール RPG エンジン）Windows 版
 
 ■ 遊び方
-  TRPG.exe をダブルクリックします。サンプルシナリオ「FirstQuest」が入っています。
+  TRPG.exe をダブルクリックします。サンプルシナリオ「FirstQuest」と「FirstQuest+」が入っていて、
+  起動すると、どちらで遊ぶかを選べます。
   Windows Terminal で開くと表示がきれいです（エクスプローラーの TRPG.exe を右クリック →
   「ターミナルで開く」、または Windows Terminal で TRPG.exe のフォルダに移動して .\TRPG.exe）。
   画面は 100 桁 × 30 行以上にしてください。

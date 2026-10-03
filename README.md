@@ -2,7 +2,14 @@
 
 ASCII アート（文字）で表現する、ターミナルで遊ぶ RPG エンジンです。
 物語・マップ・敵・アイテムは **シナリオパッケージ**（テキストファイルの集まり、または zip）に分かれていて、差し替えると別のゲームになります。
-サンプルシナリオ **FirstQuest**（全 4 章、エンディングまで）が付いています。
+サンプルシナリオが 2 本付いています（どちらも全 4 章、エンディングまで）。
+
+| シナリオ | 内容 |
+|---|---|
+| **FirstQuest** | 王道。錆びた剣を拾った少年が、封じられた魔の王に挑む |
+| **FirstQuest+** | どんでん返し。魔物が少年だけを狙う本当の理由――「主人公の正体」の物語（1・2 章は FirstQuest と同じ流れに伏線を加え、3・4 章は別の展開。セーブは別） |
+
+起動すると、どちらで遊ぶかを選ぶ画面が出ます。
 
 ## できること
 
@@ -38,7 +45,7 @@ ASCII アート（文字）で表現する、ターミナルで遊ぶ RPG エン
 | Windows の exe（Python 不要） | リリースの `TRPG-windows-<版>.zip` を展開して `TRPG.exe` を起動 |
 | pip | リリースの `trpg-<版>-py3-none-any.whl` を `pip install trpg-<版>-py3-none-any.whl` → どのフォルダでも `trpg` |
 
-どちらもサンプルシナリオ FirstQuest が入っています（起動フォルダに同じ ID のシナリオがあればそちらを使います）。
+どちらもサンプルシナリオ FirstQuest と FirstQuest+ が入っています（起動フォルダに同じ ID のシナリオがあればそちらを使います）。
 セーブは起動フォルダの `saves/` に作ります。
 
 ### 操作
@@ -49,7 +56,7 @@ ASCII アート（文字）で表現する、ターミナルで遊ぶ RPG エン
 | Enter / Z / Space | 話す・調べる・会話送り・決定 | 決定・メッセージ送り |
 | Esc / X / M | メニュー（どうぐ・スキル・そうび・つよさ・いらい・システム） | ひとつ前に戻る |
 
-UI は日本語と英語（タイトル画面の「言語 / Language」、メニューの「システム → 設定」、または `--lang en`）。シナリオの本文は、シナリオが英語版のファイル（`lang/en/`）を持っているときだけ英語になります（FirstQuest は日本語のみ）。
+UI は日本語と英語（タイトル画面の「言語 / Language」、メニューの「システム → 設定」、または `--lang en`）。シナリオの本文は、シナリオが英語版のファイル（`lang/en/`）を持っているときだけ英語になります（FirstQuest・FirstQuest+ は日本語のみ）。
 文字の速さもメニューの「システム → 設定」で変えられます。キー割当は `settings.json` で変えられます（[ツール利用ガイド](docs/tools.md)）。
 表示がずれるときは `--ambiguous-width 2`、色を使わないなら `--no-color` を付けて起動します（[ツール利用ガイド](docs/tools.md)）。
 
@@ -78,7 +85,7 @@ python -m trpg.tools.pack scenarios/MyQuest         # zip にして配る
 | [`development.md`](docs/development.md) | 開発者向けガイド（セットアップ・テスト・CI・ソースの構成） |
 | [`requirements.md`](docs/requirements.md) / [`basic_design.md`](docs/basic_design.md) | 要件定義書・基本設計書 |
 | [`development_plan.md`](docs/development_plan.md) | 開発計画（マイルストーン） |
-| [`scenario/`](docs/scenario/) | FirstQuest の本文（実装メモつき） |
+| [`scenario/`](docs/scenario/) | FirstQuest・FirstQuest+ の本文（実装メモつき） |
 
 ## 開発
 
@@ -86,4 +93,4 @@ python -m trpg.tools.pack scenarios/MyQuest         # zip にして配る
 
 ## ライセンス
 
-[MIT License](LICENSE)。エンジン・ツール・ドキュメント・サンプルシナリオ FirstQuest のすべてに適用します。
+[MIT License](LICENSE)。エンジン・ツール・ドキュメント・サンプルシナリオ（FirstQuest・FirstQuest+）のすべてに適用します。

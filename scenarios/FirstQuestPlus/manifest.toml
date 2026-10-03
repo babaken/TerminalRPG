@@ -2,7 +2,7 @@
 [package]
 id = "firstquest_plus"
 title = "FirstQuest+"
-version = "0.1.0"
+version = "1.0.0"
 author = "bbk"
 engine = ">=1.0"
 languages = ["ja"]

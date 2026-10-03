@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "trpg"
-version = "1.0.0"
+version = "1.1.0"
 description = "ASCII アートで表現するコンソール RPG エンジン"
 readme = "README.md"
 license = "MIT"
@@ -28,18 +28,23 @@ trpg-mapedit = "trpg.tools.map_editor:main"
 packages = [
   "trpg", "trpg.battle", "trpg.data", "trpg.effects", "trpg.i18n", "trpg.package", "trpg.save",
   "trpg.scenes", "trpg.script", "trpg.term", "trpg.tools", "trpg.ui", "trpg.world",
-  # 同梱のサンプルシナリオ（pip で入れると trpg/bundled/FirstQuest/ に入り、どこからでも遊べる）
+  # 同梱のサンプルシナリオ（pip で入れると trpg/bundled/<名前>/ に入り、どこからでも遊べる）
   "trpg.bundled.FirstQuest", "trpg.bundled.FirstQuest.aa",
+  "trpg.bundled.FirstQuestPlus", "trpg.bundled.FirstQuestPlus.aa",
 ]
 
 [tool.setuptools.package-dir]
 "" = "src"
 "trpg.bundled.FirstQuest" = "scenarios/FirstQuest"
 "trpg.bundled.FirstQuest.aa" = "scenarios/FirstQuest/aa"
+"trpg.bundled.FirstQuestPlus" = "scenarios/FirstQuestPlus"
+"trpg.bundled.FirstQuestPlus.aa" = "scenarios/FirstQuestPlus/aa"
 
 [tool.setuptools.package-data]
 "trpg.bundled.FirstQuest" = ["*"]
 "trpg.bundled.FirstQuest.aa" = ["*"]
+"trpg.bundled.FirstQuestPlus" = ["*"]
+"trpg.bundled.FirstQuestPlus.aa" = ["*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
