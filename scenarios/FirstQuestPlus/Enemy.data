@@ -420,6 +420,136 @@ members = ["goblin_captain", "drill_mole"]
 id = "nari_child"
 members = ["nari_child"]
 
+# ===== 4 章：玉座の間・精神世界・虚ろの殻 =====
+[[enemy]]
+id = "grey"
+name = "研究者グレイ"
+aa = "aa/grey.txt"
+stats = { hp = 650, mp = 999, atk = 24, def = 20, mag = 34, agi = 20, luk = 8 }
+exp = 400
+gold = 300
+immune_status = ["poison"]
+ai = "pattern"
+[[enemy.actions]]
+skill = "dark_flare"
+weight = 2
+[[enemy.actions]]
+skill = "attack"
+weight = 1
+[[enemy.actions]]
+skill = "core_curse"
+weight = 1
+
+[[enemy]]
+id = "grey_hurt"            # 子供のなりそこない（3 章で逃がした子）に詠唱を乱されたグレイ
+name = "研究者グレイ"
+aa = "aa/grey.txt"
+stats = { hp = 450, mp = 999, atk = 24, def = 18, mag = 28, agi = 16, luk = 8 }
+exp = 400
+gold = 300
+immune_status = ["poison"]
+ai = "pattern"
+[[enemy.actions]]
+skill = "attack"
+weight = 2
+[[enemy.actions]]
+skill = "dark_flare"
+weight = 1
+
+[[enemy]]
+id = "naive"
+name = "魔将ネイヴ"
+aa = "aa/naive.txt"
+stats = { hp = 900, mp = 99, atk = 40, def = 26, mag = 26, agi = 26, luk = 10 }
+exp = 600
+gold = 500
+weak = ["holy"]
+immune_status = ["poison"]
+ai = "pattern"
+[[enemy.actions]]
+skill = "attack"
+weight = 3
+[[enemy.actions]]
+skill = "smash"
+weight = 2
+[[enemy.actions]]
+skill = "black_wing"
+weight = 1
+when = "self.hp_rate < 0.6"
+
+[[enemy]]
+id = "zeno_inner"           # 精神世界のゼノ（勝てない。3 ターンで「声」の場面へ）
+name = "ゼノ・影"
+aa = "aa/shadow_hero.txt"
+stats = { hp = 9999, atk = 30, def = 99, mag = 20, agi = 30, luk = 10 }
+exp = 0
+gold = 0
+immune_status = ["poison"]
+ai = "pattern"
+[[enemy.actions]]
+skill = "attack"
+
+[[enemy]]
+id = "zeno_1"
+name = "虚ろの王ゼノ"
+aa = "aa/zeno.txt"
+stats = { hp = 1100, mp = 999, atk = 38, def = 28, mag = 32, agi = 20, luk = 10 }
+exp = 0
+gold = 0
+weak = ["holy"]
+immune_status = ["poison"]
+ai = "pattern"
+[[enemy.actions]]
+skill = "attack"
+weight = 2
+[[enemy.actions]]
+skill = "dark_flare"
+weight = 2
+
+[[enemy]]
+id = "zeno_2"
+name = "虚ろの王ゼノ（真の姿）"
+aa = "aa/zeno.txt"
+stats = { hp = 1400, mp = 999, atk = 40, def = 28, mag = 34, agi = 22, luk = 12 }
+exp = 2500
+gold = 0
+weak = ["holy"]
+immune_status = ["poison"]
+ai = "pattern"
+[[enemy.actions]]
+skill = "attack"
+weight = 2
+[[enemy.actions]]
+skill = "dark_flare"
+weight = 2
+[[enemy.actions]]
+skill = "steal_memory"      # 器の記憶を奪う（仲間 1 人が「記憶喪失」で動けなくなる）
+weight = 1
+[[enemy.actions]]
+skill = "eclipse"
+weight = 1
+when = "self.hp_rate < 0.5"
+
+[[group]]
+id = "grey_naive"
+members = ["grey", "naive"]
+
+[[group]]
+id = "grey_naive_spared"
+members = ["grey_hurt", "naive"]
+
+[[group]]
+id = "zeno_inner"
+members = ["zeno_inner"]
+
+[[group]]
+id = "zeno_1"
+members = ["zeno_1"]
+
+[[group]]
+id = "zeno_2"
+members = ["zeno_2"]
+
 # ===== 使い魔 =====
 # Friends.data の familiar で主人を決める。能力値は stats + growth ×（主人の Lv − 1）
 [[enemy]]

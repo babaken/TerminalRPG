@@ -221,6 +221,12 @@ turns = [3, 5]
 tick = { hp_rate = -0.08 }
 field = true
 
+[[status]]
+id = "forget"               # FirstQuest+ 4 章：ゼノに「器の記憶」を奪われる。満ちる光で治る
+name = "記憶喪失"
+turns = [2, 3]
+skip_turn = true
+
 # ===== ショップ =====
 
 [[shop]]
@@ -491,3 +497,76 @@ target = "ally_one"
 kind = "heal"
 power = 12
 anim = "flash:bright_green"
+
+# ===== FirstQuest+ 4 章 =====
+[[item]]
+id = "own_sword"
+name = "{hero}の剣"
+type = "equipment"
+slot = "weapon"
+category = "sword"
+price = 0
+desc = "鍵ではない。誰かのためのものでもない。――{hero}自身の剣。"
+stats = { atk = 45, mag = 10, luk = 5 }
+
+[[item]]
+id = "black_feather"
+name = "黒い羽根"
+type = "key"
+desc = "ネイヴのものらしい、黒い羽根。「器はお前だけではない」――ゼノの最後の言葉が耳に残る。"
+
+[[skill]]
+id = "michiru_hikari"
+name = "満ちる光"
+mp = 12
+target = "ally_all"
+kind = "heal"
+power = 40
+status = "forget"
+anim = "flash:bright_white"
+desc = "満ちた器の光。仲間全員を回復し、奪われた記憶を取り戻す。"
+
+[[skill]]
+id = "dark_flare"
+name = "ダークフレア"
+target = "enemy_all"
+kind = "magic"
+element = "dark"
+power = 16
+anim = "flash:magenta"
+
+[[skill]]
+id = "eclipse"
+name = "虚無"
+target = "enemy_all"
+kind = "magic"
+element = "dark"
+power = 24
+anim = "flash:black,shake:3"
+
+[[skill]]
+id = "core_curse"
+name = "核の呪い"
+target = "enemy_one"
+kind = "status"
+status = "poison"
+status_rate = 0.8
+anim = "flash:magenta"
+
+[[skill]]
+id = "black_wing"
+name = "黒翼の嵐"
+target = "enemy_all"
+kind = "physical"
+power = 6
+anim = "shake:2"
+
+[[skill]]
+id = "steal_memory"
+name = "器の記憶を奪う"
+target = "enemy_one"
+kind = "status"
+status = "forget"
+status_rate = 0.9
+anim = "flash:black"
+

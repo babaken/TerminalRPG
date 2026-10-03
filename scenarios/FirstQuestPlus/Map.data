@@ -246,6 +246,76 @@ trigger = "touch"
 label = "p3_mem_hill"
 when = "flag.p3_tera_done and !flag.p3_mem2"
 
+[[map.npc]]           # 4 章：帰還の出迎え
+id = "home_chief"
+glyph = "長"
+color = "white"
+x = 13
+y = 13
+talk = "p4_home_talk"
+when = "flag.p4_done"
+
+[[map.npc]]           # 4 章：帰還の出迎え
+id = "home_mother"
+glyph = "母"
+color = "bright_yellow"
+x = 14
+y = 14
+talk = "p4_home_talk"
+when = "flag.p4_done"
+
+[[map.npc]]           # 4 章：帰還の出迎え
+id = "home_father"
+glyph = "父"
+color = "yellow"
+x = 16
+y = 14
+talk = "p4_home_talk"
+when = "flag.p4_done"
+
+[[map.npc]]           # 4 章：帰還の出迎え
+id = "home_mina"
+glyph = "妹"
+color = "bright_magenta"
+x = 15
+y = 13
+talk = "p4_home_talk"
+when = "flag.p4_done"
+
+[[map.npc]]           # 4 章：帰還の出迎え
+id = "home_villager_a"
+glyph = "人"
+color = "white"
+x = 12
+y = 15
+talk = "p4_home_talk"
+when = "flag.p4_done"
+
+[[map.npc]]           # 4 章：帰還の出迎え
+id = "home_villager_b"
+glyph = "人"
+color = "white"
+x = 18
+y = 15
+talk = "p4_home_talk"
+when = "flag.p4_done"
+
+[[map.npc]]           # 4 章：帰還の出迎え
+id = "home_kai"
+glyph = "友"
+color = "cyan"
+x = 17
+y = 13
+talk = "p4_home_talk"
+when = "flag.p4_done"
+
+[[map.event]]         # 4 章：帰還（村の入口に村の人が並んでいる）
+x = 15
+y = 16
+trigger = "auto"
+label = "p4_village"
+when = "flag.p4_done and !flag.p4_home"
+
 [[map]]
 id = "house_hero"
 name = "{hero}の家"
@@ -1840,3 +1910,72 @@ x = 12
 y = 4
 when = "flag.p3_started and !flag.p3_revealed"
 
+[[map.event]]         # 4 章：グレイとネイヴ → 虚ろの殻（決戦は続けて進む）
+x = 14
+y = 13
+trigger = "auto"
+label = "p4_throne"
+when = "flag.p4_started and !flag.p4_done"
+
+[[map.npc]]
+id = "naive4"
+glyph = "魔"
+color = "bright_magenta"
+x = 14
+y = 4
+when = "flag.p4_started and !flag.p4_naive_done"
+
+[[map.npc]]
+id = "grey4"
+glyph = "研"
+color = "bright_cyan"
+x = 12
+y = 4
+when = "flag.p4_started and !flag.p4_naive_done"
+
+# ===== FirstQuest+ 4 章 =====
+[[map]]
+id = "dungeon_shell"
+name = "虚ろの殻"
+tileset = "default"
+dungeon = true
+rows = [
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRFFFFFFFFFFFFFFRRRRRRRR",
+  "RRRRRRFF______________FFRRRRRR",
+  "RRRRRF__________________FRRRRR",
+  "RRRRF____________________FRRRR",
+  "RRRRF__________M_________FRRRR",
+  "RRRRF____________________FRRRR",
+  "RRRRF____________________FRRRR",
+  "RRRRRF__________________FRRRRR",
+  "RRRRRRFF______________FFRRRRRR",
+  "RRRRRRRRFFFFFFF_FFFFFFRRRRRRRR",
+  "RRRRRRRRRRRRRRR_RRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+]
+
+[[map]]
+id = "mind_world"
+name = "？？？"
+tileset = "default"
+rows = [
+  "TTTTTTTTTTTTTTT.TTTTTTTTTTTTTTTT",
+  "T..............................T",
+  "T..HHH......................h..T",
+  "T..HDH.......HHH.....~~~~......T",
+  "T............HDH.....~~~~......T",
+  "T....................~~~~......T",
+  "T..............................T",
+  "T...,,,,,,..........HHH........T",
+  "T...,,,,,,..........HDH........T",
+  "T...,,,,,,.....................T",
+  "T..............................T",
+  "T......HHH.....................T",
+  "T......HDH...........,,,,,,....T",
+  "T....................,,,,,,....T",
+  "T..............................T",
+  "T..............................T",
+  "T..............................T",
+  "TTTTTTTTTTTTTTT.TTTTTTTTTTTTTTTT",
+]

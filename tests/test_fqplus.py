@@ -366,10 +366,100 @@ def test_return_to_guild_after_other_order(game):
     assert "協会の入口に立っていた" in talk and "p3_done" in st.flags
 
 
-def test_dorgan_after_chapter3(game):
-    d = _after_split(game)
+# ---------------------------------------------------------------- 4 章「終わりの始まり」
+from trpg.scenes.ending import EndingScene  # noqa: E402
+from trpg.scenes.title import TitleScene  # noqa: E402
+
+
+def _after_ch3(game, spared=False, lv=24) -> Play:
+    d = _after_split(game, lv=lv)
     f = d.field
     st = f.st
-    st.flags |= {"p3_done", "p3_returned"}
-    talk = " ".join(d.talk(17, 2, "right", choose=0))
-    assert "制作中" in talk
+    st.party.append(st.away.pop("left"))
+    st.flags |= {"p_family_accept", "p3_tera_done", "p3_mem1", "p3_mem2", "p3_mem3", "p3_returned", "p3_done",
+                 "p3_child_met"} | ({"p_child_spared"} if spared else set())
+    st.hero.equip["weapon"] = "heart_key_sword"
+    st.hero.extra_skills += ["kokoro_tozashi", "hoshiyomi"]
+    st.items.pop("rusty_sword", None)
+    st.set_tile("dungeon_b14", 20, 1, ">")
+    st.set_tile("dungeon_b11", 26, 5, ">")
+    for m in st.party:
+        m.hp, m.mp = m.max_hp, m.max_mp
+        m.fill_sp(game.data)
+    st.items.update(potion=10)
+    f.change_map("guild_bern", 15, 2, "left")
+    f.pending_auto = False
+    return d
+
+
+@pytest.mark.parametrize("spared", [False, True])
+def test_chapter4_to_ending(game, spared):
+    d = _after_ch3(game, spared)
+    f = d.field
+    st = f.st
+    talk = " ".join(d.talk(17, 2, "right", choose=0))           # ドルガン → 4 章
+    assert st.chapter == 4 and "p4_started" in st.flags and st.items.get("elixir") == 3
+    talk = " ".join(d.talk(17, 2, "right"))
+    assert "一番奥" in talk
+
+    # ---- 玉座の間 → グレイとネイヴ → 虚ろの殻 → 精神世界 → 剣 → ゼノ 2 形態 → 黒い羽根 → 協会
+    f.change_map("dungeon_altar", 14, 14, "up")
+    talk = " ".join(d.settle())
+    assert "余計なものを連れて" in talk
+    assert ("おにいちゃんを……いじめるな" in talk) == spared
+    assert "余は、虚ろの王ゼノ" in talk and "小さな村だ" in talk
+    assert "すげー冒険者になって帰ってこい" in talk and "ピピも、僕も" in talk and "ガロ「お前の前に立つのは俺だ" in talk
+    assert "ユウの剣を手に入れた" in talk and st.hero.equip["weapon"] == "own_sword"
+    assert "michiru_hikari" in st.hero.extra_skills
+    assert "すべて道連れに" in talk and "器は、お前だけでは" in talk
+    assert st.items.get("black_feather") == 1 and "p4_done" in st.flags
+    assert st.map_id == "guild_bern" and "おかえり、ユウ" in talk
+    assert st.effects.get("tint") in (None, "none")
+    assert game.data.items["own_sword"].name == "ユウの剣"
+
+    # ---- リト村へ → 出迎え → 丘 → エンディング
+    f.change_map("field_road", 15, 2, "up")
+    f.pending_auto = False
+    d.walk_to(15, 0)
+    talk = " ".join(d.settle())
+    assert "この村の子じゃ" in talk and "p4_home" in st.flags
+    assert "紋章は、もう消えていた" in talk and "別の「器」" in talk
+    for _ in range(200):
+        if isinstance(d.scene, EndingScene):
+            break
+        d.key("ENTER")
+        d.tick(0.2)
+    assert isinstance(d.scene, EndingScene)
+    d.tick(2.0)
+    assert "ユウのまま、明日を生きていく" in d.screen()
+    d.key("ENTER")
+    d.tick(0.3)
+    assert isinstance(d.scene, TitleScene)
+
+
+def test_michiru_hikari_cures_forget(game):
+    import random
+    from trpg.battle.core import Battle, Command
+    d = _after_ch3(game)
+    st = d.field.st
+    st.hero.extra_skills.append("michiru_hikari")
+    b = Battle(game.data, st, "zeno_2", escape=False, rng=random.Random(0))
+    list(b.intro())
+    mia = next(x for x in b.party if x.member.id == "mia")
+    mia.status["forget"] = 3
+    hero = b.party[0]
+    events = list(b._act(hero, Command("skill", skill="michiru_hikari", target="all")))
+    assert "forget" not in mia.status
+    assert any(e[0] == "msg" and "記憶喪失が治った" in e[1] for e in events)
+
+
+def test_ending_villagers_appear_after_return(game):
+    d = _after_ch3(game)
+    f = d.field
+    st = f.st
+    st.flags |= {"p4_started", "p4_naive_done", "p4_done", "p4_home"}
+    f.change_map("village_lito", 15, 15, "up")
+    f.pending_auto = False
+    assert f.npc_visible(f._find_npc("home_mother"))
+    talk = " ".join(d.talk(14, 15, "up"))
+    assert "うれしそう" in talk
