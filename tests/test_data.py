@@ -32,13 +32,13 @@ def test_sample_loads_clean(sample_dir):
 
 def test_undefined_references(sample_dir):
     edit(sample_dir / "Enemy.data", 'members = ["slime", "slime"]', 'members = ["slime", "slimee"]')
-    edit(sample_dir / "Enemy.data", '{ item = "herb", rate = 0.1 }', '{ item = "potion", rate = 0.1 }')
+    edit(sample_dir / "Enemy.data", '{ item = "herb", rate = 0.1 }', '{ item = "mega_potion", rate = 0.1 }')
     edit(sample_dir / "Friends.data", 'job = "warrior"', 'job = "knight"')
     edit(sample_dir / "Map.data", 'to = "house_hero"', 'to = "house_heroo"')
     gd, rep = load(sample_dir)
     text = msgs(rep)
     assert "敵「slimee」が定義されていません" in text
-    assert "アイテム「potion」が定義されていません" in text
+    assert "アイテム「mega_potion」が定義されていません" in text
     assert "職業「knight」が定義されていません" in text
     assert "ワープ先マップ「house_heroo」" in text
     assert len(rep.errors) == 4

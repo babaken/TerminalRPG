@@ -404,6 +404,24 @@ desc = "HP をすべて回復する。協会から支給された貴重な薬。
 use = { field = true, battle = true, target = "ally_one", effect = "heal", power = 9999 }
 
 [[item]]
+id = "potion"
+name = "ポーション"
+type = "consumable"
+price = 40
+desc = "HP を 100 回復する。やくそうより効き目の強い薬。"
+use = { field = true, battle = true, target = "ally_one", effect = "heal", power = 100 }
+
+[[item]]
+id = "chain_mail"
+name = "鎖帷子"
+type = "equipment"
+slot = "armor"
+category = "light_armor"
+price = 600
+desc = "細かな鎖を編んだ鎧。軽くて丈夫。"
+stats = { def = 14 }
+
+[[item]]
 id = "astra"
 name = "封剣アストラ"
 type = "equipment"

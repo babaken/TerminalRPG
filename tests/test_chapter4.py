@@ -48,6 +48,11 @@ def test_chapter4_to_ending(game):
     talk = " ".join(d.talk(17, 2, "right", choose=0))
     assert st.chapter == 4 and "ch4_started" in st.flags and st.items.get("elixir") == 3
     assert "蝕王ヴェルム" in talk and "ランク B" in talk
+    # 支給品：鎖帷子（着られる人は装備。魔法使いはローブのまま）、やくそう → ポーション
+    assert all(st.member(c).equip["armor"] == "chain_mail" for c in ("hero", "garo", "noa"))
+    assert st.member("mia").equip["armor"] == "robe"
+    assert "herb" not in st.items and st.items["potion"] == 20 + 5
+    assert "ポーション（HP 100 回復）に取りかえて" in talk
 
     # ---- B14F の大扉はまた開く → 儀式の間
     from test_chapter2 import check_tile, find_in
