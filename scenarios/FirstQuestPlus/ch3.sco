@@ -1,320 +1,363 @@
 # ============================================================
-#  FirstQuest  第3章　灰の影
-#  元テキスト: docs/scenario/FirstQuest_story.md（第3章）
-#  現在: 第3章すべて（3-1 調査へ 〜 3-4 最強の敵の話）
+#  FirstQuest+  第3章　器
+#  元テキスト: docs/scenario/FirstQuestPlus_story.md（第3章）
+#  3-1 調査へ 〜 3-4 最強の敵の話。2章のあと、協会長ドルガンに話しかけると始まる
+#  フラグ: p3_started → p3_revealed（正体） → p3_split（仲間の離脱） → p3_home_open → p_family_accept
+#          → p3_tera_done → p3_mem1〜3（記憶の場所） → p3_returned → p3_done
 # ============================================================
 
 # ------------------------------------------------------------
-#  3-1 調査へ（2章のあと、協会長ドルガンに話しかけると始まる）
+#  3-1 調査へ
 # ------------------------------------------------------------
-*ch3_start
-@chapter 3 "灰の影"
+*p3_start
+@chapter 3 "器"
 @effect fade_out 600
-@effect typewriter "第3章　灰の影"
+@effect typewriter "第3章　器"
 @map guild_bern 13 2 dir=right
 @effect fade_in 600
-協会長ドルガン「準備はいいか。今回は B11F より先、魔物どもの『目的』を突き止めてもらう」
-協会長ドルガン「偵察に出した連中から報告があった。B11F の東の壁が崩れて、奥へ続く道が見つかったそうだ」
-協会長ドルガン「……生きて戻れ。それが一番の任務だ」
+協会長ドルガン「グレイの研究室から、これが見つかった」
+ドルガンは、焼け焦げた紙の束を机に置いた。
+協会長ドルガン「『器計画』……赤子に魔の核を植え、王の新しい体とする」
+協会長ドルガン「十五年前、成功例が一体だけあったと書いてある」
+協会長ドルガン「その成功例は、北の森で行方不明になったそうだ」
+@if party.has(garo)
+  ガロ「北の森って……」
+@elif party.has(mia)
+  ミア「北の森って……」
+@elif party.has(rina)
+  リナ「北の森、ですか……」
+@endif
+……{hero}の生まれた村は、北の森のそばにある。
+協会長ドルガン「……黒岩の洞穴の最深部を調べろ。全部、そこにあるはずだ」
+協会長ドルガン「B11F の東の壁が崩れて、奥へ続く道が見つかった。……生きて戻れ」
 @quest give q_blackrock_deep
-@flag set ch3_started
+@flag set p3_started
 @tile 26 5 > map=dungeon_b11
-指名依頼「黒岩の洞穴の奥」を受けた！
+指名依頼「黒岩の洞穴の最深部」を受けた！
 @end
 
 # ------------------------------------------------------------
 #  黒岩の洞穴 B12F〜B15F
 # ------------------------------------------------------------
-*ch3_b12_wall
-壁一面に、見たことのない文字が刻まれている。
+*p3_b12_note
+壁ぎわの岩棚に、紙の束が押し込まれている。
+グレイの字だ。
+「被験体は全て失敗。核が肉体を拒む」
+「やはり、王が選んだ器でなければ」
+「――十五年前の器は、生きている。王の声が、それを告げている」
 @if party.has(mia)
-  ミア「魔族の文字……少しだけ読めるわ。『……封……剣……贄……』」
-@elif party.has(noa)
-  ノア「ピピが怖がってる……この字、『……封……剣……贄……』って書いてあるみたい」
-@else
-  誰にも読めない。だが、ひどく嫌な感じがする。
-@endif
-@if party.has(garo)
-  ガロ「贄……生贄ってことか。冒険者たちは、そのために……」
+  ミア「器……。人間を、入れ物みたいに……」
+@elif party.has(garo)
+  ガロ「人を入れ物扱いか。……胸くその悪い話だ」
 @elif party.has(rina)
-  リナ「贄……まさか、さらわれた人たちは……」
-@elif party.has(zara)
-  ザラ「贄、ね。……胸くその悪い話だ」
+  リナ「人を、入れ物のように……。なんて酷い……」
+@endif
+@flag set p3_note
+@end
+
+*p3_b13_child
+小さな影が、泉のそばでうずくまっている。
+……子供だ。腕の半分が、黒い鱗に覆われている。
+子供「……こないで……」
+子供「ぼく……うつわ……じゃ……なかった……」
+@choice
+  - 剣を構える
+  - そっと道をあける
+@flag set p3_child_met
+@if choice == 1
+  子供は、牙をむいて飛びかかってきた！
+  @battle group=nari_child escape=false
+  倒れた子供は、小さな人の姿に戻った。……もう動かない。
+  {hero}は、しばらくその場を動けなかった。
+@else
+  {hero}は剣を下ろし、ゆっくりと道をあけた。
+  子供は{hero}の顔をじっと見つめ――
+  子供「……おにいちゃん……おなじ……におい……」
+  そう言い残して、暗がりへ走り去っていった。
+  @flag set p_child_spared
 @endif
 @end
 
-*ch3_b13_rod
-縛られた冒険者が倒れている！
-{hero}たちは急いで縄をほどいた。
-冒険者ロッド「た、助かった……あんたたち、協会の……？」
-冒険者ロッド「奴らは……人を集めて……奥に……運んでいった……」
-冒険者ロッド「俺は途中で逃げ出して……ここで捕まって……」
-@if party.has(rina)
-  リナ「傷を癒やします。……もう大丈夫ですよ」
-@endif
-{hero}は{item.return_scroll}を広げ、ロッドを地上へ送り出した。
-@effect flash white count=2
-@flag set rod_rescued
-光に包まれて、ロッドの姿が消えた。……巻物はまだ手元にある。
-@end
-
-*ch3_b14_door
-@if flag.ch3_lost and !flag.ch4_started
-  大扉は固く閉ざされている。……剣は、何も応えない。
+*p3_b14_door
+@if flag.p3_door_open
   @end
 @endif
 行く手を、巨大な扉がふさいでいる。
-扉には、錆びた剣と同じ紋章が刻まれている。
+扉には、錆びた剣と同じ紋章――目を閉じた人の顔が刻まれている。
 @effect blink hero count=4 interval=150
-腰の剣が、かすかに光った――
-@effect flash white
+{hero}が近づくと、扉の顔が、ゆっくりと目を開いた。
+@effect flash black
 重い音を立てて、扉がひとりでに開いた。
+……まるで、帰りを待っていたかのように。
+@flag set p3_door_open
 @tile 20 1 > map=dungeon_b14
+@end
+
+*p3_b14_mural
+岩壁一面に、大きな壁画が描かれている。
+B10F で見た壁画の、続きだ。
+魔物が、赤子に剣を握らせている。
+赤子の額には、剣と同じ紋章――目を閉じた人の顔。
+@effect blink hero count=3 interval=200
+……{hero}の手の甲が、かすかにうずいた。
+@flag set p_mural_2
 @end
 
 # ------------------------------------------------------------
 #  3-2 挫折
 # ------------------------------------------------------------
-*ch3_garza
+*p3_naive
 @effect tint red
-祭壇の上で、黒い炎が燃えている。
-灰色の甲冑をまとった魔族が、祭壇の前に立っている。
-ガルザ「……来たか。封剣を持つ者よ」
-ガルザ「十五年。我らはその剣を探し続けた。まさか、人の子が抜くとはな」
-ガルザ「剣は錆び、持ち主は未熟。――今のうちに、消えてもらう」
-@effect shake h 3 600
-@effect flash black count=2
-@battle group=garza_1 escape=false turns=3 lose=*ch3_defeat
-@goto *ch3_defeat
-
-*ch3_defeat
-ガルザ「その程度か。剣が泣いているぞ」
-ガルザが手を振ると、灰色の衝撃波がパーティを襲った。
-@effect flash white
-@effect shake h 3 600
-@party leave #2 keep=injured
-{away.injured}が{hero}をかばい、倒れた――
-@effect fade_out 1500
-……遠くで誰かの声がする。
-「――走れ、{hero}！」
-@flag set ch3_lost
-@tile 20 1 G map=dungeon_b14
-@heal all
-@map guild_infirmary 3 3 dir=down
-@effect tint sepia
-@wait 600
-@effect fade_in 800
-@goto *ch3_rescue
-
-*ch3_rescue
+空の玉座の前に、黒衣の魔族とグレイが立っている。
+グレイ「お待ちしていましたよ。……いや、お帰りなさい、と言うべきでしょうか」
+@npc naive move 0 8
+魔将ネイヴが一歩前に出て、{hero}の前に片膝をついた。
+@effect shake h 1 300
+@wait 1500
+ネイヴ「――お帰りなさいませ。我らが王の器よ」
+ネイヴ「十五年前、あなた様は北の森で人間に拾われた。我らはずっと、あなた様を探しておりました」
+ネイヴ「その剣は鍵。あなた様が握った瞬間から、王の目覚めは始まっております」
+ネイヴ「村の者があなた様を恐れたのも無理はない。あなた様は――我らの側の存在なのですから」
+@effect flash black count=3
+仲間たちが、言葉を失って{hero}を見ている。
+@choice
+  - 嘘だ
+  - ……
+@if choice == 1
+  ネイヴ「では、ご自分の手を」
+@endif
+{hero}の手の甲に、剣と同じ紋章が浮かんでいる。
+@effect blink hero count=6 interval=120
+ネイヴ「今日はご挨拶のみ。いずれ王ご自身がお迎えに上がります」
+グレイ「器が満ちるのを、楽しみにしていますよ」
+@effect fade_out 800
+@npc naive hide
+@npc grey hide
+@flag set p3_revealed
 @effect tint none
-協会長ドルガン「気がついたか」
-協会長ドルガン「洞穴の入口で倒れていたお前たちを、外で待機させていた部隊が見つけた」
-協会長ドルガン「{away.injured}は……命は取り留めた。だが、しばらくは動けん」
-@if party.has(garo)
-  ガロ「……俺がもっと前に出ていれば」
+@effect fade_in 800
+二人の姿は、闇に溶けるように消えていた。
+@goto *p3_split
+
+*p3_split
+@effect fade_out 800
+@map field_blackrock 14 3 dir=down
+@effect tint night
+@effect rain on density=2
+@effect fade_in 800
+洞穴の入口。外は、冷たい雨が降っていた。
+@if party.has(garo) and flag.ch2_had_garo
+  ガロ「……{hero}、知ってたのか？」
+@elif party.has(mia) and flag.ch2_had_mia
+  ミア「……{hero}、知ってたの？」
+@elif party.has(rina) and flag.ch2_had_rina
+  リナ「……{hero}さん、ご存じだったのですか？」
 @endif
-@if party.has(mia)
-  ミア「魔法が……ひとつも通じなかった」
-@endif
-@if party.has(rina)
-  リナ「祈りが……届かなかった……」
-@endif
-@if party.has(jack)
-  ジャック「ツキがなかった、じゃ済まないよな」
-@endif
-@if party.has(zara)
-  ザラ「……悔しい」
-@endif
-@if party.has(noa)
-  ノア「ピピがずっと震えてる……」
-@endif
+「知らなかった」
+誰も、それ以上は何も言わなかった。
+……ひとりが、少し離れた岩の陰で立ち止まっている。
+誰と話す？
 @choice
-  - ……もう一度、行く
-  - 僕のせいだ
+  - ガロ → *p3_leave_garo @if party.has(garo) and !flag.ch2_had_garo
+  - ミア → *p3_leave_mia @if party.has(mia) and !flag.ch2_had_mia
+  - リナ → *p3_leave_rina @if party.has(rina) and !flag.ch2_had_rina
+  - ジャック → *p3_leave_jack @if party.has(jack)
+  - ザラ → *p3_leave_zara @if party.has(zara)
+  - ノア → *p3_leave_noa @if party.has(noa)
+
+*p3_leave_garo
+ガロ「……前に立つと決めた相手が、敵の王だったなんてな。少し、頭を冷やさせてくれ」
+@party leave garo keep=left
+@goto *p3_split_end
+
+*p3_leave_mia
+ミア「研究者としては興味深いわ。……でも、友達としては、今は顔を見られない」
+@party leave mia keep=left
+@goto *p3_split_end
+
+*p3_leave_rina
+リナ「神は……私に何を試しているのでしょう。祈る時間をください」
+@party leave rina keep=left
+@goto *p3_split_end
+
+*p3_leave_jack
+ジャック「悪い、{hero}。今回ばかりは、賭ける度胸がない」
+@party leave jack keep=left
+@goto *p3_split_end
+
+*p3_leave_zara
+ザラ「強い奴には興味がある。だが、魔物の王になる奴と組む気はない」
+@party leave zara keep=left
+@goto *p3_split_end
+
+*p3_leave_noa
+ノア「魔物とだって話せばわかるって言ったのは僕なのに……ごめん、怖いんだ」
+@party leave noa keep=left
+@goto *p3_split_end
+
+*p3_split_end
+{away.left}は、雨の中を一人で歩いていった。
+@flag set p3_split
+@effect fade_out 1000
+残った仲間たちも、言葉少なにベルンへ戻った。
+@effect rain off
+@effect tint none
+@map guild_bern 13 2 dir=right
+@effect fade_in 800
+協会長ドルガン「……話は聞いた」
+協会長ドルガン「お前が何者だろうと、協会はお前を追い出したりはせん」
+協会長ドルガン「だが、今のお前に必要なのは、剣の稽古じゃなさそうだ」
+協会長ドルガン「……一度、家に帰ってこい。リト村の村長には、わしから話を通しておく」
+@flag set p3_home_open
+@end
+
+# ------------------------------------------------------------
+#  3-3 強化開始
+# ------------------------------------------------------------
+*p3_home
+村は、しんと静まり返っていた。
+{hero}の姿を見た村人たちが、慌てて家の戸を閉めていく。
+……家の前で、母が待っていた。
+母「……帰ってきたのね」
+母「話さなきゃいけないこと、話すわね」
+@effect fade_out 600
+@map house_hero 5 4 dir=up
+@effect fade_in 600
+@goto *p3_confession
+
+*p3_confession
+@effect tint sepia
+母「十五年前の冬。テラおばあさんが、森で赤ちゃんを拾ってきたの」
+母「祠の前で、泣きもせずに、じっと空を見ている子だった」
+母「額には、変な模様があったわ。テラおばあさんは『この子は普通の子じゃない』って」
+母「でも、私たちには子供がいなかった。……あなたを抱いたとき、この子は私の子だって思ったの」
+@effect tint none
+父「……模様は、一年もしないうちに消えた。だから、忘れたことにした」
+父「お前が何者だろうと、俺たちが育てた。それだけだ」
+ミナ「おにいちゃんは、おにいちゃんだよ？」
+@choice
+  - ……ありがとう
+  - でも、僕は魔物の王の――
 @if choice == 2
-  協会長ドルガン「違う。自分を責めるな。責めるなら、弱さを責めろ」
+  母「違う。あなたは、{hero}よ。私たちがつけた名前の、私たちの子」
 @endif
-協会長ドルガン「あの魔族はお前の剣を『封剣』と呼んだそうだな」
-協会長ドルガン「風見の神殿の司祭なら、何か知っているかもしれん。北東の山の上だ」
-協会長ドルガン「洞穴前の東の落石は、騎士団にどけさせた。そこから山道を登れ」
-@tile 27 8 . map=field_blackrock
-@tile 29 8 = map=field_blackrock
+窓の外を、流れ星が流れていった。
+@effect starfall count=4
+@flag set p_family_accept
+母「テラおばあさんにも、会っていきなさい。……ずっと、あなたのことを気にかけていたのよ」
 @end
 
-# ------------------------------------------------------------
-#  3-3 強化開始（風見の神殿）
-# ------------------------------------------------------------
-# 洞穴前の東：3 章でガルザに敗れるまでは落石でふさがっている
-*ch3_rockslide
-東の岩山への道は、大きな落石でふさがっている。
-@end
-
-*ch3_snow_off
-@effect snow off
-@end
-
-*ch3_mountain_enter
-@effect snow on density=1
-@if !flag.ch3_mountain_seen
-  @flag set ch3_mountain_seen
-  冷たい風が吹きつける。山の上に、古い神殿が見える。
-@endif
-@end
-
-*ch3_temple
-司祭オルド「よくぞ参られた。……その剣を、見せていただけますかな」
-{hero}は錆びた剣を差し出した。
-司祭オルド「……間違いない。封剣アストラ。三百年前、勇者レオンが魔を封じた剣です」
-司祭オルド「剣は持ち主の心と共に目覚める。錆は、剣が眠っている証」
-司祭オルド「この神殿の奥には、剣を目覚めさせるための試練の間が三つあります」
-司祭オルド「ただし試練は、一人ひとりが己と向き合うもの。仲間の力は借りられませぬ」
-司祭オルド「お仲間には、別室で修行をしていただきましょう」
-@flag set ch3_temple_met
-北の三つの扉の先が、試練の間だ。（左から 勇気・慈愛・絆）
-@end
-
-*ch3_trial_door
-司祭オルドの話を聞こう。
-@end
-
-*ch3_altar_talk
-祭壇に祈りを捧げた。……体が軽くなった気がする。
-@heal all
-@end
-
-*ch3_acolyte_talk
-@if flag.ch3_done
-  修道士「封剣の勇者に、風の加護がありますように」
-@else
-  修道士「試練の間では、仲間の手は届きません。あなた自身の心だけが頼りです」
-@endif
-@end
-
-*ch3_ord_talk
-@if flag.ch3_done
-  司祭オルド「急ぎなさい。儀式が完成すれば、蝕王ヴェルムが蘇る」
-  @end
-@endif
-@if !flag.ch3_temple_met
-  @goto *ch3_temple
-@endif
-@if flag.trial1_done and flag.trial2_done and flag.trial3_done
-  @goto *ch3_return_member
-@endif
-司祭オルド「試練の間は北の三つの扉の先。勇気・慈愛・絆――すべてを越えなさい」
-@if flag.trial1_done
-  勇気の間：越えた
-@else
-  勇気の間：まだ
-@endif
-@if flag.trial2_done
-  慈愛の間：越えた
-@else
-  慈愛の間：まだ
-@endif
-@if flag.trial3_done
-  絆の間：越えた
-@else
-  絆の間：まだ
-@endif
-@end
-
-# ---- 勇気の間：自分の影と一人で戦う
-*ch3_trial_1
-@if flag.trial1_done
-  鏡には、自分の姿が映っている。
-  @end
-@endif
-大きな鏡がある。……鏡の中の{hero}が、にやりと笑った。
-影の{hero}「お前は弱い。仲間ひとり守れなかった」
-影の{hero}「その剣を持つ資格があるか、試してやる」
-@battle group=shadow members=hero escape=false lose=*ch3_trial_1_lost
-影は、鏡の中へ溶けるように消えた。
+*p3_tera
+テラ「……来たかい。いつか来ると思っていたよ」
+テラ「器ってのはね、空っぽの入れ物さ。だから王が入れる」
+テラ「でもね、お前さんは空っぽじゃない。十五年、ロイとエマとミナと、村のみんなで満たしてきたんだ」
+テラ「入れ物がいっぱいなら、王の入る隙間はない。……あたしはそう信じてるよ」
+テラ「剣をお貸し。この剣は鍵だ。鍵ってのは、閉めることもできる」
+テラは剣を両手で包み、目を閉じて、何かを小さくつぶやいた。
 @effect flash white count=2
-@item replace rusty_sword awakening_sword
-@skill add hero fuukouzan
-@flag set trial1_done
-@heal all
-剣の錆が少し落ちた！　{item.awakening_sword}になった！
-{hero}は「封光斬」を覚えた！
+@item replace rusty_sword heart_key_sword
+@skill add hero kokoro_tozashi
+錆びた剣は{item.heart_key_sword}になった！　{hero}は「心閉ざし」を覚えた！
+テラ「あとは、お前さん自身が自分を信じられるかどうかさ」
+テラ「三つ、行っておいで。お前さんを満たしてきたものが、残っている場所へ」
+テラ「カイと遊んだ森の祠。ロイと星を見た村の丘。……それから、初めて仲間ができた場所」
+テラ「そこで、自分の中にいるものと向き合っておいで。一人でね」
+@flag set p3_tera_done
 @end
 
-*ch3_trial_1_lost
-影の{hero}「……まだだ。出直してこい」
-影は鏡の中へ戻っていった。
-@heal all
-@end
-
-# ---- 慈愛の間：傷ついた魔物の子
-*ch3_trial_2
-部屋の奥に、傷ついた魔物の子がうずくまっている。
-魔物の子は、震えながらこちらをにらんでいる。
-@choice
-  - 手当てしてやる
-  - 剣を向ける
-@if choice == 1
-  @flag set helped_pup
-  {hero}は傷に布を巻いてやった。魔物の子は小さく鳴いて、光の中へ消えていった。
-  @stat hero luk +2
-  運が 2 上がった！
-@else
-  {hero}が剣を向けると、魔物の子は霧のように消えた。
-  ……胸の奥に、小さな痛みが残った。
-@endif
-@flag set trial2_done
+# ---- 記憶の場所（主人公ひとりの戦い。負けたら回復して出直す）
+*p3_mem_forest
+苔むした祠の前に立つと、子供の頃の声が聞こえた。
+@effect tint sepia
+カイ「{hero}、こっちこっち！　秘密基地にしようぜ！」
+カイ「大人になったら、二人ですげー冒険者になるんだ。約束な！」
+@effect tint none
+……祠の陰から、黒い影が立ち上がった。{hero}と同じ顔をしている。
+影の{hero}「その約束も、空っぽの器が見た夢だ」
+@battle group=shadow members=hero escape=false lose=*p3_mem_lost
+影は、子供の笑い声の中に溶けて消えた。
 @stat hero hp +20
-@effect flash white
-最大 HP が 20 上がった！
+@flag set p3_mem1
+@heal all
+{hero}の最大 HP が 20 上がった！
+@call *p3_mem_check
 @end
 
-# ---- 絆の間：仲間の幻影
-*ch3_trial_3
-@if flag.trial3_done
-  鏡には、仲間たちの笑顔が映っている気がした。
-  @end
-@endif
-鏡の中に、仲間たちの姿が浮かび上がった。
-仲間の幻影「お前のせいで、傷ついた」
-仲間の幻影「お前と一緒にいたから、倒れたんだ」
-@goto *ch3_trial_3_ask
-
-*ch3_trial_3_ask
-@choice
-  - ……ごめん
-  - 一人で行く
-  - それでも一緒に行きたい
-@if choice == 1
-  仲間の幻影「謝って、どうなる」
-  @goto *ch3_trial_3_ask
-@elif choice == 2
-  仲間の幻影「一人で勝てなかったのは、誰だ」
-  @goto *ch3_trial_3_ask
-@endif
-……幻影たちが、ふっと笑った気がした。
-幻影は光の粒になって消えた。
-@effect flash white count=2
-@flag set trial3_done
-これで三つの試練を越えた。司祭オルドのもとへ戻ろう。
+*p3_mem_hill
+村の丘に登ると、満天の星が広がっていた。
+@effect tint night
+@effect starfall count=5
+父「あれが北の星だ。迷ったら、あれを探せ」
+父「……どこにいても、同じ星が見える。だから、迷っても帰ってこられる」
+星の光をさえぎるように、黒い騎士が現れた。
+@battle group=mem_hill members=hero escape=false lose=*p3_mem_lost
+騎士は、星の光に焼かれるように崩れ落ちた。
+@effect tint none
+@stat hero mag +10
+@skill add hero hoshiyomi
+@flag set p3_mem2
+@heal all
+{hero}の魔力が 10 上がった！　「星詠み」を覚えた！
+@call *p3_mem_check
 @end
 
-# ---- 仲間の復帰
-*ch3_return_member
-@effect snow off
-神殿の扉が開き、見覚えのある顔が入ってくる。
-@if away.injured == garo
-  ガロ「……待たせたな」
-  ガロ「寝てる間、ずっと考えてた。次は、絶対に負けない」
-@elif away.injured == mia
-  ミア「……待たせちゃったね」
-  ミア「寝てる間、ずっと考えてた。次は、絶対に負けない」
-@elif away.injured == rina
-  リナ「……お待たせしました」
-  リナ「眠っている間、ずっと考えていました。次は、絶対に負けません」
+*p3_mem_guild
+初めて協会に来た日に座った、隅の机だ。
+@effect tint sepia
+受付セラ「{hero}さん、ちょうど、パーティを探している冒険者がいるんです」
+@if flag.ch2_had_garo
+  ガロ「よろしく頼む。…その剣、錆びてるがいい剣だな」
+@elif flag.ch2_had_mia
+  ミア「よろしくね。その剣の紋章…どこかで見た気がするのよね」
+@else
+  リナ「神のお導きに感謝します。…不思議な気配のする剣ですね」
 @endif
-@party return injured
+@effect tint none
+机の向こうに、初めての依頼で戦った魔物たちの幻が立っている。
+@battle group=mem_guild members=hero escape=false lose=*p3_mem_lost
+幻は、協会のにぎやかな声の中に消えていった。
+@flag set p3_mem3
+@heal all
+仲間たちとの日々が、{hero}を満たしていく――
+@if flag.p3_mem1 and flag.p3_mem2
+  @goto *p3_return
+@endif
+@call *p3_mem_check
+@end
+
+*p3_mem_lost
+……気がつくと、膝をついていた。影は、もう見えない。
+@heal all
+まだ、向き合いきれていない。もう一度来よう。
+@end
+
+*p3_mem_check
+@if flag.p3_mem1 and flag.p3_mem2 and flag.p3_mem3
+  三つの記憶の場所を巡った。……ベルンの協会へ戻ろう。
+@endif
+@return
+
+# ---- 仲間の復帰（記憶の場所を巡り終えて協会に入ると）
+*p3_return
+{away.left}が、協会の入口に立っていた。
+{away.left}「……ずっと考えてた」
+@if away.left == garo
+  ガロ「お前の前に立つと決めたのは俺だ。相手が誰でも、それは変わらん」
+@elif away.left == mia
+  ミア「器が満ちていれば王は入れない――テラさんの仮説、研究させてもらうわ。そばでね」
+@elif away.left == rina
+  リナ「祈りの答えがわかりました。あなたを信じることが、私の祈りです」
+@elif away.left == jack
+  ジャック「全財産、お前に賭けることにした。……まあ、全財産っつっても 12G だけどな」
+@elif away.left == zara
+  ザラ「魔物の王になんか、ならせない。……そのために、そばにいる」
+@elif away.left == noa
+  ノア「ピピがね、{hero}は怖くないって。……僕より先にわかってたんだ」
+@endif
+@party return left
+@flag set p3_returned
 {hero}たちは、ふたたび全員そろった！
-仲間たちも、神殿の別室での修行で新しい技を身につけた。
+離れていた間、仲間たちもそれぞれに腕を磨いていた。
 @if party.has(garo)
   @skill add garo whirlwind
   ガロは「旋風斬」を覚えた！
@@ -339,24 +382,26 @@
   @skill add noa beast_call
   ノアは「群れの咆哮」を覚えた！
 @endif
-@goto *ch3_legend
+@goto *p3_legend
 
 # ------------------------------------------------------------
 #  3-4 最強の敵の話
 # ------------------------------------------------------------
-*ch3_legend
-@effect tint sepia
-司祭オルド「三百年前、この地に『三柱の魔』と呼ばれる者たちが現れました」
-司祭オルド「大地を喰らう『蝕王』、空を裂く『嵐王』、海を枯らす『渇王』」
-司祭オルド「勇者レオンは蝕王を封剣で封じました。残る二柱は、いずこかへ姿を消したといいます」
-司祭オルド「ガルザなる魔族は、蝕王の配下でしょう。人を集めているのは……封印を解く『贄』とするため」
-@effect tint none
-司祭オルド「冒険者たちの失踪……すべて繋がっておりますな」
-ガルザの声が、耳の奥によみがえる。――十五年。我らはその剣を探し続けた――
-司祭オルド「封印は剣と対になっている。剣が目覚めた今、封印もまた揺らいでいるのです」
-司祭オルド「急ぎなさい。儀式が完成すれば、蝕王ヴェルムが蘇る」
-@flag set ch3_done
+*p3_legend
+@effect fade_out 500
+@map guild_bern 13 2 dir=right
+@effect fade_in 500
+協会長ドルガン「グレイの残した資料を全部読んだ」
+協会長ドルガン「虚ろの王ゼノ。三百年前、勇者に肉体を滅ぼされ、魂だけになった魔物の王だ」
+協会長ドルガン「奴は器に入り込むことで復活する。器が本物なら、完全な姿で」
+協会長ドルガン「玉座の間の奥に、ゼノの魂が封じられた『虚ろの殻』がある。ネイヴたちはそこで、お前を待っている」
+協会長ドルガン「行かなきゃ奴らはお前を狙い続ける。……行けば、奴に乗っ取られるかもしれない」
+@choice
+  - 行く
+  - ……行く。自分で終わらせる
+協会長ドルガン「……いい目だ。お前の親父さんに似てる」
+@flag set p3_done
 @effect typewriter "第3章　完"
 @save_point
-協会長ドルガンのもとへ戻ろう。
+協会長に声をかければ、第4章が始まる。
 @end

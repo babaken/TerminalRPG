@@ -66,9 +66,9 @@ on_complete = "ch2_report"
 # ===== 3 章 =====
 [[quest]]
 id = "q_blackrock_deep"
-name = "黒岩の洞穴の奥（指名）"
+name = "黒岩の洞穴の最深部（指名）"
 rank = "C"
-desc = "B11F より先へ進み、魔物たちの『目的』を突き止めること。……生きて戻れ。"
-goal = { type = "flag", flag = "ch4_done" }
-reward = { gold = 1000, exp = 300 }
-when = "flag.ch3_started"
+desc = "グレイの研究室に残された『器計画』。すべては黒岩の洞穴の最深部にあるという。B11F より奥を調べること。"
+goal = { type = "flag", flag = "p3_revealed" }
+reward = { gold = 500, exp = 300 }
+when = "flag.p3_started"

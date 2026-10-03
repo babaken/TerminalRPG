@@ -358,14 +358,14 @@ power = 18
 anim = "flash:white,shake:3"
 
 [[item]]
-id = "awakening_sword"
-name = "目覚めかけた剣"
+id = "heart_key_sword"
+name = "心の鍵剣"
 type = "equipment"
 slot = "weapon"
 category = "sword"
 price = 0
-desc = "試練で錆が少し落ちた封剣。刀身の奥で、かすかな光が脈打っている。"
-stats = { atk = 22 }
+desc = "テラが鍵を閉め直した剣。鍵は、開けることも閉めることもできる。"
+stats = { atk = 22, mag = 5 }
 
 [[skill]]
 id = "frost"
@@ -378,16 +378,27 @@ power = 18
 anim = "flash:bright_cyan"
 
 [[skill]]
-id = "fuukouzan"
-name = "封光斬"
-sp = 12
-target = "enemy_one"
-kind = "physical"
-element = "holy"
-power = 28
-anim = "flash:bright_yellow,shake:2"
+id = "kokoro_tozashi"
+name = "心閉ざし"
+sp = 8
+target = "self"
+kind = "buff"
+power = 10
+anim = "flash:bright_white"
+desc = "心に鍵をかけ、雑念を払う。攻撃が上がる。"
 
-# 試練のあとに覚える、職業ごとの上位スキル（@skill add）
+[[skill]]
+id = "hoshiyomi"
+name = "星詠み"
+mp = 10
+target = "enemy_all"
+kind = "magic"
+element = "holy"
+power = 24
+anim = "flash:bright_yellow"
+desc = "父と見た星の光を降らせる。"
+
+# 記憶の場所を巡ったあとに覚える、職業ごとの上位スキル（@skill add）
 [[skill]]
 id = "whirlwind"
 name = "旋風斬"
@@ -471,44 +482,6 @@ category = "light_armor"
 price = 600
 desc = "細かな鎖を編んだ鎧。軽くて丈夫。"
 stats = { def = 14 }
-
-[[item]]
-id = "astra"
-name = "封剣アストラ"
-type = "equipment"
-slot = "weapon"
-category = "sword"
-price = 0
-desc = "目覚めた封剣。三百年前、勇者レオンが蝕王を封じた剣。まばゆい刃が光を放つ。"
-stats = { atk = 45, luk = 5 }
-
-[[skill]]
-id = "seal_light"
-name = "封印の光"
-sp = 20
-target = "enemy_one"
-kind = "physical"
-element = "holy"
-power = 70
-anim = "flash:bright_white,shake:3"
-
-[[skill]]
-id = "dark_flare"
-name = "ダークフレア"
-target = "enemy_all"
-kind = "magic"
-element = "dark"
-power = 16
-anim = "flash:magenta"
-
-[[skill]]
-id = "eclipse"
-name = "蝕"
-target = "enemy_all"
-kind = "magic"
-element = "dark"
-power = 24
-anim = "flash:black,shake:3"
 
 [[skill]]
 id = "healing_song"

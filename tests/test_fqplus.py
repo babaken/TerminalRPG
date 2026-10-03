@@ -164,8 +164,212 @@ def test_chapter2_report_grey_gone_and_chapter3_stub(game):
     f.start_script("ch2_report")
     talk = " ".join(d.settle())                     # 仲間選択の画面が開くところまで
     assert "人が魔物になっていた" in talk and "姿を消した" in talk and "p_grey_gone" in f.st.flags
-    f2 = load_game(PLUS)
-    try:
-        assert "p3_start" in f2.script.labels
-    finally:
-        f2.close()
+
+
+# ---------------------------------------------------------------- 3 章「器」
+import test_chapter3  # noqa: E402
+from test_chapter2 import check_tile, descend, find  # noqa: E402
+from trpg.world.growth import raise_to_level  # noqa: E402
+
+
+def _after_ch2(game, lv=11) -> Play:
+    """2 章を終えた直後（1 章でミア、2 章でガロとノア）。"""
+    d = test_chapter3.after_chapter2(game, members=("mia", "garo", "noa"), lv=lv)
+    st = d.field.st
+    st.flags.add("ch2_had_mia")
+    for mid in game.data.maps:
+        st.traps[mid] = []
+    return d
+
+
+@pytest.mark.parametrize("spare", [False, True])
+def test_chapter3_cave_reveal_and_split(game, spare):
+    d = _after_ch2(game)
+    f = d.field
+    st = f.st
+    talk = " ".join(d.talk(17, 2, "right", choose=0))           # ドルガン → 3 章
+    assert "器計画" in talk and "p3_started" in st.flags and st.chapter == 3
+    assert st.quests["q_blackrock_deep"] == "active" and st.tile_override("dungeon_b11", 26, 5) == ">"
+
+    f.change_map("dungeon_b11", 25, 5)
+    f.pending_auto = False
+    d.walk_to(26, 5)
+    d.settle()
+    assert st.map_id == "dungeon_b12"
+    talk = " ".join(check_tile(d, "W"))                          # グレイの研究ノート
+    assert "王が選んだ器でなければ" in talk and "p3_note" in st.flags
+    descend(d)
+    child = f._find_npc("nari_child")
+    talk = " ".join(d.talk(child.x, child.y + 1, "up", choose=1 if spare else 0))
+    assert "うつわ" in talk and "p3_child_met" in st.flags and not f.npc_visible(child)
+    assert ("p_child_spared" in st.flags) == spare
+    assert ("おなじ……におい" in talk) == spare
+    descend(d)
+    talk = " ".join(check_tile(d, "G"))                          # 大扉が「目を開いて」開く
+    assert "目を開いた" in talk and f.tile_char(20, 1) == ">"
+    talk = " ".join(check_tile(d, "W"))                          # 壁画の全体
+    assert "赤子に剣を握らせて" in talk and "p_mural_2" in st.flags
+    descend(d)
+    for m in st.party:
+        m.hp, m.mp = m.max_hp, m.max_mp
+    game.data.maps["dungeon_b15"].encounter = ""
+    d.walk_to(*find(f, ">"))
+    assert st.map_id == "dungeon_altar" and f.map.name == "玉座の間"
+
+    # ---- 3-2：ネイヴの告白 → 洞穴の入口で仲間がひとり離れる（2 章で加わったガロかノアから選ぶ）
+    talk = " ".join(d.settle())                                  # 選択肢はどれも 1 番目
+    assert "我らが王の器よ" in talk and "手の甲に、剣と同じ紋章" in talk
+    assert "ミアの" not in talk
+    assert "p3_revealed" in st.flags and "p3_split" in st.flags and "p3_home_open" in st.flags
+    assert "頭を冷やさせてくれ" in talk                         # ガロが離れる
+    assert st.away["left"].id == "garo" and [m.id for m in st.party] == ["hero", "mia", "noa"]
+    assert st.map_id == "guild_bern" and "家に帰ってこい" in talk
+    assert st.effects.get("rain") == "off" and st.effects.get("tint") in (None, "none")
+
+
+def test_chapter3_leave_choice_lists_only_chapter2_members(game):
+    d = _after_ch2(game)
+    f = d.field
+    st = f.st
+    st.flags |= {"p3_started", "p3_revealed"}
+    f.start_script("p3_split")
+    for _ in range(40):
+        if f.choice is not None:
+            break
+        d.key("ENTER")
+        d.tick(0.3)
+    assert f.choice is not None
+    assert [o for o in f.choice.options] == ["ガロ", "ノア"]       # 1 章からのミアは出ない
+    d.key("DOWN")
+    d.key("ENTER")
+    talk = " ".join(d.settle())
+    assert "怖いんだ" in talk and st.away["left"].id == "noa"
+
+
+def _after_split(game, lv=24) -> Play:
+    d = _after_ch2(game, lv=lv)
+    f = d.field
+    st = f.st
+    st.chapter = 3
+    st.flags |= {"p3_started", "p3_revealed", "p3_split", "p3_home_open", "p3_note", "p3_door_open", "ch1_farewell",
+                 "ch1_left_village", "ch1_raid_done", "found_sword", "ch1_forest_done", "lost_friend",
+                 "ch1_invited", "ch1_raid", "ch1_family_done", "ch1_meeting_done", "got_herbs", "p_tera_1"}
+    st.quests["q_blackrock_deep"] = "active"
+    garo = st.member("garo")
+    st.party.remove(garo)
+    st.away["left"] = garo
+    return d
+
+
+def _until_won(d, flag, start, tries=8) -> str:
+    """一人の戦い：負けたら出直して、flag が立つまで挑む。読んだ会話を返す。"""
+    talk = []
+    st = d.field.st
+    for _ in range(tries):
+        try:
+            talk += start()
+        except AssertionError as e:                            # Play.settle は負けると止まる
+            assert "戦闘に負けた" in str(e)
+            talk += d.settle()
+            assert any("もう一度来よう" in t for t in talk)
+        if flag in st.flags:
+            return " ".join(talk)
+    raise AssertionError(f"{flag} が立たない")
+
+
+def test_chapter3_home_tera_memories_and_return(game):
+    d = _after_split(game)
+    f = d.field
+    st = f.st
+    # ---- 街道を北へ → 村 → 母の告白
+    f.change_map("field_road", 15, 2, "up")
+    f.pending_auto = False
+    d.walk_to(15, 0)
+    talk = " ".join(d.settle())
+    assert "戸を閉めていく" in talk and "テラおばあさんが、森で赤ちゃんを拾ってきた" in talk
+    assert "p_family_accept" in st.flags and st.map_id == "house_hero"
+    talk = " ".join(d.talk(8, 3, "up"))                          # 母
+    assert "帰る場所は、ここよ" in talk
+
+    # ---- テラ：心の鍵剣
+    d.walk_to(5, 7)
+    d.walk_to(21, 8)
+    assert st.map_id == "tera_hut"
+    talk = " ".join(d.talk(5, 3, "up"))
+    assert "入れ物がいっぱいなら" in talk and "p3_tera_done" in st.flags
+    assert st.hero.equip["weapon"] == "heart_key_sword" and "kokoro_tozashi" in st.hero.extra_skills
+    assert "心の鍵剣" in talk
+
+    # ---- 記憶の場所：森の祠（影の自分）
+    d.walk_to(4, 6)
+    d.walk_to(15, 0)
+    assert st.map_id == "forest_1"
+    d.settle()
+    hp0 = st.hero.max_hp
+    talk = _until_won(d, "p3_mem1", lambda: d.talk(20, 2, "up"))  # 影の自分（同じ強さ。負けたら出直す）
+    assert "秘密基地" in talk and st.hero.max_hp == hp0 + 20
+
+    # ---- 村の丘（父と星）
+    d.walk_to(15, 15)
+    assert st.map_id == "village_lito"
+    def hill():
+        d.walk_to(27, 2)
+        return d.walk_to(28, 2) or d.settle()
+    talk = _until_won(d, "p3_mem2", hill)
+    assert "北の星" in talk and "hoshiyomi" in st.hero.extra_skills
+
+    # ---- ベルンの協会（最後に回ると、そのまま仲間が戻ってくる → 3 章の完）
+    f.change_map("guild_bern", 3, 5, "down")
+    f.pending_auto = False
+
+    def guild():
+        f.st.dir = "down"
+        d.key("ENTER")
+        return d.settle()
+    talk = _until_won(d, "p3_mem3", guild)
+    from trpg.scenes.saveload import SaveLoadScene
+    assert isinstance(d.scene, SaveLoadScene)                  # 3 章の完のセーブ
+    d.key("ESC")
+    talk += " ".join(d.back_to_field())
+    assert "p3_returned" in st.flags
+    assert "お前の前に立つと決めたのは俺だ" in talk
+    assert [m.id for m in st.party] == ["hero", "mia", "noa", "garo"] and not st.away
+    assert "whirlwind" in st.member("garo").extra_skills and "flame_storm" in st.member("mia").extra_skills
+    assert "虚ろの王ゼノ" in talk and "p3_done" in st.flags
+
+
+def test_chapter3_memory_lost_can_retry(game):
+    d = _after_split(game, lv=12)
+    f = d.field
+    st = f.st
+    st.flags |= {"p_family_accept", "p3_tera_done"}
+    f.start_script("p3_mem_lost")
+    talk = " ".join(d.settle())
+    assert "もう一度来よう" in talk and "p3_mem1" not in st.flags
+    f.change_map("forest_1", 20, 2, "up")
+    f.pending_auto = False
+    ev = [e for e in f.map.events if e.label == "p3_mem_forest"]
+    assert ev and f._cond(ev[0].when)                             # まだ挑める
+
+
+def test_return_to_guild_after_other_order(game):
+    """協会を先に回ったときは、残りを巡ってから協会に入ると仲間が戻る。"""
+    d = _after_split(game)
+    f = d.field
+    st = f.st
+    st.flags |= {"p_family_accept", "p3_tera_done", "p3_mem1", "p3_mem2", "p3_mem3"}
+    f.change_map("town_bern", 7, 8, "up")
+    f.pending_auto = False
+    d.walk_to(7, 7)
+    assert st.map_id == "guild_bern"
+    talk = " ".join(d.settle())
+    assert "協会の入口に立っていた" in talk and "p3_done" in st.flags
+
+
+def test_dorgan_after_chapter3(game):
+    d = _after_split(game)
+    f = d.field
+    st = f.st
+    st.flags |= {"p3_done", "p3_returned"}
+    talk = " ".join(d.talk(17, 2, "right", choose=0))
+    assert "制作中" in talk
