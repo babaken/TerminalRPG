@@ -126,3 +126,17 @@ def test_sell_several(d):
     sc._open_sell()
     pick(d, sc, "どくけし")
     assert sc.mode == "sell" and sc.choice is not None        # 1 つしかなければ個数は聞かない
+
+
+def test_mage_and_priest_gear(game):
+    """魔法使い・僧侶向けの皮のローブとロッド（武具屋）。魔力が上がり、ほかの職業は装備できない。"""
+    from trpg.world.state import Member
+    gd = game.data
+    assert {"rod", "leather_robe"} <= set(gd.shops["town_weapon"].goods)
+    mia, rina, garo = (Member.from_data(gd, c) for c in ("mia", "rina", "garo"))
+    for m in (mia, rina):
+        assert m.can_equip("rod", gd) and m.can_equip("leather_robe", gd)
+    assert not garo.can_equip("rod", gd) and not garo.can_equip("leather_robe", gd)
+    mag0 = mia.stat("mag", gd)
+    mia.equip.update(weapon="rod", armor="leather_robe")
+    assert mia.stat("mag", gd) == mag0 - 2 + 10 + 4                  # ローブ（魔力 +2）から着替え

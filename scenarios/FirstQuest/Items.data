@@ -55,6 +55,26 @@ price = 60
 stats = { def = 3, mag = 2 }
 
 [[item]]
+id = "leather_robe"
+name = "皮のローブ"
+type = "equipment"
+slot = "armor"
+category = "robe"
+price = 250
+desc = "なめし革で補強したローブ。魔法使い・僧侶向け。"
+stats = { def = 7, mag = 4 }
+
+[[item]]
+id = "rod"
+name = "ロッド"
+type = "equipment"
+slot = "weapon"
+category = "staff"
+price = 300
+desc = "魔力を込めやすい杖。魔法使い・僧侶向け。魔法の威力と回復量が上がる。"
+stats = { atk = 5, mag = 10 }
+
+[[item]]
 id = "return_scroll"
 name = "帰還の巻物"
 type = "key"
@@ -196,7 +216,7 @@ goods = ["herb", "antidote", "bread"]
 [[shop]]
 id = "town_weapon"
 name = "ベルンの武具屋"
-goods = ["copper_sword", "dagger", "whip", "stone_axe", "leather_armor", "wood_shield"]
+goods = ["copper_sword", "dagger", "whip", "stone_axe", "rod", "leather_armor", "leather_robe", "wood_shield"]
 
 # 4 章からの品ぞろえ（ポーション・鎖帷子が増える）
 [[shop]]
@@ -207,7 +227,7 @@ goods = ["potion", "herb", "antidote", "bread"]
 [[shop]]
 id = "town_weapon_4"
 name = "ベルンの武具屋"
-goods = ["chain_mail", "copper_sword", "dagger", "whip", "stone_axe", "leather_armor", "wood_shield"]
+goods = ["chain_mail", "copper_sword", "dagger", "whip", "stone_axe", "rod", "leather_armor", "leather_robe", "wood_shield"]
 
 # ===== 2章 =====
 [[item]]
