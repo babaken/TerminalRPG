@@ -169,7 +169,7 @@
 | `kind` | 文字列 | | `"physical"` | `physical`（攻撃＋power）`magic`（魔力）`heal` `buff`（攻撃を上げる）`debuff`（守備を下げる）`status`（状態異常）`tame`（手なずける）`escape`（逃げる） |
 | `element` | 文字列 | | `""` | 属性：`fire` `ice` `thunder` `holy` `dark` |
 | `power` | 整数 | | `0` | 威力（buff / debuff は増減量。既定 5） |
-| `status` | 状態異常 ID | | `""` | 付ける状態異常 |
+| `status` | 状態異常 ID | | `""` | 付ける状態異常（`kind = "heal"` のときは治す状態異常） |
 | `status_rate` | 数値 | | status があれば `1.0` | 付ける確率（0〜1） |
 | `anim` | 文字列 | | `""` | 使ったときの演出：`flash`（`flash:色`）`shake`（`shake:強さ`、1〜3）`blink` を `,` でつなぐ（例 `"flash:red,shake:2"`） |
 | `desc` | 文字列 | | `""` | 説明 |

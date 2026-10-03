@@ -535,13 +535,16 @@ class Battle:
                     yield ("msg", tr('あまり効いていないようだ…'))
             elif sk.kind == "heal":
                 yield from self._heal(t, self.heal_amount(a, sk.power))
+                if sk.status and t.alive and sk.status in t.status:   # 回復の技の status は「治す」状態異常
+                    del t.status[sk.status]
+                    yield ("msg", tr('{0}の{1}が治った！', t.name, self.gd.statuses[sk.status].name))
             elif sk.kind in ("buff", "debuff"):
                 key = "atk" if sk.kind == "buff" else "def"
                 amount = max(1, sk.power or 5) * (1 if sk.kind == "buff" else -1)
                 t.mods[key] = [amount, 3]
                 word = tr('攻撃力が上がった！') if sk.kind == "buff" else tr('守備力が下がった！')
                 yield ("msg", tr('{0}の{1}', t.name, word))
-            if sk.status and t.alive:
+            if sk.status and t.alive and sk.kind != "heal":
                 yield from self._inflict(t, sk.status, sk.status_rate, verbose=sk.kind == "status")
 
     def _heal(self, t: Battler, amount: int) -> Iterator[Event]:
