@@ -285,3 +285,104 @@ table = [
   { group = "lizard_2", weight = 2 },
   { group = "lizard_goblin", weight = 2 },
 ]
+
+# ===== 3 章：黒岩の洞穴の奥 =====
+[[enemy]]
+id = "ash_soldier"
+name = "灰の兵士"
+aa = "aa/ash_soldier.txt"
+stats = { hp = 150, atk = 29, def = 22, agi = 10, luk = 3 }
+exp = 90
+gold = 45
+resist = ["fire"]
+ai = "pattern"
+[[enemy.actions]]
+skill = "attack"
+weight = 3
+[[enemy.actions]]
+skill = "smash"
+weight = 1
+
+[[enemy]]
+id = "ash_hound"
+name = "灰の魔犬"
+aa = "aa/ash_hound.txt"
+stats = { hp = 100, atk = 26, def = 14, agi = 20, luk = 6 }
+exp = 70
+gold = 30
+weak = ["fire"]
+tameable = true
+tame_rate = 0.08
+ai = "pattern"
+[[enemy.actions]]
+skill = "attack"
+weight = 2
+[[enemy.actions]]
+skill = "bite"
+weight = 1
+
+[[enemy]]
+id = "shadow_knight"
+name = "シャドウナイト"
+aa = "aa/shadow_knight.txt"
+stats = { hp = 240, atk = 33, def = 26, mag = 20, agi = 12, luk = 5 }
+exp = 160
+gold = 80
+ai = "pattern"
+[[enemy.actions]]
+skill = "attack"
+weight = 3
+[[enemy.actions]]
+skill = "smash"
+weight = 2
+
+[[enemy]]
+id = "garza_1"
+name = "灰のガルザ"
+aa = "aa/garza.txt"
+stats = { hp = 9999, atk = 38, def = 99, mag = 30, agi = 30, luk = 10 }
+exp = 0
+gold = 0
+immune_status = ["poison"]
+ai = "pattern"
+[[enemy.actions]]
+skill = "attack"
+weight = 2
+[[enemy.actions]]
+skill = "ash_wave"
+weight = 1
+
+[[group]]
+id = "ash_2"
+members = ["ash_soldier", "ash_soldier"]
+
+[[group]]
+id = "hound_3"
+members = ["ash_hound", "ash_hound", "ash_hound"]
+
+[[group]]
+id = "soldier_hound"
+members = ["ash_hound", "ash_soldier", "ash_hound"]
+
+[[group]]
+id = "knight_1"
+members = ["shadow_knight"]
+
+[[group]]
+id = "knight_soldier"
+members = ["ash_soldier", "shadow_knight"]
+
+[[group]]
+id = "garza_1"
+members = ["garza_1"]
+
+[[encounter]]
+id = "cave_abyss"
+steps = [16, 28]
+table = [
+  { group = "ash_2", weight = 2 },
+  { group = "hound_3", weight = 2 },
+  { group = "soldier_hound", weight = 2 },
+  { group = "knight_1", weight = 1 },
+  { group = "knight_soldier", weight = 1 },
+]
