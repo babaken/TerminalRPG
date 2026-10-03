@@ -1,0 +1,561 @@
+# ===== 敵 =====
+
+[[enemy]]
+id = "slime"
+name = "スライム"
+aa = "aa/slime.txt"
+stats = { hp = 8, atk = 5, def = 2, agi = 3, luk = 1 }
+exp = 3
+gold = 2
+weak = ["fire"]
+drops = [ { item = "herb", rate = 0.1 } ]
+tameable = true
+tame_rate = 0.3
+
+[[enemy]]
+id = "bat"
+name = "コウモリ"
+aa = "aa/bat.txt"
+stats = { hp = 6, atk = 6, def = 1, agi = 9, luk = 3 }
+exp = 3
+gold = 3
+ai = "random"
+[[enemy.actions]]
+skill = "attack"
+weight = 3
+[[enemy.actions]]
+skill = "bite"
+weight = 1
+
+[[enemy]]
+id = "shadow_wolf"
+name = "シャドウウルフ"
+aa = "aa/wolf.txt"
+stats = { hp = 10, atk = 3, def = 3, agi = 7, luk = 2 }   # FirstQuest+：主人公を連れ戻しに来たので手加減している（FirstQuest は atk 7）
+exp = 6
+gold = 0
+ai = "pattern"
+[[enemy.actions]]
+skill = "attack"
+target = "id:hero"          # 1章: 主人公だけを狙う
+
+[[enemy]]
+id = "mole"
+name = "ハタケモグラ"
+aa = "aa/mole.txt"
+stats = { hp = 40, atk = 12, def = 6, agi = 5, luk = 3 }
+exp = 18
+gold = 12
+weak = ["fire"]
+drops = [ { item = "herb", rate = 0.2 } ]
+tameable = true
+tame_rate = 0.15
+ai = "pattern"
+[[enemy.actions]]
+skill = "attack"
+weight = 3
+[[enemy.actions]]
+skill = "dig_attack"
+weight = 1
+when = "self.hp_rate < 0.5"
+
+[[enemy]]
+id = "rabbit"
+name = "ツノウサギ"
+aa = "aa/rabbit.txt"
+stats = { hp = 10, atk = 6, def = 2, agi = 10, luk = 4 }
+exp = 4
+gold = 4
+drops = [ { item = "herb", rate = 0.25 } ]
+tameable = true
+tame_rate = 0.3
+
+[[enemy]]
+id = "mushroom"
+name = "ドクキノコ"
+aa = "aa/mushroom.txt"
+stats = { hp = 12, atk = 5, def = 4, mag = 2, agi = 2, luk = 2 }
+exp = 5
+gold = 5
+weak = ["fire"]
+drops = [ { item = "antidote", rate = 0.2 } ]
+ai = "random"
+[[enemy.actions]]
+skill = "attack"
+weight = 2
+[[enemy.actions]]
+skill = "spore"
+weight = 1
+
+# ===== 敵グループ =====
+
+[[group]]
+id = "slime_2"
+members = ["slime", "slime"]
+
+[[group]]
+id = "bat_1"
+members = ["bat"]
+
+[[group]]
+id = "slime_bat"
+members = ["slime", "bat"]
+
+[[group]]
+id = "raid_wolves"
+members = ["shadow_wolf", "shadow_wolf", "shadow_wolf"]
+
+[[group]]
+id = "narisokonai_1"
+members = ["narisokonai"]
+
+[[group]]
+id = "mole_pack"
+members = ["mole", "mole"]
+
+[[group]]
+id = "rabbit_2"
+members = ["rabbit", "rabbit"]
+
+[[group]]
+id = "mushroom_slime"
+members = ["mushroom", "slime"]
+
+[[group]]
+id = "slime_3"
+members = ["slime", "slime", "slime"]
+
+# ===== 出現表 =====
+
+[[encounter]]
+id = "forest_1"
+steps = [12, 24]
+table = [
+  { group = "slime_2", weight = 5 },
+  { group = "bat_1", weight = 2 },
+  { group = "slime_bat", weight = 2 },
+]
+
+[[encounter]]
+id = "road"
+steps = [14, 26]
+table = [
+  { group = "slime_2", weight = 4 },
+  { group = "slime_3", weight = 2 },
+  { group = "rabbit_2", weight = 3 },
+  { group = "mushroom_slime", weight = 2 },
+]
+
+# ===== 2章 =====
+[[enemy]]
+id = "drill_mole"
+name = "ドリルモール"
+aa = "aa/drill_mole.txt"
+stats = { hp = 80, mp = 0, atk = 13, def = 8, mag = 0, agi = 6, luk = 4 }
+exp = 80
+gold = 60
+weak = ["fire"]
+ai = "pattern"
+[[enemy.actions]]
+skill = "attack"
+weight = 3
+[[enemy.actions]]
+skill = "dig_attack"
+weight = 2
+[[enemy.actions]]
+skill = "drill_attack"
+weight = 2
+when = "self.hp_rate < 0.5"
+
+[[group]]
+id = "mole_boss"
+members = ["mole", "drill_mole", "mole"]
+
+[[encounter]]
+id = "kabura"
+steps = [14, 26]
+table = [
+  { group = "mole_pack", weight = 3 },
+  { group = "rabbit_2", weight = 3 },
+  { group = "mushroom_slime", weight = 1 },
+]
+
+# ----- 黒岩の洞穴 -----
+[[enemy]]
+id = "goblin"
+name = "ゴブリン"
+aa = "aa/goblin.txt"
+stats = { hp = 28, atk = 13, def = 6, agi = 7, luk = 3 }
+exp = 14
+gold = 10
+drops = [ { item = "herb", rate = 0.15 } ]
+
+[[enemy]]
+id = "narisokonai"            # FirstQuest+：器の実験で魔物になりかけた冒険者（B7F）
+name = "なりそこない"
+aa = "aa/narisokonai.txt"
+stats = { hp = 75, atk = 15, def = 8, agi = 5, luk = 2 }
+exp = 40
+gold = 0
+ai = "pattern"
+[[enemy.actions]]
+skill = "attack"
+
+[[enemy]]
+id = "goblin_captain"
+name = "ゴブリン隊長"
+aa = "aa/goblin_captain.txt"
+stats = { hp = 60, atk = 16, def = 8, agi = 8, luk = 4 }
+exp = 35
+gold = 30
+ai = "pattern"
+[[enemy.actions]]
+skill = "attack"
+weight = 3
+[[enemy.actions]]
+skill = "smash"
+weight = 1
+
+[[enemy]]
+id = "rock_lizard"
+name = "イワトカゲ"
+aa = "aa/rock_lizard.txt"
+stats = { hp = 45, atk = 15, def = 12, agi = 4, luk = 2 }
+exp = 22
+gold = 14
+weak = ["fire"]
+tameable = true
+tame_rate = 0.1
+
+[[enemy]]
+id = "ogre"
+name = "オーガ"
+aa = "aa/ogre.txt"
+stats = { hp = 220, atk = 25, def = 10, agi = 4, luk = 3 }
+exp = 200
+gold = 150
+ai = "pattern"
+[[enemy.actions]]
+skill = "attack"
+weight = 3
+[[enemy.actions]]
+skill = "smash"
+weight = 2
+
+[[group]]
+id = "goblin_guard"
+members = ["goblin", "goblin_captain", "goblin"]
+
+[[group]]
+id = "cave_goblin_2"
+members = ["goblin", "goblin"]
+
+[[group]]
+id = "cave_goblin_bat"
+members = ["bat", "goblin", "bat"]
+
+[[group]]
+id = "lizard_1"
+members = ["rock_lizard"]
+
+[[group]]
+id = "goblin_3"
+members = ["goblin", "goblin", "goblin"]
+
+[[group]]
+id = "lizard_goblin"
+members = ["rock_lizard", "goblin"]
+
+[[group]]
+id = "lizard_2"
+members = ["rock_lizard", "rock_lizard"]
+
+[[group]]
+id = "ogre"
+members = ["ogre"]
+
+[[encounter]]
+id = "cave_upper"
+steps = [12, 22]
+table = [
+  { group = "cave_goblin_2", weight = 3 },
+  { group = "cave_goblin_bat", weight = 2 },
+  { group = "bat_1", weight = 1 },
+]
+
+[[encounter]]
+id = "cave_mid"
+steps = [12, 22]
+table = [
+  { group = "lizard_1", weight = 2 },
+  { group = "goblin_3", weight = 2 },
+  { group = "lizard_goblin", weight = 2 },
+]
+
+[[encounter]]
+id = "cave_deep"
+steps = [12, 22]
+table = [
+  { group = "goblin_guard", weight = 2 },
+  { group = "lizard_2", weight = 2 },
+  { group = "lizard_goblin", weight = 2 },
+]
+
+# ===== 3 章：黒岩の洞穴の奥 =====
+[[enemy]]
+id = "ash_soldier"
+name = "灰の兵士"
+aa = "aa/ash_soldier.txt"
+stats = { hp = 150, atk = 29, def = 22, agi = 10, luk = 3 }
+exp = 90
+gold = 45
+resist = ["fire"]
+ai = "pattern"
+[[enemy.actions]]
+skill = "attack"
+weight = 3
+[[enemy.actions]]
+skill = "smash"
+weight = 1
+
+[[enemy]]
+id = "ash_hound"
+name = "灰の魔犬"
+aa = "aa/ash_hound.txt"
+stats = { hp = 100, atk = 26, def = 14, agi = 20, luk = 6 }
+exp = 70
+gold = 30
+weak = ["fire"]
+tameable = true
+tame_rate = 0.08
+ai = "pattern"
+[[enemy.actions]]
+skill = "attack"
+weight = 2
+[[enemy.actions]]
+skill = "bite"
+weight = 1
+
+[[enemy]]
+id = "shadow_knight"
+name = "シャドウナイト"
+aa = "aa/shadow_knight.txt"
+stats = { hp = 240, atk = 33, def = 26, mag = 20, agi = 12, luk = 5 }
+exp = 160
+gold = 80
+ai = "pattern"
+[[enemy.actions]]
+skill = "attack"
+weight = 3
+[[enemy.actions]]
+skill = "smash"
+weight = 2
+
+[[enemy]]
+id = "garza_1"
+name = "灰のガルザ"
+aa = "aa/garza.txt"
+stats = { hp = 9999, atk = 38, def = 99, mag = 30, agi = 30, luk = 10 }
+exp = 0
+gold = 0
+immune_status = ["poison"]
+ai = "pattern"
+[[enemy.actions]]
+skill = "attack"
+weight = 2
+[[enemy.actions]]
+skill = "ash_wave"
+weight = 1
+
+[[group]]
+id = "ash_2"
+members = ["ash_soldier", "ash_soldier"]
+
+[[group]]
+id = "hound_3"
+members = ["ash_hound", "ash_hound", "ash_hound"]
+
+[[group]]
+id = "soldier_hound"
+members = ["ash_hound", "ash_soldier", "ash_hound"]
+
+[[group]]
+id = "knight_1"
+members = ["shadow_knight"]
+
+[[group]]
+id = "knight_soldier"
+members = ["ash_soldier", "shadow_knight"]
+
+[[group]]
+id = "garza_1"
+members = ["garza_1"]
+
+[[encounter]]
+id = "cave_abyss"
+steps = [16, 28]
+table = [
+  { group = "ash_2", weight = 2 },
+  { group = "hound_3", weight = 2 },
+  { group = "soldier_hound", weight = 2 },
+  { group = "knight_1", weight = 1 },
+  { group = "knight_soldier", weight = 1 },
+]
+
+# ===== 3 章：風見の山道・試練 =====
+[[enemy]]
+id = "snow_wolf"
+name = "雪狼"
+aa = "aa/wolf.txt"
+stats = { hp = 120, atk = 30, def = 16, agi = 20, luk = 5 }
+exp = 75
+gold = 30
+weak = ["fire"]
+resist = ["ice"]
+tameable = true
+tame_rate = 0.1
+ai = "pattern"
+[[enemy.actions]]
+skill = "attack"
+weight = 3
+[[enemy.actions]]
+skill = "bite"
+weight = 1
+
+[[enemy]]
+id = "ice_spirit"
+name = "氷の精"
+aa = "aa/ice_spirit.txt"
+stats = { hp = 90, mp = 60, atk = 14, def = 12, mag = 32, agi = 14, luk = 6 }
+exp = 80
+gold = 40
+weak = ["fire"]
+resist = ["ice"]
+ai = "pattern"
+[[enemy.actions]]
+skill = "attack"
+weight = 1
+[[enemy.actions]]
+skill = "frost"
+weight = 2
+
+[[enemy]]
+id = "shadow_hero"
+name = "影の{hero}"
+aa = "aa/shadow_hero.txt"
+stats = { hp = 1 }
+copy = "hero"
+immune_status = ["poison"]
+
+[[group]]
+id = "snow_wolf_2"
+members = ["snow_wolf", "snow_wolf"]
+
+[[group]]
+id = "ice_spirit_2"
+members = ["ice_spirit", "ice_spirit"]
+
+[[group]]
+id = "wolf_spirit"
+members = ["snow_wolf", "ice_spirit", "snow_wolf"]
+
+[[group]]
+id = "shadow"
+members = ["shadow_hero"]
+
+[[encounter]]
+id = "mountain"
+steps = [14, 26]
+table = [
+  { group = "snow_wolf_2", weight = 3 },
+  { group = "ice_spirit_2", weight = 2 },
+  { group = "wolf_spirit", weight = 2 },
+]
+
+# ===== 4 章：儀式の間 =====
+[[enemy]]
+id = "garza_2"
+name = "灰のガルザ"
+aa = "aa/garza.txt"
+stats = { hp = 1100, mp = 99, atk = 40, def = 28, mag = 30, agi = 22, luk = 8 }
+exp = 600
+gold = 500
+weak = ["holy"]
+immune_status = ["poison"]
+ai = "pattern"
+[[enemy.actions]]
+skill = "attack"
+weight = 3
+[[enemy.actions]]
+skill = "ash_wave"
+weight = 1
+[[enemy.actions]]
+skill = "smash"
+weight = 2
+when = "self.hp_rate < 0.5"
+
+[[enemy]]
+id = "verm_1"
+name = "蝕王ヴェルム（不完全体）"
+aa = "aa/verm.txt"
+stats = { hp = 1000, mp = 999, atk = 38, def = 28, mag = 32, agi = 18, luk = 10 }
+exp = 0
+gold = 0
+weak = ["holy"]
+immune_status = ["poison"]
+ai = "pattern"
+[[enemy.actions]]
+skill = "attack"
+weight = 2
+[[enemy.actions]]
+skill = "dark_flare"
+weight = 2
+
+[[enemy]]
+id = "verm_2"
+name = "蝕王ヴェルム"
+aa = "aa/verm.txt"
+stats = { hp = 1300, mp = 999, atk = 40, def = 28, mag = 32, agi = 22, luk = 12 }
+exp = 2000
+gold = 0
+weak = ["holy"]
+immune_status = ["poison"]
+ai = "pattern"
+[[enemy.actions]]
+skill = "attack"
+weight = 2
+[[enemy.actions]]
+skill = "dark_flare"
+weight = 2
+[[enemy.actions]]
+skill = "eclipse"
+weight = 1
+when = "self.hp_rate < 0.6"
+
+[[group]]
+id = "garza_2"
+members = ["garza_2"]
+
+[[group]]
+id = "verm_1"
+members = ["verm_1"]
+
+[[group]]
+id = "verm_2"
+members = ["verm_2"]
+
+# ===== 使い魔 =====
+# Friends.data の familiar で主人を決める。能力値は stats + growth ×（主人の Lv − 1）
+[[enemy]]
+id = "pipi"
+name = "ピピ"
+aa = "aa/pipi.txt"
+stats = { hp = 14, mp = 6, atk = 5, def = 3, mag = 6, agi = 14, luk = 6 }
+growth = { hp = 5, mp = 2, atk = 2, def = 1, mag = 2, agi = 2 }
+ai = "pattern"
+[[enemy.actions]]
+skill = "attack"
+weight = 3
+[[enemy.actions]]
+skill = "healing_song"
+weight = 1

@@ -1,0 +1,2167 @@
+# ===== タイルセット =====
+# glyph は表示幅 2（全角 1 文字）。曖昧幅の記号（■ ▼ ─ など）は避ける
+
+[[tileset]]
+id = "default"
+[tileset.tiles]
+"#" = { glyph = "＃", pass = false, color = "gray",         name = "壁" }
+"." = { glyph = "．", pass = true,  color = "green",        name = "地面" }
+"T" = { glyph = "木", pass = false, color = "bright_green", name = "木" }
+"~" = { glyph = "～", pass = false, color = "bright_blue",  name = "水" }
+"H" = { glyph = "家", pass = false, color = "yellow",       name = "家" }
+"D" = { glyph = "戸", pass = true,  color = "yellow",       name = "戸口" }
+"," = { glyph = "畑", pass = true,  color = "green",        name = "畑" }
+"t" = { glyph = "机", pass = false, color = "yellow",       name = "家具" }
+"S" = { glyph = "祠", pass = false, color = "bright_cyan",  name = "祠" }
+"=" = { glyph = "：", pass = true,  color = "yellow",       name = "道" }
+"R" = { glyph = "岩", pass = false, color = "white",        name = "岩壁" }
+"_" = { glyph = "．", pass = true,  color = "gray",         name = "洞穴の床" }
+"<" = { glyph = "上", pass = true,  color = "bright_white", name = "上り階段" }
+">" = { glyph = "下", pass = true,  color = "bright_white", name = "下り階段" }
+"C" = { glyph = "穴", pass = true,  color = "bright_white", name = "洞穴の入口" }
+"B" = { glyph = "箱", pass = false, color = "bright_yellow", name = "宝箱" }
+"b" = { glyph = "箱", pass = false, color = "gray",         name = "開いた宝箱" }
+"P" = { glyph = "袋", pass = false, color = "yellow",       name = "荷物" }
+"O" = { glyph = "泉", pass = false, color = "bright_cyan",  name = "回復の泉" }
+"M" = { glyph = "陣", pass = true,  color = "bright_magenta", name = "魔法陣の跡" }
+"W" = { glyph = "文", pass = false, color = "magenta",      name = "壁の文字" }
+"G" = { glyph = "扉", pass = false, color = "bright_yellow", name = "大扉" }
+"A" = { glyph = "祭", pass = false, color = "bright_red",   name = "祭壇" }
+"F" = { glyph = "炎", pass = false, color = "red",          name = "黒い炎" }
+"Z" = { glyph = "寝", pass = false, color = "white",        name = "寝台" }
+"s" = { glyph = "．", pass = true,  color = "bright_white", name = "雪原" }
+"^" = { glyph = "山", pass = false, color = "bright_white", name = "岩山" }
+"o" = { glyph = "．", pass = true,  color = "white",        name = "石畳" }
+"|" = { glyph = "柱", pass = false, color = "white",        name = "柱" }
+"+" = { glyph = "鏡", pass = false, color = "bright_cyan",  name = "鏡" }
+"K" = { glyph = "檻", pass = false, color = "gray",         name = "檻の残骸" }      # FirstQuest+
+
+# ===== 見えない罠 =====
+# 踏むまで見えない。踏むと作動して文字が見えるようになる（見えたあとも踏めば作動する）
+# マップの traps = [最小, 最大] の数だけ、初めて入ったときにランダムな床に置く
+[[trap]]
+id = "poison_needle"
+name = "毒の針"
+glyph = "毒"
+color = "bright_magenta"
+target = "one"
+damage_rate = 0.05
+status = "poison"
+message = "足元から毒の針が飛び出した！"
+
+[[trap]]
+id = "arrow"
+name = "矢の罠"
+glyph = "矢"
+color = "bright_yellow"
+target = "one"
+damage_rate = 0.2
+message = "壁から矢が飛んできた！"
+
+[[trap]]
+id = "bomb"
+name = "爆発の罠"
+glyph = "爆"
+color = "bright_red"
+target = "all"
+damage_rate = 0.12
+message = "足元で爆発が起きた！"
+
+# ===== マップ =====
+
+[[map]]
+id = "village_lito"
+name = "リト村"
+tileset = "default"
+rows = [
+  "TTTTTTTTTTTTTTT.TTTTTTTTTTTTTTTT",
+  "T..............................T",
+  "T..HHH.........................T",
+  "T..HDH.......HHH.....~~~~......T",
+  "T............HDH.....~~~~......T",
+  "T....................~~~~......T",
+  "T..............................T",
+  "T...,,,,,,..........HHH........T",
+  "T...,,,,,,..........HDH........T",
+  "T...,,,,,,.....................T",
+  "T..............................T",
+  "T......HHH.....................T",
+  "T......HDH...........,,,,,,....T",
+  "T....................,,,,,,....T",
+  "T..............................T",
+  "T..............................T",
+  "T..............................T",
+  "TTTTTTTTTTTTTTT.TTTTTTTTTTTTTTTT",
+]
+
+[[map.warp]]          # 主人公の家の戸口
+x = 4
+y = 3
+to = "house_hero"
+tx = 5
+ty = 6
+
+[[map.warp]]          # 村長の家の戸口
+x = 14
+y = 4
+to = "house_chief"
+tx = 5
+ty = 6
+
+[[map.warp]]          # 老婆テラの小屋の戸口（FirstQuest+）
+x = 21
+y = 8
+to = "tera_hut"
+tx = 4
+ty = 5
+
+[[map.warp]]          # 北の出口 → 囁きの森
+x = 15
+y = 0
+to = "forest_1"
+tx = 15
+ty = 14
+
+[[map.event]]         # 家から初めて出たとき：カイが誘いに来る
+x = 4
+y = 4
+trigger = "auto"
+label = "ch1_kai_invite"
+when = "!flag.ch1_invited"
+
+[[map.event]]         # 南の出口（村を出るまでは通れない）
+x = 15
+y = 17
+trigger = "touch"
+label = "ch1_south_gate"
+
+[[map.event]]         # 翌朝、外に出るとモンスターが襲ってくる
+x = 4
+y = 4
+trigger = "auto"
+label = "ch1_raid"
+when = "flag.ch1_raid and !flag.ch1_raid_done"
+
+[[map.npc]]
+id = "kai"
+glyph = "友"
+color = "cyan"
+x = 15
+y = 2
+talk = "ch1_kai_talk"
+when = "!flag.ch1_forest_done"
+
+[[map.npc]]
+id = "chief"
+glyph = "長"
+color = "white"
+x = 16
+y = 5
+talk = "ch1_chief_talk"
+when = "!flag.ch1_raid"
+
+[[map.npc]]
+id = "farmer"
+glyph = "人"
+color = "white"
+x = 6
+y = 10
+move = "random"
+talk = "ch1_farmer_talk"
+when = "!flag.ch1_raid_done"
+
+[[map.npc]]
+id = "wolf1"
+glyph = "狼"
+color = "bright_red"
+x = 15
+y = 7
+when = "flag.ch1_raid and !flag.ch1_raid_done"
+
+[[map.npc]]
+id = "wolf2"
+glyph = "狼"
+color = "bright_red"
+x = 12
+y = 8
+when = "flag.ch1_raid and !flag.ch1_raid_done"
+
+[[map.npc]]
+id = "wolf3"
+glyph = "狼"
+color = "bright_red"
+x = 18
+y = 8
+when = "flag.ch1_raid and !flag.ch1_raid_done"
+
+[[map.npc]]
+id = "villager_a"
+glyph = "人"
+color = "white"
+x = 10
+y = 6
+talk = "ch1_villager_a"
+when = "flag.ch1_raid_done and !flag.ch1_left_village"
+
+[[map.npc]]
+id = "villager_b"
+glyph = "人"
+color = "white"
+x = 21
+y = 6
+talk = "ch1_villager_b"
+when = "flag.ch1_raid_done and !flag.ch1_left_village"
+
+[[map.npc]]
+id = "villager_c"
+glyph = "人"
+color = "white"
+x = 18
+y = 11
+talk = "ch1_villager_c"
+when = "flag.ch1_raid_done and !flag.ch1_left_village"
+
+[[map.npc]]
+id = "kai_gate"
+glyph = "友"
+color = "cyan"
+x = 14
+y = 16
+talk = "ch1_kai_gate_talk"
+when = "flag.ch1_farewell and !flag.ch1_left_village"
+
+[[map.npc]]
+id = "home_chief"
+glyph = "長"
+color = "white"
+x = 13
+y = 13
+talk = "ch4_home_talk"
+when = "flag.ch4_kai"
+
+[[map.npc]]
+id = "home_mother"
+glyph = "母"
+color = "bright_yellow"
+x = 14
+y = 14
+talk = "ch4_home_talk"
+when = "flag.ch4_kai"
+
+[[map.npc]]
+id = "home_father"
+glyph = "父"
+color = "yellow"
+x = 16
+y = 14
+talk = "ch4_home_talk"
+when = "flag.ch4_kai"
+
+[[map.npc]]
+id = "home_mina"
+glyph = "妹"
+color = "bright_magenta"
+x = 15
+y = 13
+talk = "ch4_home_talk"
+when = "flag.ch4_kai"
+
+[[map.npc]]
+id = "home_villager_a"
+glyph = "人"
+color = "white"
+x = 12
+y = 15
+talk = "ch4_home_talk"
+when = "flag.ch4_kai"
+
+[[map.npc]]
+id = "home_villager_b"
+glyph = "人"
+color = "white"
+x = 18
+y = 15
+talk = "ch4_home_talk"
+when = "flag.ch4_kai"
+
+[[map.npc]]
+id = "home_kai"
+glyph = "友"
+color = "cyan"
+x = 17
+y = 13
+talk = "ch4_home_talk"
+when = "flag.ch4_kai"
+
+[[map.event]]
+x = 15
+y = 16
+trigger = "auto"
+label = "ch4_village"
+when = "flag.ch4_kai and !flag.ch4_home"
+
+[[map]]
+id = "house_hero"
+name = "{hero}の家"
+tileset = "default"
+indoor = true
+rows = [
+  "############",
+  "#..........#",
+  "#.tt.......#",
+  "#..........#",
+  "#.......tt.#",
+  "#..........#",
+  "#..........#",
+  "#####D######",
+]
+
+[[map.warp]]
+x = 5
+y = 7
+to = "village_lito"
+tx = 4
+ty = 4
+
+[[map.npc]]
+id = "mother"
+glyph = "母"
+color = "magenta"
+x = 8
+y = 2
+talk = "ch1_mother_talk"
+
+[[map.npc]]
+id = "father"
+glyph = "父"
+color = "yellow"
+x = 9
+y = 5
+talk = "ch1_father_talk"
+when = "flag.ch1_forest_done"
+
+[[map.npc]]
+id = "mina"
+glyph = "妹"
+color = "bright_magenta"
+x = 3
+y = 5
+move = "random"
+talk = "ch1_mina_talk"
+
+[[map]]
+id = "tera_hut"
+name = "テラの小屋"
+tileset = "default"
+indoor = true
+rows = [
+  "#########",
+  "#.tt....#",
+  "#.......#",
+  "#.....t.#",
+  "#.......#",
+  "#.......#",
+  "####D####",
+]
+
+[[map.warp]]
+x = 4
+y = 6
+to = "village_lito"
+tx = 21
+ty = 9
+
+[[map.npc]]
+id = "tera"
+glyph = "婆"
+color = "bright_green"
+x = 5
+y = 2
+talk = "p1_tera_talk"
+
+[[map]]
+id = "forest_1"
+name = "囁きの森"
+tileset = "default"
+encounter = "forest_1"
+rows = [
+  "TTTTTTTTTTTTTTTTTTTTTTTTTTTTTT",
+  "TTT.......TTTTT.....S...TTTTTT",
+  "TT....TT.....TT..TTT.......TTT",
+  "T....TTTT..........T...~~...TT",
+  "T.....TT.....TTT......~~~~...T",
+  "TT..........TTTTT......~~....T",
+  "TTT....TT....TTT.............T",
+  "T......TT..........TTT......TT",
+  "T..TT.........TT...TTT.......T",
+  "T..TT....TT...TT.........TT..T",
+  "TT.......TT.........TT...TT..T",
+  "TTT..............TT.TT......TT",
+  "TTTT....TTT......TT.........TT",
+  "TTTTT...TTT.................TT",
+  "TTTTTTT......TT.TT.......TTTTT",
+  "TTTTTTTTTTTTTTT.TTTTTTTTTTTTTT",
+]
+
+[[map.warp]]
+x = 15
+y = 15
+to = "village_lito"
+tx = 15
+ty = 1
+
+[[map.event]]         # 森に入ったとき（1回だけ）
+x = 15
+y = 14
+trigger = "auto"
+label = "ch1_forest_enter"
+once = true
+
+[[map.event]]         # 祠を調べる
+x = 20
+y = 1
+trigger = "check"
+label = "ch1_find_sword"
+once = true
+when = "flag.lost_friend"
+
+[[map.npc]]
+id = "kai"
+glyph = "友"
+color = "cyan"
+x = 16
+y = 13
+talk = "ch1_kai_forest_talk"
+when = "!flag.ch1_forest_done"
+
+[[map]]
+id = "house_chief"
+name = "村長の家"
+tileset = "default"
+indoor = true
+rows = [
+  "############",
+  "#..........#",
+  "#.tt.......#",
+  "#..........#",
+  "#.......tt.#",
+  "#..........#",
+  "#..........#",
+  "#####D######",
+]
+
+[[map.warp]]
+x = 5
+y = 7
+to = "village_lito"
+tx = 14
+ty = 5
+
+[[map.event]]         # 襲撃のあと：村長の話
+x = 5
+y = 6
+trigger = "auto"
+label = "ch1_meeting"
+when = "flag.ch1_need_meeting and !flag.ch1_meeting_done"
+
+[[map.npc]]
+id = "chief_in"
+glyph = "長"
+color = "white"
+x = 6
+y = 2
+talk = "ch1_chief_home_talk"
+when = "flag.ch1_raid"              # 襲撃の前は外（village_lito の chief）にいる
+
+[[map.npc]]
+id = "chief_wife"
+glyph = "妻"
+color = "magenta"
+x = 9
+y = 5
+talk = "ch1_chief_wife_talk"
+
+[[map]]
+id = "field_road"
+name = "街道"
+tileset = "default"
+encounter = "road"
+rows = [
+  "TTTTTTTTTTTTTTT=TTTTTTTTTTTTTT",
+  "T..............=.............T",
+  "T..TT..........=.............T",
+  "T..............=........TT...T",
+  "T..............=..........T..T",
+  "T..............=.............T",
+  "T..............=....~~~~.....T",
+  "T.....HHH......=....~~~~.....T",
+  "T.....HDH......=....~~~~.....T",
+  "T.T....=========.............T",
+  "T..T...........=.............T",
+  "T..............=.............T",
+  "T..............=..........TT.T",
+  "T..............=.............T",
+  "T..............=.............T",
+  "T....T.........=......T......T",
+  "T..............=.............T",
+  "TTTTTTTTTTTTTTT=TTTTTTTTTTTTTT",
+]
+
+[[map.event]]         # 北：村へ（追い出された後は戻れない）
+x = 15
+y = 0
+trigger = "touch"
+label = "ch1_road_north"
+
+[[map.warp]]          # 南：ベルン北門
+x = 15
+y = 17
+to = "town_bern"
+tx = 20
+ty = 1
+dir = "down"
+
+[[map.npc]]
+id = "merchant"
+glyph = "商"
+color = "bright_green"
+x = 6
+y = 9
+talk = "ch1_road_merchant"
+
+[[map.event]]         # 立て札
+x = 16
+y = 2
+trigger = "check"
+label = "ch1_signpost"
+
+[[map]]
+id = "town_bern"
+name = "交易都市ベルン"
+tileset = "default"
+rows = [
+  "####################=###################",
+  "#...................=..................#",
+  "#...................=..................#",
+  "#..HHHHHHHHH........=.......HHHHHHHH...#",
+  "#..HHHHHHHHH.T......=....T..HHHHHHHH...#",
+  "#..HHHHHHHHH........=.......HHHHHHHH...#",
+  "#..HHHHHHHHH........=.......HHHDHHHH...#",
+  "#..HHHHDHHHH........=..................#",
+  "#...................=..................#",
+  "#............ttt....=...ttt..........T.#",
+  "#...................=..................#",
+  "#...====================================",
+  "#...................=..................#",
+  "#................~~~~~~~...............#",
+  "#................~~~~~~~...............#",
+  "#..HHHHHH........~~~~~~~......HHHHHHH..#",
+  "#..HHHHHH...........=.........HHHHHHH..#",
+  "#..HHHHHH...........=.........HHHHHHH..#",
+  "#..HHHHHH..HHHHH....=.........HHHHHHH..#",
+  "#########..HHHHH....=...T..............#",
+  "#..........HHHHHT...=..................#",
+  "#...................=..................#",
+  "#...................=..................#",
+  "####################=###################",
+]
+
+[[map.event]]         # 初めて街に入ったとき：門番
+x = 20
+y = 1
+trigger = "auto"
+label = "ch1_gate"
+when = "!flag.ch1_gate_talked"
+
+[[map.warp]]          # 北門 → 街道
+x = 20
+y = 0
+to = "field_road"
+tx = 15
+ty = 16
+dir = "up"
+
+[[map.warp]]          # 冒険者協会
+x = 7
+y = 7
+to = "guild_bern"
+tx = 10
+ty = 8
+dir = "up"
+
+[[map.warp]]          # 宿屋
+x = 31
+y = 6
+to = "bern_inn"
+tx = 7
+ty = 6
+dir = "up"
+
+[[map.npc]]
+id = "guard"
+glyph = "兵"
+color = "bright_white"
+x = 21
+y = 2
+talk = "ch1_guard_talk"
+
+[[map.npc]]                 # 広場を見回る兵士（道順どおりに往復）
+id = "patrol"
+glyph = "兵"
+color = "white"
+x = 22
+y = 12
+move = "route"
+route = ["right", "right", "right", "wait", "left", "left", "left", "wait"]
+talk = "ch1_patrol_talk"
+
+[[map.npc]]
+id = "bread_girl"
+glyph = "娘"
+color = "bright_magenta"
+x = 17
+y = 8
+talk = "ch1_bread_talk"
+
+[[map.npc]]
+id = "trader"
+glyph = "商"
+color = "bright_green"
+x = 30
+y = 10
+move = "random"
+talk = "ch1_trader_talk"
+
+[[map.npc]]
+id = "old_man"
+glyph = "老"
+color = "white"
+x = 10
+y = 13
+talk = "ch1_oldman_talk"
+
+[[map.npc]]
+id = "child"
+glyph = "子"
+color = "bright_cyan"
+x = 26
+y = 13
+move = "random"
+talk = "ch1_child_talk"
+
+[[map.npc]]
+id = "item_keeper"
+glyph = "道"
+color = "bright_yellow"
+x = 14
+y = 10
+talk = "ch1_item_keeper"
+
+[[map.npc]]
+id = "weapon_keeper"
+glyph = "武"
+color = "bright_yellow"
+x = 25
+y = 10
+talk = "ch1_weapon_keeper"
+
+[[map.npc]]
+id = "cat"
+glyph = "猫"
+color = "yellow"
+x = 2
+y = 21
+talk = "ch1_cat"
+when = "quest.q_lost_cat == active and !flag.found_cat"
+
+[[map.warp]]
+x = 20
+y = 23
+to = "village_kabura"
+tx = 14
+ty = 1
+dir = "down"
+
+[[map.warp]]
+x = 39
+y = 11
+to = "field_blackrock"
+tx = 1
+ty = 8
+dir = "right"
+
+[[map.npc]]
+id = "east_guard"
+glyph = "兵"
+color = "bright_white"
+x = 39
+y = 11
+talk = "ch2_east_guard_talk"
+when = "!flag.ch2_map_reported"
+
+[[map.npc]]
+id = "east_guard_open"
+glyph = "兵"
+color = "bright_white"
+x = 38
+y = 10
+talk = "ch2_east_guard_open_talk"
+when = "flag.ch2_map_reported"
+
+[[map]]
+id = "guild_bern"
+name = "冒険者協会ベルン支部"
+tileset = "default"
+indoor = true
+rows = [
+  "####################",
+  "####################",
+  "#..................#",
+  "#.....tttt.tttt....#",
+  "#..................#",
+  "#..................#",
+  "#.tt...........tt..#",
+  "#.tt...........tt..#",
+  "#..................#",
+  "##########D#########",
+]
+
+[[map.warp]]
+x = 10
+y = 9
+to = "town_bern"
+tx = 7
+ty = 8
+dir = "down"
+
+[[map.npc]]
+id = "sera"
+glyph = "受"
+color = "bright_magenta"
+x = 10
+y = 3
+talk = "ch1_sera_talk"
+
+[[map.npc]]
+id = "adventurer_a"
+glyph = "剣"
+color = "white"
+x = 5
+y = 5
+talk = "ch1_adv_a_talk"
+
+[[map.npc]]
+id = "adventurer_b"
+glyph = "弓"
+color = "white"
+x = 14
+y = 7
+talk = "ch1_adv_b_talk"
+
+[[map.npc]]
+id = "dorgan"
+glyph = "会"
+color = "bright_yellow"
+x = 18
+y = 2
+talk = "ch2_dorgan_talk"
+when = "flag.ch2_map_reported"
+
+[[map.npc]]
+id = "kai_guild"
+glyph = "友"
+color = "cyan"
+x = 10
+y = 8
+talk = "ch4_kai_guild_talk"
+when = "flag.ch4_returned and !flag.ch4_home"
+
+[[map]]
+id = "bern_inn"
+name = "宿屋「旅鳥亭」"
+tileset = "default"
+indoor = true
+rows = [
+  "##############",
+  "#ttt.........#",
+  "#ttt.........#",
+  "#...ttt.ttt..#",
+  "#............#",
+  "#............#",
+  "#............#",
+  "#######D######",
+]
+
+[[map.warp]]
+x = 7
+y = 7
+to = "town_bern"
+tx = 31
+ty = 7
+dir = "down"
+
+[[map.npc]]
+id = "innkeeper"
+glyph = "主"
+color = "bright_yellow"
+x = 7
+y = 3
+talk = "ch1_innkeeper_talk"
+
+[[map.npc]]
+id = "traveler"
+glyph = "旅"
+color = "white"
+x = 11
+y = 5
+move = "random"
+talk = "ch1_traveler_talk"
+
+[[map]]
+id = "village_kabura"
+name = "カブラ村"
+tileset = "default"
+rows = [
+  "TTTTTTTTTTTTTT=TTTTTTTTTTTTTTT",
+  "T.............=..............T",
+  "T..HHH........=.......HHH....T",
+  "T..HDH........=.......HDH....T",
+  "T.............=..............T",
+  "T....T........=........T.....T",
+  "T...,,,,,,,...=....,,,,,,,...T",
+  "T...,,,,,,,...=....,,,,,,,...T",
+  "T...,,,,,,,...=....,,,,,,,...T",
+  "T.............=..............T",
+  "T.............======.........T",
+  "T..................=.........T",
+  "T....HHH...........=...~~~...T",
+  "T....HDH...........=...~~~...T",
+  "T..................=.........T",
+  "T.....T............=.....T...T",
+  "T..................=.........T",
+  "TTTTTTTTTTTTTTTTTTT=TTTTTTTTTT",
+]
+
+[[map.warp]]
+x = 14
+y = 0
+to = "town_bern"
+tx = 20
+ty = 22
+dir = "up"
+
+[[map.warp]]
+x = 19
+y = 17
+to = "field_kabura"
+tx = 19
+ty = 1
+dir = "down"
+
+[[map.npc]]
+id = "kabura_wife"
+glyph = "婦"
+color = "bright_yellow"
+x = 6
+y = 4
+talk = "ch2_kabura_wife_talk"
+
+[[map.npc]]
+id = "kabura_farmer"
+glyph = "農"
+color = "white"
+x = 21
+y = 9
+move = "random"
+talk = "ch2_kabura_farmer_talk"
+
+[[map.npc]]
+id = "kabura_child"
+glyph = "子"
+color = "white"
+x = 10
+y = 14
+move = "random"
+talk = "ch2_kabura_child_talk"
+
+[[map.npc]]
+id = "kabura_elder"
+glyph = "老"
+color = "white"
+x = 23
+y = 4
+talk = "ch2_kabura_elder_talk"
+
+[[map.npc]]           # FirstQuest+：協会の研究員グレイ（畑荒らしの依頼に同行。戦闘には出ない）
+id = "grey"
+glyph = "研"
+color = "bright_cyan"
+x = 16
+y = 9
+talk = "p2_grey_talk"
+when = "flag.p_grey_met and !flag.mole_defeated"
+
+[[map]]
+id = "field_kabura"
+name = "カブラ村の畑"
+tileset = "default"
+encounter = "kabura"
+rows = [
+  "TTTTTTTTTTTTTTTTTTT=TTTTTTTTTT",
+  "T..................=.........T",
+  "T..,,,,,,,,,.......=..,,,,,..T",
+  "T..,,,,,,,,,..........,,,,,..T",
+  "T..,,,,,,,,,..........,,,,,..T",
+  "T.........................T..T",
+  "T....,,,,,,,,,,,,,,,,,,......T",
+  "T....,,,,,,,,,,,,,,,,,,......T",
+  "T....,,,,,,,,,,,,,,,,,,......T",
+  "T....,,,,,,,,,,,,,,,,,,......T",
+  "T..T.........................T",
+  "T........,,,,,,,......~~~....T",
+  "T........,,,,,,,......~~~....T",
+  "T........,,,,,,,.............T",
+  "T............................T",
+  "TTTTTTTTTTTTTTTTTTTTTTTTTTTTTT",
+]
+
+[[map.warp]]
+x = 19
+y = 0
+to = "village_kabura"
+tx = 19
+ty = 16
+dir = "up"
+
+[[map.event]]
+x = 0
+y = 0
+trigger = "auto"
+label = "ch2_mole_battle"
+once = true
+when = "quest.q_mole == active and flag.ch2_kabura_talked and !flag.mole_defeated"
+
+[[map]]
+id = "field_blackrock"
+name = "黒岩の洞穴前"
+tileset = "default"
+rows = [
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRRRCRRRRRRRRRRRRRRR",
+  "RRRRRRRRRRRR__=__RRRRRRRRRRRRR",
+  "RRRRRRRRRR....=....RRRRRRRRRRR",
+  "RRRRRRRR......=......RRRRRRRRR",
+  "RRRR..........=..........RRRRR",
+  "RR..T.......=...........RRRRRR",
+  "R.........R.=......R.....RRRRR",
+  "===============............R.R",
+  "R....T....................RRRR",
+  "RR......R.........T......RRRRR",
+  "RRRR.....................RRRRR",
+  "RRRRRRR...............RRRRRRRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+]
+
+[[map.warp]]
+x = 14
+y = 1
+to = "dungeon_b01"
+tx = 3
+ty = 10
+dir = "down"
+
+[[map.warp]]
+x = 0
+y = 8
+to = "town_bern"
+tx = 38
+ty = 11
+dir = "left"
+
+[[map.event]]
+x = 14
+y = 12
+trigger = "auto"
+label = "ch2_blackrock_out"
+once = true
+
+[[map.event]]
+x = 13
+y = 4
+trigger = "touch"
+label = "ch2_blackrock_guard"
+when = "!flag.ch2_guard_done"
+
+[[map.event]]
+x = 14
+y = 4
+trigger = "touch"
+label = "ch2_blackrock_guard"
+when = "!flag.ch2_guard_done"
+
+[[map.event]]
+x = 15
+y = 4
+trigger = "touch"
+label = "ch2_blackrock_guard"
+when = "!flag.ch2_guard_done"
+
+[[map.npc]]
+id = "goblin_a"
+glyph = "ゴ"
+color = "green"
+x = 13
+y = 3
+when = "!flag.ch2_guard_done"
+
+[[map.npc]]
+id = "goblin_cap"
+glyph = "隊"
+color = "bright_green"
+x = 14
+y = 2
+when = "!flag.ch2_guard_done"
+
+[[map.npc]]
+id = "goblin_b"
+glyph = "ゴ"
+color = "green"
+x = 15
+y = 3
+when = "!flag.ch2_guard_done"
+
+[[map.warp]]
+x = 29
+y = 8
+to = "field_mountain"
+tx = 1
+ty = 10
+dir = "right"
+
+[[map.event]]
+x = 26
+y = 8
+trigger = "check"
+label = "ch3_rockslide"
+when = "!flag.ch3_lost"
+
+[[map.event]]
+x = 1
+y = 8
+trigger = "auto"
+label = "ch3_snow_off"
+when = "flag.ch3_lost"
+
+[[map]]
+id = "dungeon_b01"
+traps = [1, 1]
+name = "黒岩の洞穴 B1F"
+tileset = "default"
+encounter = "cave_upper"
+dark = true
+dungeon = true
+rows = [
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRRRRRRRRR________RR",
+  "RRRRR_______RRRRR___________RR",
+  "RRRRR_______RR>___RR________RR",
+  "RRRRR_____________________RRRR",
+  "RRRRR_______RR____RRRRRR__RRRR",
+  "RRRRR_______RR____RRRRRR__RRRR",
+  "RRRRRRRRRRRRRRRRR_RRRRRR__RRRR",
+  "RRRRRRRRRRRRRRRRR_RRRRRR__RRRR",
+  "RRR<___RRRRRRRRRR_RRRRRR__RRRR",
+  "RRR____RRRRRRRRRR_RRRRRR__RRRR",
+  "RRR____RRRRRRRRRR_RRRRRR__RRRR",
+  "RRRRR_RRRRRRRR_______RR__P_RRR",
+  "RRRRR________________RR____RRR",
+  "RRRRRRRRRRRRRR_______RR____RRR",
+  "RRRRRRRRRRRRRRRRRRRRRRR____RRR",
+  "RRRRRRRRRRRRRRRRRRRRRRR____RRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+]
+
+[[map.warp]]
+x = 3
+y = 9
+to = "field_blackrock"
+tx = 14
+ty = 2
+dir = "down"
+
+[[map.warp]]
+x = 14
+y = 3
+to = "dungeon_b02"
+tx = 14
+ty = 5
+dir = "down"
+
+[[map.event]]
+x = 25
+y = 12
+trigger = "check"
+label = "ch2_b01_pack"
+once = true
+
+[[map.event]]
+x = 3
+y = 10
+trigger = "auto"
+label = "ch2_cave_enter"
+once = true
+
+[[map]]
+id = "dungeon_b02"
+traps = [1, 1]
+name = "黒岩の洞穴 B2F"
+tileset = "default"
+encounter = "cave_upper"
+dark = true
+dungeon = true
+rows = [
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRRR<_______RRRRRRRR",
+  "RRRRRRRRRRRRRR________RRRRRRRR",
+  "RRRRRRRRRRRRRR________RRRRRRRR",
+  "RRRRRRRRRRRRRR________RRR>___R",
+  "RRRRRRRRRRRRRR________RRR____R",
+  "RRRRRRRRRRRRRRRRRRRRR_RRR____R",
+  "R____RRRRRRRRRRRRRR_____RRR_RR",
+  "R____RRRRRRRRRRRRRR_____RRR_RR",
+  "R_______________________RRR_RR",
+  "R____RRR____RR______________RR",
+  "RRR_________RR____R_____RRRRRR",
+  "RRRRRRRR____RRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+]
+
+[[map.warp]]
+x = 14
+y = 4
+to = "dungeon_b01"
+tx = 14
+ty = 4
+dir = "up"
+
+[[map.warp]]
+x = 25
+y = 7
+to = "dungeon_b03"
+tx = 12
+ty = 5
+dir = "down"
+
+[[map]]
+id = "dungeon_b03"
+traps = [1, 1]
+name = "黒岩の洞穴 B3F"
+tileset = "default"
+encounter = "cave_upper"
+dark = true
+dungeon = true
+rows = [
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "R____B___RRRRRRRRRRRRRRRRRRRRR",
+  "R________RRR<______RRRRRRRRRRR",
+  "R_____________________RRRRRRRR",
+  "R________RRR_______RR______>RR",
+  "R________RRR_______RR_______RR",
+  "RRRRR_RRRRRR_______RR_______RR",
+  "RRRRR_RRRRRRRRR_RRRRR_______RR",
+  "RRRRR_RRRRR_____RRRRR_______RR",
+  "RR________R_____RRRRR_RR_RRRRR",
+  "RR______________RRR______RRRRR",
+  "RR________R____RRRR______RRRRR",
+  "RR________RRRRRRRRR_____RRRRRR",
+  "RR________RRRRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+]
+
+[[map.warp]]
+x = 12
+y = 4
+to = "dungeon_b02"
+tx = 25
+ty = 8
+dir = "up"
+
+[[map.warp]]
+x = 27
+y = 6
+to = "dungeon_b04"
+tx = 20
+ty = 10
+dir = "down"
+
+[[map.event]]
+x = 5
+y = 3
+trigger = "check"
+label = "ch2_b03_chest"
+once = true
+
+[[map]]
+id = "dungeon_b04"
+traps = [1, 1]
+name = "黒岩の洞穴 B4F"
+tileset = "default"
+encounter = "cave_upper"
+dark = true
+dungeon = true
+rows = [
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRRRRRRR________RRRR",
+  "RRRRRRRRRRRRRRRRRR________RRRR",
+  "RRRRR_____________________RRRR",
+  "RRRRR_R________RRR________RRRR",
+  "RRRRR_R________RRRRRRRRRRRRRRR",
+  "RRRRR_R_________________RRRRRR",
+  "RRRRR_R________RRRRRRRR_RRRRRR",
+  "RRRRR_R________RRRRRRRR_RRRRRR",
+  "RRRRR_RRRRR_R_RRRRRR<______RRR",
+  "RRRRR_RRRRR>___RRRRR_______RRR",
+  "RRRRR_RRRRR____RRRRR_______RRR",
+  "RR______RRR____RRRRRRRRRRRRRRR",
+  "RR_____KRRR____RRRRRRRRRRRRRRR",
+  "RR_____________RRRRRRRRRRRRRRR",
+  "RR______RRRRRRRRRRRRRRRRRRRRRR",
+  "RR______RRRRRRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+]
+
+[[map.warp]]
+x = 20
+y = 9
+to = "dungeon_b03"
+tx = 27
+ty = 7
+dir = "up"
+
+[[map.warp]]
+x = 11
+y = 10
+to = "dungeon_b05"
+tx = 18
+ty = 8
+dir = "down"
+
+[[map.event]]         # FirstQuest+：檻の残骸
+x = 7
+y = 13
+trigger = "check"
+label = "p2_b04_cage"
+
+[[map]]
+id = "dungeon_b05"
+traps = [1, 1]
+name = "黒岩の洞穴 B5F"
+tileset = "default"
+encounter = "cave_mid"
+dark = true
+dungeon = true
+rows = [
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRRRRR__O_RRRRRRRRRR",
+  "RRRRRRRRRRRRRRRR____RRRRRRRRRR",
+  "RR__________________RRRRRRRRRR",
+  "RR_______R_RRRRR____RRRRRRRRRR",
+  "RR_______R_RRRRRRRRRRRRRRRRRRR",
+  "RRRRR_RRRR_RRRRRRR<______RRRRR",
+  "RRRRR_________RRRR_______RRRRR",
+  "RRRRR____________________RRRRR",
+  "RRRRR_________RRRR_______RRRRR",
+  "RRRRR_________RRRRRRRRRRRRRRRR",
+  "RRRRR_________RRRRRRRRRRRRRRRR",
+  "RRRRR_RRRRRRRRRRRRR>_____RRRRR",
+  "RRRRR____________________RRRRR",
+  "RRRRRRRRRRRRRRRRRRR______RRRRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+]
+
+[[map.warp]]
+x = 18
+y = 7
+to = "dungeon_b04"
+tx = 11
+ty = 11
+dir = "up"
+
+[[map.warp]]
+x = 19
+y = 13
+to = "dungeon_b06"
+tx = 8
+ty = 9
+dir = "down"
+
+[[map.event]]
+x = 18
+y = 2
+trigger = "check"
+label = "ch2_b05_spring"
+
+[[map]]
+id = "dungeon_b06"
+traps = [2, 3]
+name = "黒岩の洞穴 B6F"
+tileset = "default"
+encounter = "cave_mid"
+dark = true
+dungeon = true
+rows = [
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "R__P_RRRRRRRRRRRRRRRRRRRRRRRRR",
+  "R____RRRRRRRRRRRRRR____RRRRRRR",
+  "R____RRRRRR____________RR>___R",
+  "R____RRR<_____RRRRR____RR____R",
+  "RRR_RRRR_____________________R",
+  "RRR_RRRR______RRRRRRR_RRR____R",
+  "RRR_RRRRRRR_RRRRRRRRR_RRR____R",
+  "RRR_RRRRRRR_RRRRRRRRR_RRRRRRRR",
+  "RRR_RRRRR____RRRR_____RRRRRRRR",
+  "RRR___________________RRRRRRRR",
+  "RRRRRRRRR____RRRR____RRRRRRRRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+]
+
+[[map.warp]]
+x = 8
+y = 8
+to = "dungeon_b05"
+tx = 19
+ty = 14
+dir = "up"
+
+[[map.warp]]
+x = 25
+y = 7
+to = "dungeon_b07"
+tx = 6
+ty = 6
+dir = "down"
+
+[[map.event]]
+x = 3
+y = 5
+trigger = "check"
+label = "ch2_b06_relic"
+once = true
+
+[[map]]
+id = "dungeon_b07"
+traps = [2, 3]
+name = "黒岩の洞穴 B7F"
+tileset = "default"
+encounter = "cave_mid"
+dark = true
+dungeon = true
+rows = [
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "R____RRRRRRRRRRRR_____RRRRRRRR",
+  "R________________________RRRRR",
+  "R____RRRRRRRRRRRR_____RR_RRRRR",
+  "RRR_RRRRRRRRRRRRRRR_R_RR_RRRRR",
+  "RRR_RR<___RRRRRRRRR_R_RR_RRRRR",
+  "RRR_RR____RR>____RR____R_RRRRR",
+  "RRR____________________R_RRRRR",
+  "RRRRRR____RR_____RR____R_RRRRR",
+  "RRRRRR____RRRRRRRRR____R_RRRRR",
+  "RRRRRRRRRRRRRRRRRRRRR_RR_RRRRR",
+  "RRRRRRRRRRRRRRRRRRRRR_RR_RRRRR",
+  "RRRRRRRRRRRRRRRRRRRRR_RR_RRRRR",
+  "RRRRRRRRRRRRRRRRRRRRR_RR_RRRRR",
+  "RRRRRRRRRRRRRRRRRRRRR_____RRRR",
+  "RRRRRRRRRRRRRRRRRRRRR_____RRRR",
+  "RRRRRRRRRRRRRRRRRRRRRR____RRRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+]
+
+[[map.warp]]
+x = 6
+y = 5
+to = "dungeon_b06"
+tx = 25
+ty = 8
+dir = "up"
+
+[[map.warp]]
+x = 12
+y = 6
+to = "dungeon_b08"
+tx = 11
+ty = 3
+dir = "down"
+
+[[map.event]]         # FirstQuest+：なりそこない（一度きり）
+x = 14
+y = 7
+trigger = "touch"
+label = "p2_b07_narisokonai"
+when = "!flag.p_b07_done"
+
+[[map]]
+id = "dungeon_b08"
+traps = [2, 3]
+name = "黒岩の洞穴 B8F"
+tileset = "default"
+encounter = "cave_mid"
+dark = true
+dungeon = true
+rows = [
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRRRR<_______RRRRR____RR",
+  "RRR>_____RR________RRRRR____RR",
+  "RRR_________________________RR",
+  "RRR______RR________RRRRR____RR",
+  "RRRRRRRRRRRRRRRRR_RRRRRR____RR",
+  "RRRRRRRRRRRRRRRRR_RRRRRR_RRRRR",
+  "RRRRRRRRRRRRRRRRR_RRRRRR_RRRRR",
+  "R________RRRRRRRR_RRRRRR_RRRRR",
+  "R________RRRRRRRR_RRRRRR_RRRRR",
+  "R_________________RRRRRR_RRRRR",
+  "R________RRRRRR_____RR____RRRR",
+  "RRRRR_____________________RRRR",
+  "RRRRRRRRRRRRRRR_____RR____RRRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+]
+
+[[map.warp]]
+x = 11
+y = 2
+to = "dungeon_b07"
+tx = 12
+ty = 7
+dir = "up"
+
+[[map.warp]]
+x = 3
+y = 3
+to = "dungeon_b09"
+tx = 16
+ty = 3
+dir = "down"
+
+[[map.event]]
+x = 3
+y = 4
+trigger = "touch"
+label = "ch2_b08_ogre"
+when = "!flag.ch2_ogre_done"
+
+[[map.event]]
+x = 4
+y = 3
+trigger = "touch"
+label = "ch2_b08_ogre"
+when = "!flag.ch2_ogre_done"
+
+[[map]]
+id = "dungeon_b09"
+traps = [2, 3]
+name = "黒岩の洞穴 B9F"
+tileset = "default"
+encounter = "cave_deep"
+dark = true
+dungeon = true
+rows = [
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRR_____RR<____RRRRRRRRR",
+  "RRRRRRRRR_____RR_____RRRRRRRRR",
+  "RRRRRRRRR_____RR_____RRRRRRRRR",
+  "RRRRRRRRRR__RRRRRR_RRRRRRRRRRR",
+  "RRRRRRRRRR__RRRRRR_RRRR>_____R",
+  "RRRRRRRRRR__RRRRRR_R_________R",
+  "RRRRRRRRRR__RRRRRR_R_RR______R",
+  "RRRRRR________RRRR____RRRRRRRR",
+  "RRRRRR________RRRR____RRRRRRRR",
+  "RRRRRR______________________RR",
+  "RRRRRR______________________RR",
+  "RRRRRRRRRRRRRRRRRRRRRRR_____RR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+]
+
+[[map.warp]]
+x = 16
+y = 2
+to = "dungeon_b08"
+tx = 3
+ty = 4
+dir = "up"
+
+[[map.warp]]
+x = 23
+y = 6
+to = "dungeon_b10"
+tx = 18
+ty = 3
+dir = "down"
+
+[[map]]
+id = "dungeon_b10"
+traps = [2, 3]
+name = "黒岩の洞穴 B10F"
+tileset = "default"
+encounter = "cave_deep"
+dark = true
+dungeon = true
+rows = [
+  "RRRRRWRRRRRRRRRRRRRRRRRRRRRRRR",
+  "RRR______RRRRRRRRRRRRRRRRRRRRR",
+  "RRR______RRRRRRRRR<_______RRRR",
+  "RRR______RRRRRRRRR________RRRR",
+  "RRR______R______RR________RRRR",
+  "RRR______R______RRRRRR_RRRRRRR",
+  "RRRRRR_R_________________RRRRR",
+  "RRRRRR_R_R______RRRRRR_R_RRRRR",
+  "RRRRRR_R_R______RRRRRR>____RRR",
+  "RRRRRR_R_RRRRRRRRRRRRR_____RRR",
+  "RRRRRR_R_RRRRRRRRRRRRR_____RRR",
+  "RRRRRR_R_RRRRRRRR____R_____RRR",
+  "RRRRRR__M__RRRRRR____R_____RRR",
+  "RRRRRR_________________RRRRRRR",
+  "RRRRRR_____RRRRRR____RRRRRRRRR",
+  "RRRRRR_____RRRRRR____RRRRRRRRR",
+  "RRRRRR_____RRRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+]
+
+[[map.warp]]
+x = 18
+y = 2
+to = "dungeon_b09"
+tx = 23
+ty = 7
+dir = "up"
+
+[[map.warp]]
+x = 22
+y = 8
+to = "dungeon_b11"
+tx = 1
+ty = 8
+dir = "down"
+
+[[map.event]]
+x = 8
+y = 12
+trigger = "check"
+label = "ch2_b10_circle"
+
+[[map.event]]         # FirstQuest+：壁画（一部）
+x = 5
+y = 0
+trigger = "check"
+label = "p2_b10_mural"
+
+[[map]]
+id = "dungeon_b11"
+traps = [2, 3]
+name = "黒岩の洞穴 B11F"
+tileset = "default"
+encounter = "cave_deep"
+dark = true
+dungeon = true
+rows = [
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRRRRRRR_______RRRRR",
+  "RRRRRR___________________RRRRR",
+  "RRRRRR______RRRRRR_______RRRRR",
+  "RRRRRR______RRRRRRRRR_RRRRRRRR",
+  "RRRRRR______RRRRRRRRR_____RRRR",
+  "RRRRRRRRRRRRRRRRRRRRR_____RRRR",
+  "R<_____RRRRRRRR___________RRRR",
+  "R______RRRRRRRR_____R_____RRRR",
+  "R___________________R_RRRRRRRR",
+  "R______RRRRRRRR_____R_RRRRRRRR",
+  "RRRRRRRRRRRRRRR_____R_RRRRRRRR",
+  "RRRRRRRRRRRRRRRR_RRRR_RRRRRRRR",
+  "RRRRRRRRRRRRRRRR_RRRR_RRRRRRRR",
+  "RRRRRRRRRRRRRR__B__RR_RRRRRRRR",
+  "RRRRRRRRRRRRRR________RRRRRRRR",
+  "RRRRRRRRRRRRRR_____RRRRRRRRRRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+]
+
+[[map.warp]]
+x = 1
+y = 7
+to = "dungeon_b10"
+tx = 22
+ty = 9
+dir = "up"
+
+[[map.event]]
+x = 16
+y = 14
+trigger = "check"
+label = "ch2_return_scroll"
+
+[[map.warp]]
+x = 26
+y = 5
+to = "dungeon_b12"
+tx = 12
+ty = 5
+dir = "down"
+
+[[map]]
+id = "dungeon_b12"
+traps = [4, 5]
+name = "黒岩の洞穴 B12F"
+tileset = "default"
+encounter = "cave_abyss"
+dark = true
+dungeon = true
+rows = [
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "RRRRR______RRRRRRRRRRRRRRRRRRR",
+  "RRR________RRRRRRRRRRRRRRRRRRR",
+  "RRR_R______RRRRRRRRRRRRRRRRRRR",
+  "RRR_RRRR_RRR<___RRRRRRRRRRRRRR",
+  "R>___RRR_RRR____RRR________RRR",
+  "R____RRR_RRR____RRR________RRR",
+  "R__________________________RRR",
+  "RRRR_RRR_RRRRR_RR_R________RRR",
+  "R______R_RRRRR_RR_R________RRR",
+  "R______R_RRRRR_RR_RRRRRRRRRRRR",
+  "R______________RR_RRRRRRRRRRRR",
+  "R______R_RRRRRRRR_RRRRRRRRRRRR",
+  "R______R_RRRRRRRR_RRRRRRRRRRRR",
+  "RRRRRRRR_RRRRR___W__RRRRRRRRRR",
+  "RRRRRRRR____________RRRRRRRRRR",
+  "RRRRRRRRRRRRRR______RRRRRRRRRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+]
+
+[[map.warp]]
+x = 12
+y = 4
+to = "dungeon_b11"
+tx = 25
+ty = 5
+dir = "left"
+
+[[map.warp]]
+x = 1
+y = 5
+to = "dungeon_b13"
+tx = 13
+ty = 14
+dir = "down"
+
+[[map.event]]
+x = 17
+y = 14
+trigger = "check"
+label = "ch3_b12_wall"
+
+[[map]]
+id = "dungeon_b13"
+traps = [4, 5]
+name = "黒岩の洞穴 B13F"
+tileset = "default"
+encounter = "cave_abyss"
+dark = true
+dungeon = true
+rows = [
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "RR________RRRRRRRRRRRRRRRRRRRR",
+  "RR________RRRRRRRRRRRRRRRRRRRR",
+  "RR_______________RRRRRRRRRRRRR",
+  "RR________RRRRRR_RRO____RRRRRR",
+  "RRRRRR_RRRRRRRRR_RR______RRRRR",
+  "RRRRRR>_______RR_RR______RRRRR",
+  "RRRRRR________RR_RRRR_RR_RRRRR",
+  "RRRRRR________RR_RRRR_RR_RRRRR",
+  "RRRRRR________RR_RRRR_RR_RRRRR",
+  "RRRRRR_RRR_RRRRR_RRRR_______RR",
+  "RRRRRR_RRR_RRRRR_RRRR_______RR",
+  "RRR__________<______________RR",
+  "RRR_______RRR_______R_______RR",
+  "RRR___________________RRRRRRRR",
+  "RRR_______RRRRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+]
+
+[[map.warp]]
+x = 13
+y = 13
+to = "dungeon_b12"
+tx = 1
+ty = 6
+dir = "up"
+
+[[map.warp]]
+x = 6
+y = 7
+to = "dungeon_b14"
+tx = 13
+ty = 5
+dir = "down"
+
+[[map.npc]]
+id = "rod"
+glyph = "人"
+color = "white"
+x = 21
+y = 5
+talk = "ch3_b13_rod"
+when = "!flag.rod_rescued"
+
+[[map.event]]
+x = 19
+y = 5
+trigger = "check"
+label = "ch2_b05_spring"
+
+[[map]]
+id = "dungeon_b14"
+traps = [4, 5]
+name = "黒岩の洞穴 B14F"
+tileset = "default"
+encounter = "cave_abyss"
+dark = true
+dungeon = true
+rows = [
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRRRRRRRRRG_______RR",
+  "R_____RRRRRRRRRRRRRR________RR",
+  "R_____RRRRRRRRRRRRRR________RR",
+  "R____________<______________RR",
+  "R_____RRRRRR_______RRRRR__RRRR",
+  "RRRRRRRRRRRR_______RRRRR__RRRR",
+  "RRRRRRRRRRRR_______R_______RRR",
+  "RRRRRRRRRRRR_______________RRR",
+  "RRRRRRRRRRRR_RRRRRRR_______RRR",
+  "RRRRRRRRRRRR_RRRRRRRRRR___RRRR",
+  "RRRRRRRRRRRR_RRRRRRRRR______RR",
+  "RRRRRRRRRR_____RRRRRRR______RR",
+  "RRRRRRRRRR_____RRRRRRR______RR",
+  "RRRRRRRRRR_______________RRRRR",
+  "RRRRRRRRRR_____RRRRRRRRRRRRRRR",
+  "RRRRRRRRRR_____RRRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+]
+
+[[map.warp]]
+x = 13
+y = 4
+to = "dungeon_b13"
+tx = 6
+ty = 8
+dir = "up"
+
+[[map.warp]]
+x = 20
+y = 1
+to = "dungeon_b15"
+tx = 21
+ty = 2
+dir = "down"
+
+[[map.event]]
+x = 20
+y = 1
+trigger = "check"
+label = "ch3_b14_door"
+
+[[map]]
+id = "dungeon_b15"
+traps = [4, 5]
+name = "黒岩の洞穴 B15F"
+tileset = "default"
+encounter = "cave_abyss"
+dark = true
+dungeon = true
+rows = [
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRRR________RRR<___RRRRR",
+  "RRRRRRRRRR________RRR____RRRRR",
+  "RRR>___RRR________RRR____RRRRR",
+  "RRR____RRRRRRR_RRRRRR____RRRRR",
+  "RRR____RRRRRRR_RRRRRR____RRRRR",
+  "RRRRR_RRRRRRRR_RRRRRRRR_RRRRRR",
+  "RRRR_______RRR_R____RRR_RRRRRR",
+  "RRRR_______RRR_R____RRR_RRRRRR",
+  "RRRR________________RRR_RRRRRR",
+  "RRRR_______RRR_R____RRR_RRRRRR",
+  "RRRRRRRRRRRRRR_R____RRR_RRRRRR",
+  "RRRRRRRRRRRRRR_RRRRRR_____RRRR",
+  "RRRRRRRRRRRRRR_RRRRRR_____RRRR",
+  "RRRRRRRRRRRRRR____________RRRR",
+  "RRRRRRRRRRRRRRRRRRRRR_____RRRR",
+  "RRRRRRRRRRRRRRRRRRRRR_____RRRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+]
+
+[[map.warp]]
+x = 21
+y = 1
+to = "dungeon_b14"
+tx = 20
+ty = 2
+dir = "up"
+
+[[map.warp]]
+x = 3
+y = 3
+to = "dungeon_altar"
+tx = 14
+ty = 14
+dir = "up"
+
+[[map]]
+id = "dungeon_altar"
+name = "儀式の間"
+tileset = "default"
+dungeon = true
+rows = [
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRRRRFFFFFFFFRRRRRRRRRRR",
+  "RRRRRRRRRRF___AA___FRRRRRRRRRR",
+  "RRRRRRRR_____________RRRRRRRRR",
+  "RRRRRR_________________RRRRRRR",
+  "RRRRR___________________RRRRRR",
+  "RRRR_____M_________M_____RRRRR",
+  "RRRR_____________________RRRRR",
+  "RRRR_____________________RRRRR",
+  "RRRRR___________________RRRRRR",
+  "RRRRRR_________________RRRRRRR",
+  "RRRRRRRR_____________RRRRRRRRR",
+  "RRRRRRRRRRRR_____RRRRRRRRRRRRR",
+  "RRRRRRRRRRRRR___RRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRR___RRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRRR<RRRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+  "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRR",
+]
+
+[[map.warp]]
+x = 14
+y = 15
+to = "dungeon_b15"
+tx = 3
+ty = 4
+dir = "up"
+
+[[map.event]]
+x = 14
+y = 13
+trigger = "auto"
+label = "ch3_garza"
+when = "!flag.ch3_lost"
+
+[[map.npc]]
+id = "garza"
+glyph = "灰"
+color = "bright_white"
+x = 14
+y = 3
+when = "!flag.ch3_lost"
+
+[[map.event]]
+x = 14
+y = 13
+trigger = "auto"
+label = "ch4_garza2"
+when = "flag.ch4_started and !flag.ch4_done"
+
+[[map.npc]]
+id = "garza2"
+glyph = "灰"
+color = "bright_white"
+x = 14
+y = 3
+when = "flag.ch4_started and !flag.ch4_done"
+
+[[map]]
+id = "guild_infirmary"
+name = "冒険者協会・医務室"
+tileset = "default"
+indoor = true
+rows = [
+  "############",
+  "#..........#",
+  "#.Z..Z..Z..#",
+  "#..........#",
+  "#.Z..Z.....#",
+  "#..........#",
+  "######D#####",
+]
+
+[[map.warp]]
+x = 6
+y = 6
+to = "guild_bern"
+tx = 10
+ty = 8
+dir = "down"
+
+[[map]]
+id = "field_mountain"
+name = "風見の山道"
+tileset = "default"
+encounter = "mountain"
+rows = [
+  "^^^^^^^^^^^^^^^^^^^^^^^=^^^^^^",
+  "^^^^^^^^^^^^^^^^^^^sss=sss^^^^",
+  "^^^^^^^^^^^^^^^sssssss=ssss^^^",
+  "^^^^^^^^^^^^sssssTsss==sssss^^",
+  "^^^^^^^^^ssssssssss==sssssss^^",
+  "^^^^^^^ssssssssss==sssssTsss^^",
+  "^^^^^ssssTsssss===sssssssss^^^",
+  "^^^^ssssssssss=sssssssssss^^^^",
+  "^^^sssssssss===ssssssTsss^^^^^",
+  "^^sssssssss=sssssssssss^^^^^^^",
+  "=========sssssssssss^^^^^^^^^^",
+  "^ssssTssssssssssss^^^^^^^^^^^^",
+  "^^sssssssssssssss^^^^^^^^^^^^^",
+  "^^^^ssssssssss^^^^^^^^^^^^^^^^",
+  "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^",
+]
+
+[[map.warp]]
+x = 0
+y = 10
+to = "field_blackrock"
+tx = 28
+ty = 8
+dir = "left"
+
+[[map.warp]]
+x = 23
+y = 0
+to = "temple_kazami"
+tx = 14
+ty = 10
+dir = "up"
+
+[[map.event]]
+x = 1
+y = 10
+trigger = "auto"
+label = "ch3_mountain_enter"
+
+[[map]]
+id = "temple_kazami"
+name = "風見の神殿"
+tileset = "default"
+rows = [
+  "##############################",
+  "#####D##########D##########D##",
+  "#####o##########o##########o##",
+  "#oooooooooooooooooooooooooooo#",
+  "#o|oooo|oooo|oooooo|oooo|ooo|#",
+  "#oooooooooooooooooooooooooooo#",
+  "#oooooooooooooSoooooooooooooo#",
+  "#o|oooo|oooooooooooo|oooo|ooo#",
+  "#oooooooooooooooooooooooooooo#",
+  "#oooooooooooooooooooooooooooo#",
+  "#oooooooooooooooooooooooooooo#",
+  "##############D###############",
+]
+
+[[map.warp]]
+x = 14
+y = 11
+to = "field_mountain"
+tx = 23
+ty = 1
+dir = "down"
+
+[[map.warp]]
+x = 5
+y = 1
+to = "trial_1"
+tx = 9
+ty = 6
+dir = "up"
+
+[[map.warp]]
+x = 16
+y = 1
+to = "trial_2"
+tx = 9
+ty = 6
+dir = "up"
+
+[[map.warp]]
+x = 27
+y = 1
+to = "trial_3"
+tx = 9
+ty = 6
+dir = "up"
+
+[[map.event]]
+x = 14
+y = 10
+trigger = "auto"
+label = "ch3_temple"
+when = "flag.ch3_lost and !flag.ch3_temple_met"
+
+[[map.event]]
+x = 14
+y = 6
+trigger = "check"
+label = "ch3_altar_talk"
+
+[[map.event]]
+x = 5
+y = 2
+trigger = "touch"
+label = "ch3_trial_door"
+when = "!flag.ch3_temple_met"
+
+[[map.event]]
+x = 16
+y = 2
+trigger = "touch"
+label = "ch3_trial_door"
+when = "!flag.ch3_temple_met"
+
+[[map.event]]
+x = 27
+y = 2
+trigger = "touch"
+label = "ch3_trial_door"
+when = "!flag.ch3_temple_met"
+
+[[map.npc]]
+id = "ord"
+glyph = "司"
+color = "bright_white"
+x = 14
+y = 5
+talk = "ch3_ord_talk"
+
+[[map.npc]]
+id = "acolyte"
+glyph = "僧"
+color = "white"
+x = 4
+y = 8
+move = "random"
+talk = "ch3_acolyte_talk"
+
+[[map]]
+id = "trial_1"
+name = "勇気の間"
+tileset = "default"
+indoor = true
+rows = [
+  "####################",
+  "#oooooooo+ooooooooo#",
+  "#oooooooooooooooooo#",
+  "#o|oooooooooooooo|o#",
+  "#oooooooooooooooooo#",
+  "#o|oooooooooooooo|o#",
+  "#oooooooooooooooooo#",
+  "#########D##########",
+]
+
+[[map.warp]]
+x = 9
+y = 7
+to = "temple_kazami"
+tx = 5
+ty = 2
+dir = "down"
+
+[[map.event]]
+x = 9
+y = 1
+trigger = "check"
+label = "ch3_trial_1"
+
+[[map]]
+id = "trial_2"
+name = "慈愛の間"
+tileset = "default"
+indoor = true
+rows = [
+  "####################",
+  "#oooooooooooooooooo#",
+  "#oooooooooooooooooo#",
+  "#o|oooooooooooooo|o#",
+  "#oooooooooooooooooo#",
+  "#o|oooooooooooooo|o#",
+  "#oooooooooooooooooo#",
+  "#########D##########",
+]
+
+[[map.warp]]
+x = 9
+y = 7
+to = "temple_kazami"
+tx = 16
+ty = 2
+dir = "down"
+
+[[map.event]]
+x = 9
+y = 2
+trigger = "touch"
+label = "ch3_trial_2"
+when = "!flag.trial2_done"
+
+[[map.npc]]
+id = "pup"
+glyph = "仔"
+color = "yellow"
+x = 9
+y = 1
+when = "!flag.trial2_done"
+
+[[map]]
+id = "trial_3"
+name = "絆の間"
+tileset = "default"
+indoor = true
+rows = [
+  "####################",
+  "#oooooooo+ooooooooo#",
+  "#oooooooooooooooooo#",
+  "#o|oooooooooooooo|o#",
+  "#oooooooooooooooooo#",
+  "#o|oooooooooooooo|o#",
+  "#oooooooooooooooooo#",
+  "#########D##########",
+]
+
+[[map.warp]]
+x = 9
+y = 7
+to = "temple_kazami"
+tx = 27
+ty = 2
+dir = "down"
+
+[[map.event]]
+x = 9
+y = 1
+trigger = "check"
+label = "ch3_trial_3"
