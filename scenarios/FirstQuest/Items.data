@@ -509,3 +509,12 @@ kind = "magic"
 element = "dark"
 power = 24
 anim = "flash:black,shake:3"
+
+[[skill]]
+id = "healing_song"
+name = "癒やしのさえずり"
+mp = 4
+target = "ally_one"
+kind = "heal"
+power = 12
+anim = "flash:bright_green"

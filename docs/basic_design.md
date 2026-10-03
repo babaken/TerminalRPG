@@ -233,6 +233,7 @@ stats = { hp = 30, mp = 5, atk = 8, def = 6, mag = 3, agi = 6, luk = 5 }   # hp 
 equip = { armor = "cloth" }  # weapon / armor / shield / accessory
 face = "aa/face_hero.txt"    # 顔 AA（@face hero で表示）
 recruit_text = "…"           # 仲間選択画面の紹介文
+familiar = "pipi"            # 使い魔（敵 ID）【済】：このキャラが戦闘に出ていると一緒に自動で戦う。ペットとは別枠
 ```
 - SP【済】：技（物理・強化など）は SP、魔法・回復魔法は MP を使う。スキルに `sp = 6` か `mp = 4` を書く。SP は戦闘のあとも持ち越し、宿屋・`@heal all`（回復の泉・祭壇）・加入・レベルアップで回復する。最大 SP が 0 の職業が SP の技を覚えると --check で警告。SP のない古いセーブは最大 SP から始まる。
 - 職業の `equip` が空なら何でも装備できる。装飾品も category（例 `accessory`）で判定する【変更】。
@@ -257,6 +258,7 @@ drops = [ { item = "herb", rate = 0.2 } ]
 tameable = true
 tame_rate = 0.15
 ai = "pattern"                    # attack_only | random | pattern
+# growth = { hp = 5, atk = 2 }   # 使い魔のとき【済】：主人の Lv が 1 上がるごとに増える能力値（stats + growth ×（Lv − 1））
 # copy = "hero"                   # キャラクター ID：戦闘開始時のそのキャラの能力値（装備込み）を写す【済】（試練の「影の{hero}」。name に {hero} 可）
 [[enemy.actions]]
 skill = "attack"                  # attack / defend は組み込み。それ以外は Items.data の [[skill]]
@@ -562,6 +564,7 @@ on_complete = "ch1_quest_done"   # 達成報告のあとに実行するラベル
 | 状態異常 | 付与率 status_rate。かかったら turns の範囲で残りターンを決め、ターン終了時に tick を適用し 1 減らす |
 | 強化・弱体（buff/debuff） | 攻撃 ＋威力（既定 5）／守備 −威力 を 3 ターン（簡易版） |
 | テイム | `tame_rate × (1 + (1 − 相手HP率))`（最大 0.95）。成功で戦闘から外れ、GameState.pet に記録（すでにいれば入れ替わり、前のペットは野に帰る） |
+| 使い魔【済】 | Friends.data の familiar。主人が戦闘に出ていれば一緒に戦う（members= で主人がいなければ出ない）。能力は主人の Lv で決まり、毎回 HP 満タン。行動・表示はペットと同じ（戦闘画面の右側に「使い魔」の枠、フィールドのパネルに「使い魔 ○○」）。ペットとは別に並ぶ |
 | ペット【済】 | パーティ枠の外で 1 体、味方として戦闘に参加（戦闘画面の右端）。毎回 HP 満タン・魔物のときの能力のまま。行動は自動：魔物の行動表（when も有効）から選び、攻撃・攻撃技は敵へ、ally_one / self の技はいちばん HP 率の低い味方へ。敵からも狙われる。経験値はもらわない。パーティ全員が倒れたら、ペットが残っていても負け。逃げるのに失敗したターンは行動しない |
 | 経験値 | 倒した敵の合計を生存メンバーで等分 |
 | レベルアップ | 次の Lv に必要な累計経験値 `round(10 × lv^2.2)`。上昇量は職業の growth ＋ {−1, 0, 0, +1} |

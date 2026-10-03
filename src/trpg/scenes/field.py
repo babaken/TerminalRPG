@@ -886,7 +886,9 @@ class FieldScene(Scene):
                     hp_st, clip=area)
             y += 3
         pet = self.gd.enemies.get(self.st.pet) if self.st.pet else None
-        info = ([f"ペット {pet.name}"] if pet else []) + [f"G {self.st.gold:>8}"]
+        fams = [self.gd.enemies[c.familiar].name for m in self.st.party
+                if (c := self.gd.characters.get(m.id)) and c.familiar in self.gd.enemies]
+        info = [f"使い魔 {n}" for n in fams] + ([f"ペット {pet.name}"] if pet else []) + [f"G {self.st.gold:>8}"]
         if self.st.chapter:
             info.append(f"第{self.st.chapter}章 {self.st.chapter_title}")
         t = int(self.st.playtime)

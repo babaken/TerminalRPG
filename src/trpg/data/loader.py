@@ -122,7 +122,8 @@ def _load_friends(f: _File, gd: GameData) -> None:
                 equip[slot] = v
         c = Character(id=t.id(), name=t.str("name"), job=t.str("job"), lv=t.int("lv", 1, min=1, max=99),
                       stats=_stats(t, "stats", ("hp",)), equip=equip, face=t.str("face", ""),
-                      name_input=t.bool("name_input", False), recruit_text=t.str("recruit_text", ""))
+                      name_input=t.bool("name_input", False), recruit_text=t.str("recruit_text", ""),
+                      familiar=t.str("familiar", ""))
         t.done()
         _register(gd.characters, c, t, "キャラクター")
         c._line = t.line  # type: ignore[attr-defined]
@@ -148,7 +149,8 @@ def _load_enemies(f: _File, gd: GameData) -> None:
                   weak=t.strlist("weak", []), resist=t.strlist("resist", []),
                   immune_status=t.strlist("immune_status", []), drops=drops,
                   tameable=t.bool("tameable", False), tame_rate=t.num("tame_rate", 0.0, min=0.0, max=1.0),
-                  ai=t.str("ai", "attack_only", choices=AI_TYPES), actions=actions, copy=t.str("copy", ""))
+                  ai=t.str("ai", "attack_only", choices=AI_TYPES), actions=actions, copy=t.str("copy", ""),
+                  growth=_stats(t, "growth") if t.has("growth") else {})
         for k in ("weak", "resist"):
             for el in getattr(e, k):
                 if el not in ELEMENTS:
@@ -428,6 +430,9 @@ def _cross_check(gd: GameData, manifest, rep: Report) -> None:
             rep.error(file, line, f"{where}: {kind}「{ident}」が定義されていません")
 
     skills_all = set(gd.skills) | set(BUILTIN_SKILLS)
+
+    for c in gd.characters.values():
+        need(gd.enemies, c.familiar, "敵", FRIENDS, ln(c), f"キャラクター {c.id} の使い魔")
 
     for j in gd.jobs.values():                    # SP を使う技を覚えるのに、最大 SP が 0 の職業
         if j.sp_base == 0 and j.sp_growth == 0:

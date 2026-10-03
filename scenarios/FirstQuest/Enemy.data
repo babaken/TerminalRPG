@@ -528,3 +528,19 @@ members = ["verm_1"]
 [[group]]
 id = "verm_2"
 members = ["verm_2"]
+
+# ===== 使い魔 =====
+# Friends.data の familiar で主人を決める。能力値は stats + growth ×（主人の Lv − 1）
+[[enemy]]
+id = "pipi"
+name = "ピピ"
+aa = "aa/pipi.txt"
+stats = { hp = 14, mp = 6, atk = 5, def = 3, mag = 6, agi = 14, luk = 6 }
+growth = { hp = 5, mp = 2, atk = 2, def = 1, mag = 2, agi = 2 }
+ai = "pattern"
+[[enemy.actions]]
+skill = "attack"
+weight = 3
+[[enemy.actions]]
+skill = "healing_song"
+weight = 1
