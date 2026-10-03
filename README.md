@@ -1,243 +1,73 @@
 # TRPG — コンソール RPG エンジン
 
-ASCII アートで表現する、ターミナル用の RPG エンジンです。設計資料は `docs/` にあります。
+ASCII アート（文字）で表現する、ターミナルで遊ぶ RPG エンジンです。
+物語・マップ・敵・アイテムは **シナリオパッケージ**（テキストファイルの集まり、または zip）に分かれていて、差し替えると別のゲームになります。
+サンプルシナリオ **FirstQuest**（全 4 章、エンディングまで）が付いています。
 
-## 現在の実装状況
+## できること
 
-| 工程 | 状況 |
-|---|---|
-| 端末レイヤ（描画・入力・サイズ検知） `src/trpg/term/` | 実装済み |
-| メインループ・シーン管理 `src/trpg/app.py` | 実装済み（最小限） |
-| シナリオパッケージ読込（zip / フォルダ） `src/trpg/package/` | 実装済み |
-| データ読込・検証（.data → データ） `src/trpg/data/` | 実装済み |
-| スクリプト（構文解析・実行・検証） `src/trpg/script/` | 実装済み |
-| タイトル・名前入力・フィールド移動・会話・選択肢 `src/trpg/scenes/` | 実装済み |
-| エフェクト `src/trpg/effects/` | flash / fade_in / fade_out / shake / tint（invert 含む）/ typewriter / wait / rain / snow / starfall / wipe / blink / move / aa_show / aa_hide / scroll_text（全 16 種） |
-| ショップ・宿屋・冒険者協会（依頼）・仲間選択 `src/trpg/scenes/facility.py` | 実装済み |
-| ダンジョン（`dungeon = true` の階名表示・`map` 条件式・ワープアイテム・`@tile` でタイルを書き換え・見えない罠） | 実装済み |
-| 戦闘（ターン制・スキル〔技は SP・魔法は MP〕・道具・状態異常・逃走・テイム＝ペットが一緒に戦う・経験値とレベルアップ） `src/trpg/battle/` `scenes/battle.py` | 実装済み |
-| 全滅時の画面（タイトルへ／セーブから） `scenes/gameover.py` | 実装済み |
-| FirstQuest `scenarios/FirstQuest/` | 1章「出会いと旅立ち」すべて、2章「影を追う者たち」すべて（`ch2.sco`）、3章「灰の影」（`ch3.sco`）、4章「終わりの始まり」（`ch4.sco`）からエンディングまで。**全章遊べる** |
-| フィールドメニュー（どうぐ・スキル・そうび・つよさ・いらい・システム） `scenes/menu.py` | 実装済み |
-| セーブ / ロード（3 スロット・暗号化・改ざん検知・つづきから・全滅時「セーブから」） `src/trpg/save/` `scenes/saveload.py` | 実装済み |
-| パッケージツール（検証してから zip にする） `src/trpg/tools/pack.py` | 実装済み |
-| AA 変換ツール（画像 → AA・色ファイル） `src/trpg/tools/aa_convert.py` | 実装済み |
-| マップエディタ（TUI） `src/trpg/tools/map_editor.py` | 実装済み（タイル・範囲の塗りつぶし・コピー、NPC・ワープ・イベント、新しいマップ・大きさの変更） |
+- 2D マップの探索、会話と選択肢、イベント、ダンジョン（暗い階・見えない罠）
+- ターン制の戦闘（スキル〔技は SP・魔法は MP〕・属性・状態異常・テイムしたペットと使い魔）
+- ショップ・宿屋・冒険者協会の依頼・仲間の加入と一時離脱
+- 画面演出（光る・揺れる・暗転・雨や雪・流れ星・スタッフロールなど 16 種）
+- 暗号化された 3 スロットのセーブ
+- シナリオ制作ツール：検証・zip 化・画像から AA・マップエディタ
 
 ## 動作環境
 
-- Python 3.11 以上、`cryptography`（セーブデータの暗号化に使用）
+- Python 3.11 以上
 - UTF-8 と ANSI エスケープに対応した端末、100 桁 × 30 行以上
-  - Windows: **Windows Terminal** 推奨（コマンドプロンプト・PowerShell も可）
-  - Linux: 一般的な端末エミュレータ
+  - Windows：**Windows Terminal** 推奨（コマンドプロンプト・PowerShell も可）
+  - Linux / macOS：一般的な端末
 
-## かんたん起動（起動スクリプト）
+## 遊ぶ
 
-| OS | 起動 | デバッグつきで起動 |
+| OS | 起動 |
+|---|---|
+| Windows | `run.bat`（ダブルクリックでも可） |
+| Linux / macOS | `./run.sh` |
+
+初回は仮想環境とライブラリ（`cryptography`）を自動で用意します。
+起動フォルダか `scenarios/` にあるシナリオを探して起動し、複数あれば選択画面になります。
+ほかのシナリオの zip は、起動フォルダか `scenarios/` に置くだけで遊べます。
+
+### 操作
+
+| キー | フィールド | 戦闘 |
 |---|---|---|
-| Windows | `run.bat`（ダブルクリックでも可） | `run.bat` の `set DEBUG=0` を `1` に書き換える、または `set DEBUG=1` のあとで `run.bat` |
-| Linux / macOS | `./run.sh` | `DEBUG=1 ./run.sh`（スクリプト内の `DEBUG=${DEBUG:-0}` を `1` にしてもよい） |
+| 矢印 / WASD / テンキー | 移動・選ぶ | ↑↓ コマンドを選ぶ、←→ 相手を選ぶ |
+| Enter / Z / Space | 話す・調べる・会話送り・決定 | 決定・メッセージ送り |
+| Esc / X / M | メニュー（どうぐ・スキル・そうび・つよさ・いらい・システム） | ひとつ前に戻る |
 
-スクリプトは次の順に動きます。
-1. 仮想環境（`.venv`）がなければ作る（Python 3.11 以上が必要）
-2. `requirements.txt` のライブラリを入れる（初回と、`requirements.txt` が変わったときだけ）
-3. デバッグフラグが ON なら `--dev --keylog`（座標表示とキーログ `trpg_debug.log`）つきで、OFF ならふつうに起動する
+表示がずれるときは `--ambiguous-width 2`、色を使わないなら `--no-color` を付けて起動します（[ツール利用ガイド](docs/tools.md)）。
 
-引数はそのままゲームに渡します（例：`run.bat --scenario FirstQuest.zip`、`./run.sh --check scenarios/FirstQuest`）。
-`run.bat` はコマンドプロンプトで文字化けしないよう Shift_JIS で保存しています（`.gitattributes` で変換しない設定）。
+## シナリオを作る
 
-## セットアップ（手動）
+テキストファイルを書いて、検証コマンドで確かめながら作ります。プログラムは書きません。
 
-```sh
-python -m venv .venv
-.venv/bin/pip install -r requirements.txt pytest   # Windows: .venv\Scripts\pip install -r requirements.txt pytest
-```
-（または `pip install -e .[dev]`）
-
-## 起動
-
-```powershell
-cd TRPG
-$env:PYTHONPATH="src"
-python -m trpg              # 起動フォルダと scenarios\ のシナリオを探して起動（複数あれば選択画面）
-python -m trpg --dev        # 開発モード（右パネルにマップ ID・座標を表示）
-python -m trpg --scenario FirstQuest.zip
-python -m trpg --term-demo  # 描画・入力のデモ
-python -m trpg --keylog     # 不具合調査用: 受け取ったキーと画面の状態を trpg_debug.log に記録
-```
-または `pip install -e .` のあとで `trpg` コマンドを実行します。
-
-ゲーム中の操作
-| キー | 動作 |
-|---|---|
-| 矢印 / WASD / テンキー | 移動、選択肢のカーソル移動 |
-| Enter / Z / Space | 話す・調べる、会話送り（表示途中なら全文表示）、決定 |
-| Esc / X / M | メニューを開く（どうぐ・スキル・そうび・つよさ・いらい・システム）。メニュー内では Esc でひとつ戻る |
-
-戦闘中の操作
-| キー | 動作 |
-|---|---|
-| ↑↓ | コマンド・スキル・道具を選ぶ |
-| ←→ | 相手を選ぶ |
-| Enter / Z | 決定、メッセージの早送り |
-| Esc / X | ひとつ前に戻る（前の仲間のコマンドにも戻れる） |
-
-オプション
-| オプション | 説明 |
-|---|---|
-| `--ambiguous-width 2` | 罫線（─ │）などの表示がずれるときに試す |
-| `--no-color` | 色を使わない |
-| `--fps N` | フレームレート（既定 30） |
-
-## シナリオの検証
+1. [シナリオ作成マニュアル](docs/manual/README.md) の **チュートリアル** で、小さなシナリオを 1 本作ってみる
+2. [スクリプトリファレンス](docs/manual/02_script.md)・[データ仕様書](docs/data_spec.md) で書き方を調べる
+3. [ツール](docs/tools.md) で検証・マップ編集・AA 作成・zip 化
 
 ```sh
-python -m trpg --check scenarios/FirstQuest     # フォルダ
-python -m trpg --check FirstQuest.zip           # zip
-python -m trpg --list                           # 起動フォルダと scenarios/ のパッケージ一覧
+./run.sh --check scenarios/MyQuest                  # 検証（Windows は run.bat --check …）
+./run.sh --scenario scenarios/MyQuest --dev         # 座標を表示しながら遊ぶ
+python -m trpg.tools.map_editor scenarios/MyQuest   # マップエディタ
+python -m trpg.tools.pack scenarios/MyQuest         # zip にして配る
 ```
-データ（未定義の ID 参照・型の誤り・マップ行の長さ違い・タイルの表示幅・存在しない AA ファイル・綴り間違い）と
-スクリプト（未知の命令・引数の誤り・条件式の誤り・存在しないラベル / マップ / アイテム / NPC・マップ外や壁の中の座標・
-@if と @endif の対応・使われていないラベル・一度も立てていないフラグ）を、ファイル名と行番号つきで表示します。
-シナリオに誤りがあるとゲームは起動せず、同じ内容を表示します。zip はフォルダごと圧縮した形（`FirstQuest/manifest.toml`）でも読めます。
-
-## シナリオの zip 化（パッケージツール）
-
-```sh
-python -m trpg.tools.pack scenarios/FirstQuest              # → FirstQuest-<版>.zip を今のフォルダに作る
-python -m trpg.tools.pack scenarios/FirstQuest -o dist/FirstQuest.zip
-python -m trpg.tools.pack scenarios/FirstQuest --dry-run    # 入れるファイルを表示するだけ
-```
-先に `--check` と同じ検証を行い、エラーがあれば zip を作りません（`--strict` なら警告でも中断）。
-隠しファイル・`__pycache__`・バックアップ（`*~` `*.bak`）・Python ファイル・zip は入れません。
-manifest.toml が zip の直下に来る形で作り、できた zip をもう一度検証します。zip 内の日時は固定なので、同じ中身からは同じ zip ができます。
-同じ名前の zip があるときは `--force` で上書きします。pip でインストールした場合は `trpg-pack` でも起動できます。
-
-## 画像から AA を作る（AA 変換ツール）
-
-`pip install Pillow` が必要です（ゲーム本体には不要）。
-```sh
-python -m trpg.tools.aa_convert slime.png -w 20 --color --preview   # ファイルを作らず端末で確かめる
-python -m trpg.tools.aa_convert slime.png -w 20 --color -d scenarios/FirstQuest/aa   # → slime.txt と slime.color
-python -m trpg.tools.aa_convert images/ -w 24 -d out/                # フォルダ内の画像をまとめて変換
-```
-| オプション | 説明 |
-|---|---|
-| `-w N` | 出力の桁数（半角換算、既定 40） |
-| `--charset ascii / wide` | 記号のみ（既定）／全角の記号。`--chars " .oO@"` で濃さの順に好きな文字を並べることもできる |
-| `--invert` | 明暗を反転（既定は明るいところほど濃い文字。白い背景の画像はこれを付ける） |
-| `--edges` / `--outline` | 輪郭を `- / \| \` の線で描く／線だけを描く。`--edge-threshold 0.3`（小さいほど線が増える） |
-| `--color` | 色ファイル（`.color`）も作る。色合いから 15 色のどれかに近づける |
-| `--aspect 0.5` | 文字 1 個の 幅÷高さ。縦長・横長に見えるときに調整 |
-| `--no-trim` / `--force` | 周りの空白を取らない／同じ名前のファイルを上書きする |
-
-透明なところは半角空白になり、戦闘画面などでは下が透けます。pip でインストールした場合は `trpg-aa` でも起動できます。
-
-## マップを編集する（マップエディタ）
-
-```sh
-python -m trpg.tools.map_editor scenarios/FirstQuest                 # 最初のマップを開く
-python -m trpg.tools.map_editor scenarios/FirstQuest --map town_bern
-```
-| キー | 操作 |
-|---|---|
-| 矢印（PgUp / PgDn / Home / End） | カーソル移動 |
-| Enter / Space | 選んでいるタイルで塗る |
-| `[` `]` / Tab、`1`〜`9` | タイルを選ぶ |
-| `i` | カーソルの下のタイルを選ぶ（スポイト） |
-| `p` | ペン（オンの間は動いた先を塗る） |
-| `v` | 範囲を選ぶ（矢印で広げて `f`：塗りつぶし、`c`：コピー、Esc：やめる） |
-| `b` | コピーした範囲をカーソルの位置に貼り付け（はみ出た分は切り捨て） |
-| `r` | マップの大きさを変える（右・下を増減。NPC などが外に出るときは変えない） |
-| `u` | 元に戻す |
-| `n` / `w` / `e` | カーソルの位置に NPC / ワープ / イベントを置く（入力フォームが開く） |
-| `c` | カーソルの位置の NPC などを編集 |
-| `g` | カーソルの位置の NPC などを動かす（矢印で移動、Enter で置く） |
-| `x` / Delete | カーソルの位置の NPC などを消す（確認あり） |
-| `o` | NPC・ワープ（Ｗ）・イベント（Ｅ）の表示／非表示 |
-| `m` | マップを切り替える（一覧で `a`：新しいマップ。ID・名前・タイルセット・大きさ・敷きつめるタイル・暗い／屋内） |
-| `s` / F2 | 保存 |
-| `q` / Esc | 終わる（未保存なら確認） |
-
-保存では Map.data のうち変えたところ（マップの `rows`、NPC などの表の項目）だけを書き換えます（コメントや書式はそのまま）。
-入力フォームでは ID の重複・文字の幅・道順・ワープ先がマップの外でないかを確かめます。
-最初の保存の前に元のファイルを `Map.data.bak` に写し、保存後に `--check` と同じ検証をして結果を表示します。
-編集できるのはフォルダのシナリオだけです（zip は不可）。pip でインストールした場合は `trpg-mapedit` でも起動できます。
-
-セーブデータは起動フォルダの `saves/<シナリオID>/slot1〜3.sav` に保存されます（環境変数 `TRPG_SAVE_DIR` で変更可）。
-暗号化と改ざん検知をしているため、書き換えたファイルや別シナリオのファイルは読み込みません。
-
-ウィンドウを 100×30 より小さくすると、警告を出してゲームを一時停止します。大きくすると自動で元に戻ります。
 
 ## ドキュメント（`docs/`）
 
 | ファイル | 内容 |
 |---|---|
-| `manual/` | **シナリオ作成マニュアル**（チュートリアル・スクリプトリファレンス・エフェクト・よくある作り方。見本 `manual/sample/HelloQuest`） |
-| `data_spec.md` | **データ仕様書**（シナリオパッケージの全ファイル・全項目。読み込み処理との食い違いはテストで検出） |
-| `requirements.md` | 要件定義書 v1.1 |
-| `basic_design.md` | 基本設計書 v0.2（データ仕様・スクリプト構文・計算式。【済】【未】で実装状況を表示） |
-| `development_plan.md` | 開発計画（マイルストーン M1〜M7、GitHub での管理方針） |
-| `scenario/FirstQuest_story.md` | FirstQuest 本文（案A） |
-| `scenario/FirstQuestPlus_story.md` | FirstQuest+ 本文（案C、保留） |
-| `plot_options.md` | 3・4 章のプロット案 |
+| [`manual/`](docs/manual/README.md) | **シナリオ作成マニュアル**（チュートリアル・スクリプトリファレンス・エフェクト・よくある作り方） |
+| [`data_spec.md`](docs/data_spec.md) | **データ仕様書**（シナリオパッケージの全ファイル・全項目） |
+| [`tools.md`](docs/tools.md) | **ツール利用ガイド**（起動オプション・検証・パッケージ・AA 変換・マップエディタ） |
+| [`development.md`](docs/development.md) | 開発者向けガイド（セットアップ・テスト・CI・ソースの構成） |
+| [`requirements.md`](docs/requirements.md) / [`basic_design.md`](docs/basic_design.md) | 要件定義書・基本設計書 |
+| [`development_plan.md`](docs/development_plan.md) | 開発計画（マイルストーン） |
+| [`scenario/`](docs/scenario/) | FirstQuest の本文（実装メモつき） |
 
 ## 開発
 
-- リポジトリ: https://github.com/babaken/TRPG
-- `main` は常に動く状態に保ち、作業は `feature/<内容>` ブランチ → プルリクエストで取り込む
-- プッシュ・プルリクエストで GitHub Actions が Windows / Linux × Python 3.11 / 3.14 のテストを実行する
-
-## テスト
-
-```sh
-pip install pytest
-python -m pytest
-```
-
-## ソース構成（端末レイヤ）
-
-| ファイル | 役割 |
-|---|---|
-| `term/width.py` | 文字の表示幅（全角 2 / 半角 1 / 結合文字 0）、切り詰め・折り返し |
-| `term/style.py` | 色・属性、ANSI SGR 生成 |
-| `term/buffer.py` | セルバッファ（全角の分断を自動補正）、文字・枠・塗り・AA 描画 |
-| `term/screen.py` | ダブルバッファ、差分のみ出力、リサイズ検知 |
-| `term/input_win.py` / `input_posix.py` | キー入力（Windows: ReadConsoleInputW で入力レコードを直接読む / Linux: termios） |
-| `term/keys.py` | キーイベント、アクション（移動・決定・キャンセル・メニュー）とキー割当 |
-| `term/terminal.py` | 端末の初期化・後始末（Windows の VT 有効化・UTF-8 化を含む） |
-| `app.py` | シーンスタックとフレームループ、画面サイズ不足時の一時停止 |
-| `scenes/term_demo.py` | 動作確認用デモ |
-| `package/source.py` | zip / フォルダの読み出し、パストラバーサル・zip bomb 対策、Shift_JIS ファイル名の救済 |
-| `package/manifest.py` | manifest.toml の検証、対応エンジン版の判定 |
-| `package/__init__.py` | パッケージを開く・探す（`open_package` / `discover`） |
-| `package/check.py` | パッケージの検証（`--check` とパッケージツールで共用） |
-| `tools/pack.py` | パッケージツール（検証 → zip 化 → 作った zip の再検証） |
-| `tools/aa_convert.py` | AA 変換ツール（明るさ → 文字、輪郭 → 線、色 → .color） |
-| `tools/map_editor.py` | マップエディタの画面と操作 |
-| `tools/mapfile.py` | Map.data の書き換え（rows、NPC・ワープ・イベントの追加・変更・削除、マップの追加。コメント・書式を保つ） |
-| `tools/objform.py` | マップエディタの入力フォーム（NPC・ワープ・イベント・新しいマップ・大きさ） |
-| `data/reader.py` | 型チェックつきの値取り出し、未知の項目の警告 |
-| `data/models.py` | 職業・キャラ・敵・アイテム・マップ・クエスト等のデータクラス |
-| `data/loader.py` | 各 .data の読み込みと相互参照チェック |
-| `data/report.py` | エラー・警告の収集と表示（ファイル名・行番号つき） |
-| `script/expr.py` | 条件式（flag / var / gold / item / party / quest / choice）の解析と評価 |
-| `script/parser.py` | scenario.sco の構文解析（@if をジャンプに展開、@include、引数チェック） |
-| `script/vm.py` | スクリプト実行機。会話・選択肢・待ちで止まり、再開できる |
-| `script/lint.py` | スクリプトとデータの突き合わせ検証 |
-| `world/state.py` | ゲームの進行状態（パーティ・所持品・フラグ・位置）、{hero} などの置き換え |
-| `effects/__init__.py` | 画面エフェクト |
-| `ui/widgets.py` | 会話窓（折り返し・ページ送り・1 文字ずつ表示）、選択肢窓 |
-| `game.py` | パッケージ・データ・スクリプトをまとめて読み込み・検証 |
-| `scenes/title.py` | タイトル・名前入力・シナリオ選択 |
-| `scenes/field.py` | フィールド（移動・NPC・ワープ・イベント・スクリプト実行・エンカウント） |
-| `scenes/facility.py` | ショップ・宿屋・冒険者協会・仲間選択（フィールドに重ねて表示） |
-| `world/quests.py` | 依頼の受注・進み具合・達成報告 |
-| `world/growth.py` | 経験値・レベルアップ・覚えるスキル |
-| `battle/core.py` | 戦闘の進行と計算（画面に依存しない。行動順・ダメージ・会心・回避・属性・状態異常・敵 AI・逃走・テイム・報酬） |
-| `scenes/battle.py` | 戦闘画面（敵の AA 表示・コマンド入力・対象選択・メッセージ） |
-| `scenes/gameover.py` | 全滅時の画面 |
-| `scenes/menu.py` | フィールドメニュー |
-| `world/items.py` | フィールドでのアイテム・スキルの使用 |
-| `save/__init__.py` | セーブデータの形式・暗号化（AES-256-GCM）・スロット管理 |
-| `scenes/saveload.py` | セーブ／ロード画面 |
+リポジトリは https://github.com/babaken/TRPG です。テストは `python -m pytest`、CI は Windows / Linux × Python 3.11 / 3.14。詳しくは [開発者向けガイド](docs/development.md)。

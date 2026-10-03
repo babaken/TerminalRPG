@@ -36,7 +36,7 @@ MyQuest/
 | 画像から AA を作る | `python -m trpg.tools.aa_convert image.png -w 24 --color -d scenarios/MyQuest/aa` |
 | zip にして配る | `python -m trpg.tools.pack scenarios/MyQuest` |
 
-ツールの詳しい使い方は README を見てください。
+ツールの詳しい使い方は [ツール利用ガイド](../tools.md) を見てください。
 
 ## 作るときのコツ
 
