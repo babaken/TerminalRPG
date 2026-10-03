@@ -140,3 +140,12 @@ def test_mage_and_priest_gear(game):
     mag0 = mia.stat("mag", gd)
     mia.equip.update(weapon="rod", armor="leather_robe")
     assert mia.stat("mag", gd) == mag0 - 2 + 10 + 4                  # ローブ（魔力 +2）から着替え
+
+
+def test_upper_mage_gear_from_chapter4(game):
+    """硬革のローブとマジックロッドは 4 章からの武具屋だけ。"""
+    gd = game.data
+    assert {"hard_leather_robe", "magic_rod"} <= set(gd.shops["town_weapon_4"].goods)
+    assert not {"hard_leather_robe", "magic_rod"} & set(gd.shops["town_weapon"].goods)
+    assert gd.items["magic_rod"].stats["mag"] > gd.items["rod"].stats["mag"]
+    assert gd.items["hard_leather_robe"].stats["def"] > gd.items["leather_robe"].stats["def"]

@@ -75,6 +75,26 @@ desc = "魔力を込めやすい杖。魔法使い・僧侶向け。魔法の威
 stats = { atk = 5, mag = 10 }
 
 [[item]]
+id = "hard_leather_robe"
+name = "硬革のローブ"
+type = "equipment"
+slot = "armor"
+category = "robe"
+price = 700
+desc = "硬く煮しめた革を重ねたローブ。鎖帷子に負けない守り。魔法使い・僧侶向け。"
+stats = { def = 14, mag = 7 }
+
+[[item]]
+id = "magic_rod"
+name = "マジックロッド"
+type = "equipment"
+slot = "weapon"
+category = "staff"
+price = 800
+desc = "魔石をはめ込んだ杖。魔法の威力と回復量が大きく上がる。魔法使い・僧侶向け。"
+stats = { atk = 10, mag = 20 }
+
+[[item]]
 id = "return_scroll"
 name = "帰還の巻物"
 type = "key"
@@ -227,7 +247,7 @@ goods = ["potion", "herb", "antidote", "bread"]
 [[shop]]
 id = "town_weapon_4"
 name = "ベルンの武具屋"
-goods = ["chain_mail", "copper_sword", "dagger", "whip", "stone_axe", "rod", "leather_armor", "leather_robe", "wood_shield"]
+goods = ["chain_mail", "hard_leather_robe", "magic_rod", "copper_sword", "dagger", "whip", "stone_axe", "rod", "leather_armor", "leather_robe", "wood_shield"]
 
 # ===== 2章 =====
 [[item]]
