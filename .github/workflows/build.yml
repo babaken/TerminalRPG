@@ -1,0 +1,86 @@
+# 配布物を作る：Windows の TRPG.exe（PyInstaller）と、pip で入れる wheel。
+# プルリクエストでは作って動作を確かめるだけ。v* のタグを付けたときはリリースに添付する。
+name: build
+
+on:
+  pull_request:
+    paths: ["packaging/**", "pyproject.toml", ".github/workflows/build.yml", "src/**", "scenarios/**"]
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  windows-exe:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: python -m pip install --upgrade pip pyinstaller cryptography
+      - name: Build TRPG.exe
+        run: pyinstaller packaging/trpg.spec --noconfirm
+      - name: Smoke test（同梱の FirstQuest が見つかる）
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory smoke | Out-Null
+          Set-Location smoke
+          $out = & ..\dist\TRPG.exe --list
+          $out
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          if (-not ($out -match "firstquest")) { Write-Error "FirstQuest が見つからない"; exit 1 }
+      - name: Package
+        shell: pwsh
+        run: |
+          $ver = if ($env:GITHUB_REF_TYPE -eq "tag") { $env:GITHUB_REF_NAME } else { "dev" }
+          New-Item -ItemType Directory TRPG | Out-Null
+          Copy-Item dist\TRPG.exe TRPG\
+          Copy-Item packaging\README_windows.txt TRPG\はじめにお読みください.txt
+          Compress-Archive -Path TRPG\* -DestinationPath "TRPG-windows-$ver.zip"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: TRPG-windows
+          path: TRPG-windows-*.zip
+      - name: Upload to release
+        if: github.ref_type == 'tag'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1 || gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" --notes "（リリースノートは後で追記）"
+          gh release upload "$GITHUB_REF_NAME" TRPG-windows-*.zip --clobber
+
+  wheel:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build wheel
+        run: |
+          python -m pip install --upgrade pip build
+          python -m build --wheel
+      - name: Install test（空のフォルダから同梱の FirstQuest で起動できる）
+        run: |
+          python -m venv /tmp/v
+          /tmp/v/bin/pip install dist/*.whl
+          mkdir /tmp/empty && cd /tmp/empty
+          /tmp/v/bin/trpg --list | tee out.txt
+          grep -q firstquest out.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wheel
+          path: dist/*.whl
+      - name: Upload to release
+        if: github.ref_type == 'tag'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          sleep 30   # Windows のジョブがリリースを作るのを少し待つ
+          gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1 || gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" --notes "（リリースノートは後で追記）"
+          gh release upload "$GITHUB_REF_NAME" dist/*.whl --clobber

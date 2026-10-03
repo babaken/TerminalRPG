@@ -27,6 +27,19 @@ GitHub Actions（`.github/workflows/test.yml`）が、プッシュとプルリ�
 2. `python -m trpg.tools.pack scenarios/FirstQuest --strict`（警告があると失敗）
 3. `python -m pytest`
 
+### 配布物のビルド
+
+`.github/workflows/build.yml` が、プルリクエスト（`src/` `scenarios/` `packaging/` `pyproject.toml` を変えたとき）・手動実行・`v*` のタグで次を作ります。
+- Windows：PyInstaller（`packaging/trpg.spec`）で `TRPG.exe` を作り、空のフォルダで `--list` して FirstQuest が見えるか確かめ、`TRPG-windows-<版>.zip`（exe と `packaging/README_windows.txt`）にする
+- wheel：`python -m build --wheel` → 新しい仮想環境に入れて、空のフォルダで `trpg --list` を確かめる
+
+どちらも Actions の成果物（Artifacts）に残り、タグのときはリリースに添付します。
+手元で作るときは `pip install build pyinstaller` のあと `python -m build --wheel`（→ `dist/`）／`pyinstaller packaging/trpg.spec`（→ `dist/TRPG`、その OS 用）。
+
+- wheel には FirstQuest を `trpg/bundled/FirstQuest/` として入れます（`pyproject.toml` の `package-dir`）。exe では PyInstaller の展開先の `scenarios/FirstQuest`。
+- シナリオは `find_scenarios()`（`src/trpg/package/__init__.py`）が「起動フォルダ・`scenarios/`」→「同梱」の順に探し、同じ ID は起動フォルダ側を使います。
+- `src/trpg/` にサブパッケージを足したら `pyproject.toml` の `packages` にも足します（`tests/test_distribution.py` が確かめます）。
+
 ## 作業の流れ
 
 - リポジトリ：https://github.com/babaken/TRPG（private）

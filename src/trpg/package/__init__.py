@@ -76,6 +76,25 @@ class Candidate:
     error: str = ""
 
 
+def bundled_dirs() -> list[Path]:
+    """エンジンに同梱したシナリオの置き場所（pip で入れたとき・exe のとき）。"""
+    import sys
+    out = []
+    if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):          # PyInstaller の exe
+        out.append(Path(sys._MEIPASS) / "scenarios")
+    out.append(Path(__file__).resolve().parent.parent / "bundled")         # pip：trpg/bundled/
+    return [d for d in out if d.is_dir()]
+
+
+def find_scenarios(cwd: Optional[Path] = None) -> list[Candidate]:
+    """起動フォルダと scenarios/、そのあとに同梱のシナリオ（同じ ID がすでに見つかっていれば出さない）。"""
+    cwd = Path(cwd or Path.cwd())
+    found = discover([cwd, cwd / "scenarios"])
+    ids = {c.id for c in found if c.id}
+    found += [c for c in discover(bundled_dirs()) if not c.id or c.id not in ids]
+    return found
+
+
 def discover(dirs: Iterable[Path | str]) -> list[Candidate]:
     """フォルダ内の *.zip と、manifest.toml を含むサブフォルダを探す。"""
     seen: set[Path] = set()
@@ -108,5 +127,5 @@ def discover(dirs: Iterable[Path | str]) -> list[Candidate]:
 
 __all__ = [
     "Package", "PackageError", "Candidate", "Manifest", "FORMAT_VERSION",
-    "open_package", "discover", "REQUIRED_FILES", "OPTIONAL_FILES",
+    "open_package", "discover", "find_scenarios", "bundled_dirs", "REQUIRED_FILES", "OPTIONAL_FILES",
 ]
