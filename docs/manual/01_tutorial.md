@@ -341,4 +341,4 @@ python -m trpg.tools.pack scenarios/HelloQuest     # → HelloQuest-1.0.0.zip
 - [スクリプトリファレンス](02_script.md)：すべての命令と条件式
 - [エフェクト](03_effects.md)：画面演出
 - [よくある作り方](04_recipes.md)：宝箱・仲間の加入・依頼・ダンジョン・負けイベントなど
-- データファイルの全項目は [データ仕様書](../data_spec.md)（M6 6-2 で作成予定）。それまでは [基本設計書](../basic_design.md) の 3〜9 章と、サンプル `scenarios/FirstQuest/` を参考にしてください
+- [データ仕様書](../data_spec.md)：データファイルの全項目。サンプル `scenarios/FirstQuest/` も参考になります
