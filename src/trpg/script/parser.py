@@ -200,6 +200,14 @@ class Parser:
     def _choice_option(self, s: str, file: str, no: int) -> None:
         body = s[1:].strip()
         label = None
+        cond = None
+        m = re.search(r"(?:^|\s)@if(?:\s|$)", body)
+        if m:                                   # - 表示 → *ラベル @if 条件（条件が成り立つときだけ出す）
+            body, rest = body[:m.start()].strip(), body[m.end():]
+            if not rest.strip():
+                self.err(file, no, "選択肢の @if の後に条件式がありません")
+            else:
+                cond = self._cond(rest.strip(), file, no)
         for arrow in ("→", "->"):
             if arrow in body:
                 body, target = body.rsplit(arrow, 1)
@@ -214,6 +222,8 @@ class Parser:
             self.err(file, no, "選択肢の表示文がありません")
             return
         self._choice.args["options"].append((body, label, no))
+        if cond is not None:
+            self._choice.args.setdefault("conds", {})[len(self._choice.args["options"]) - 1] = cond
 
     def _command(self, body: str, file: str, no: int) -> None:
         parts = body.split(None, 1)

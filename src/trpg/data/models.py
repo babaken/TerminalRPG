@@ -114,6 +114,7 @@ class Item:
     category: str = ""
     stats: Stats = field(default_factory=dict)
     use: dict = field(default_factory=dict)
+    raw: tuple[str, str] = ()   # name・desc に {hero} があるときの元の文（world.items.personalize が名前を入れる）
 
 
 @dataclass

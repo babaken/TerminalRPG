@@ -66,6 +66,7 @@ class VM:
         self.pc: Optional[int] = None
         self.stack: list[int] = []
         self._pending_choice: Optional[Instr] = None
+        self._shown: list[int] = []               # 出した選択肢（書いた順の番号）
 
     @property
     def running(self) -> bool:
@@ -92,6 +93,7 @@ class VM:
         if ins is None:
             return
         self._pending_choice = None
+        index = self._shown[index]               # 表示した中での番号 → 書いた順の番号
         self.state.last_choice = index + 1
         _, label, _ = ins.args["options"][index]
         if label:
@@ -132,8 +134,13 @@ class VM:
             if op == "msg":
                 return MessageReq([(sp, format_text(t, self.state, self.gd)) for sp, t in ins.args["lines"]])
             if op == "choice":
+                conds = ins.args.get("conds", {})
+                self._shown = [i for i in range(len(ins.args["options"]))
+                               if i not in conds or self._eval(ins, conds[i])]
+                if not self._shown:
+                    raise ScriptError(ins, "条件に合う選択肢がひとつもありません")
                 self._pending_choice = ins
-                return ChoiceReq([format_text(t, self.state, self.gd) for t, _, _ in ins.args["options"]])
+                return ChoiceReq([format_text(ins.args["options"][i][0], self.state, self.gd) for i in self._shown])
             if op == "jump":
                 self.pc = ins.args["target"]
             elif op == "jif":

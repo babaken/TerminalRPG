@@ -130,3 +130,14 @@ def use_skill(gd: GameData, user: Member, sk: Skill, target: Optional[Member], p
         return UseResult(False, msgs[1:] or [tr('しかし、何も起こらなかった。')])
     user.mp -= sk.mp
     return UseResult(True, msgs)
+
+
+def personalize(gd: "GameData", hero_name: str) -> None:
+    """アイテムの名前・説明の {hero} を主人公の名前にする（「{hero}の剣」→「ユウの剣」）。
+    ニューゲーム・ロードのたびに呼ぶ（主人公の名前はセーブごとに違う）。"""
+    for it in gd.items.values():
+        if not it.raw:
+            if "{hero}" not in it.name and "{hero}" not in it.desc:
+                continue
+            it.raw = (it.name, it.desc)
+        it.name, it.desc = (t.replace("{hero}", hero_name) for t in it.raw)
