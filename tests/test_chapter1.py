@@ -72,6 +72,8 @@ class Play(Driver):
 
     def ov_choose(self, i: int) -> None:
         sc = self.ov()
+        if sc.choice is None and getattr(sc, "mode", "").startswith("qty_"):
+            self.key("ENTER")                    # ショップの個数（1 個のまま決定）
         assert sc.choice is not None, "選択肢が出ていない"
         for _ in range(i):
             self.key("DOWN")
