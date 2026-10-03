@@ -189,6 +189,9 @@ class Overlay(Scene):
                 y += 1
 
 
+MAX_STACK = 99           # 1 種類のアイテムを持てる数の上限（ショップで個数を選ぶときの上限）
+
+
 # ====================================================================== ショップ
 class ShopScene(Overlay):
     def __init__(self, field: "FieldScene", shop_id: str):
@@ -224,6 +227,17 @@ class ShopScene(Overlay):
     def _buy(self, it: Item) -> None:
         if it.price > self.st.gold:
             self.say("お金が足りないよ。")
+            return
+        if it.type != "equipment":
+            # 道具は個数を選んで買う（装備品は 1 つずつ。買ったあと装備するか聞くため）
+            have = self.st.items.get(it.id, 0)
+            most = MAX_STACK - have
+            if it.price > 0:
+                most = min(most, self.st.gold // it.price)
+            if most <= 0:
+                self.say("それ以上は持てないよ。")
+                return
+            self._ask_qty("buy", it, most)
             return
 
         def yes(i: int) -> None:
@@ -267,21 +281,70 @@ class ShopScene(Overlay):
         self.list = ListWindow([(f"{it.name} ×{n}", f"{self._sell_price(it)} G", True) for it, n in items])
 
     def _sell(self, it: Item) -> None:
-        price = self._sell_price(it)
+        n = self.st.items.get(it.id, 0)
+        if n > 1:
+            self._ask_qty("sell", it, n)
+            return
+        self._sell_n(it, 1)
+
+    def _sell_n(self, it: Item, n: int) -> None:
+        price = self._sell_price(it) * n
+        what = it.name if n == 1 else f"{it.name}を {n} 個、合計"
 
         def yes(i: int) -> None:
             if i == 0:
-                self.st.remove_item(it.id)
+                self.st.remove_item(it.id, n)
                 self.st.gold += price
                 idx = self.list.index
                 self._open_sell()
                 self.list.index = min(idx, max(0, len(self.list.rows) - 1))
-                self.say(f"{it.name}を {price} G で買い取ったよ。")
-        self.ask(f"{it.name}を {price} G で売りますか？", ["はい", "いいえ"], yes, cancel_index=1)
+                self.say(f"{what if n > 1 else it.name + 'を'} {price} G で買い取ったよ。")
+        self.ask(f"{what if n > 1 else it.name + 'を'} {price} G で売りますか？", ["はい", "いいえ"], yes, cancel_index=1)
+
+    # ---- 個数
+    def _ask_qty(self, kind: str, it: Item, most: int) -> None:
+        self.qty_kind, self.qty_item, self.qty_max, self.qty = kind, it, most, 1
+        self.mode = "qty_" + kind
+
+    def _qty_key(self, actions: frozenset[Action]) -> None:
+        d = 1 if Action.UP in actions else -1 if Action.DOWN in actions else \
+            10 if Action.RIGHT in actions else -10 if Action.LEFT in actions else 0
+        if d:
+            if self.qty + d > self.qty_max and abs(d) == 1:
+                self.qty = 1                         # 上限を超えたら 1 に戻る（↑を押し続けて一周）
+            elif self.qty + d < 1 and abs(d) == 1:
+                self.qty = self.qty_max
+            else:
+                self.qty = min(self.qty_max, max(1, self.qty + d))
+        elif Action.CANCEL in actions:
+            self.mode = self.qty_kind
+        elif Action.OK in actions:
+            kind, it, n = self.qty_kind, self.qty_item, self.qty
+            self.mode = kind
+            if kind == "buy":
+                self._buy_n(it, n)
+            else:
+                self._sell_n(it, n)
+
+    def _buy_n(self, it: Item, n: int) -> None:
+        total = it.price * n
+
+        def yes(i: int) -> None:
+            if i != 0:
+                return
+            self.st.gold -= total
+            self.st.add_item(it.id, n)
+            self._open_buy_keep_cursor()
+            self.say("まいどあり！")
+        what = f"{it.name}を" if n == 1 else f"{it.name}を {n} 個、合計"
+        self.ask(f"{what} {total} G で買いますか？", ["はい", "いいえ"], yes, cancel_index=1)
 
     # ---- 入力・描画
     def on_ui_key(self, ev: KeyEvent, actions: frozenset[Action]) -> None:
         if self.list is None:
+            return
+        if self.mode.startswith("qty_"):
+            self._qty_key(actions)
             return
         if Action.UP in actions:
             self.list.move(-1)
@@ -323,10 +386,25 @@ class ShopScene(Overlay):
         if self.list is None:
             return
         lrect, drect = self.columns(buf, 40)
-        self.list.draw(buf, lrect, title=f"{self.shop.name}（{'かう' if self.mode == 'buy' else 'うる'}）")
+        buying = self.mode in ("buy", "qty_buy")
+        self.list.draw(buf, lrect, title=f"{self.shop.name}（{'かう' if buying else 'うる'}）")
         if not self.list.empty:
-            it = self._goods[self.list.index] if self.mode == "buy" else self._bag[self.list.index][0]
+            it = self._goods[self.list.index] if buying else self._bag[self.list.index][0]
             self.draw_detail(buf, drect, it.name, self._item_detail(it))
+        if self.mode.startswith("qty_"):
+            self._draw_qty(buf, lrect)
+
+    def _draw_qty(self, buf: Buffer, lrect: Rect) -> None:
+        it = self.qty_item
+        unit = it.price if self.qty_kind == "buy" else self._sell_price(it)
+        have = self.st.items.get(it.id, 0)
+        rect = Rect(lrect.x + 2, min(lrect.bottom - 6, lrect.y + 2 + self.list.index), lrect.w - 4, 6)
+        inner = buf.box(rect, Style.of("bright_white"), title="いくつ？", chars=BOX_SINGLE)
+        buf.fill(inner, " ")
+        buf.put(inner.x + 1, inner.y, f"{it.name}（持っている数 {have}）", TEXT, clip=inner)
+        buf.put(inner.x + 1, inner.y + 1, f"◀ {self.qty:>2} 個 ▶   合計 {unit * self.qty} G", GOLD_ST, clip=inner)
+        buf.put(inner.x + 1, inner.y + 2, f"↑↓：1 つずつ  ←→：10 ずつ（最大 {self.qty_max}）", DIM_TEXT, clip=inner)
+        buf.put(inner.x + 1, inner.y + 3, "Enter：決定  Esc：やめる", DIM_TEXT, clip=inner)
 
 
 # ====================================================================== 宿屋
