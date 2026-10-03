@@ -29,6 +29,11 @@ id = "default"
 "A" = { glyph = "祭", pass = false, color = "bright_red",   name = "祭壇" }
 "F" = { glyph = "炎", pass = false, color = "red",          name = "黒い炎" }
 "Z" = { glyph = "寝", pass = false, color = "white",        name = "寝台" }
+"s" = { glyph = "．", pass = true,  color = "bright_white", name = "雪原" }
+"^" = { glyph = "山", pass = false, color = "bright_white", name = "岩山" }
+"o" = { glyph = "．", pass = true,  color = "white",        name = "石畳" }
+"|" = { glyph = "柱", pass = false, color = "white",        name = "柱" }
+"+" = { glyph = "鏡", pass = false, color = "bright_cyan",  name = "鏡" }
 
 # ===== 見えない罠 =====
 # 踏むまで見えない。踏むと作動して文字が見えるようになる（見えたあとも踏めば作動する）
@@ -823,7 +828,7 @@ rows = [
   "RRRR..........=..........RRRRR",
   "RR..T.......=...........RRRRRR",
   "R.........R.=......R.....RRRRR",
-  "===============............RRR",
+  "===============............R.R",
   "R....T....................RRRR",
   "RR......R.........T......RRRRR",
   "RRRR.....................RRRRR",
@@ -898,6 +903,28 @@ color = "green"
 x = 15
 y = 3
 when = "!flag.ch2_guard_done"
+
+[[map.warp]]
+x = 29
+y = 8
+to = "field_mountain"
+tx = 1
+ty = 10
+dir = "right"
+
+[[map.event]]
+x = 26
+y = 8
+trigger = "check"
+label = "ch3_rockslide"
+when = "!flag.ch3_lost"
+
+[[map.event]]
+x = 1
+y = 8
+trigger = "auto"
+label = "ch3_snow_off"
+when = "flag.ch3_lost"
 
 [[map]]
 id = "dungeon_b01"
@@ -1732,3 +1759,249 @@ to = "guild_bern"
 tx = 10
 ty = 8
 dir = "down"
+
+[[map]]
+id = "field_mountain"
+name = "風見の山道"
+tileset = "default"
+encounter = "mountain"
+rows = [
+  "^^^^^^^^^^^^^^^^^^^^^^^=^^^^^^",
+  "^^^^^^^^^^^^^^^^^^^sss=sss^^^^",
+  "^^^^^^^^^^^^^^^sssssss=ssss^^^",
+  "^^^^^^^^^^^^sssssTsss==sssss^^",
+  "^^^^^^^^^ssssssssss==sssssss^^",
+  "^^^^^^^ssssssssss==sssssTsss^^",
+  "^^^^^ssssTsssss===sssssssss^^^",
+  "^^^^ssssssssss=sssssssssss^^^^",
+  "^^^sssssssss===ssssssTsss^^^^^",
+  "^^sssssssss=sssssssssss^^^^^^^",
+  "=========sssssssssss^^^^^^^^^^",
+  "^ssssTssssssssssss^^^^^^^^^^^^",
+  "^^sssssssssssssss^^^^^^^^^^^^^",
+  "^^^^ssssssssss^^^^^^^^^^^^^^^^",
+  "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^",
+]
+
+[[map.warp]]
+x = 0
+y = 10
+to = "field_blackrock"
+tx = 28
+ty = 8
+dir = "left"
+
+[[map.warp]]
+x = 23
+y = 0
+to = "temple_kazami"
+tx = 14
+ty = 10
+dir = "up"
+
+[[map.event]]
+x = 1
+y = 10
+trigger = "auto"
+label = "ch3_mountain_enter"
+
+[[map]]
+id = "temple_kazami"
+name = "風見の神殿"
+tileset = "default"
+rows = [
+  "##############################",
+  "#####D##########D##########D##",
+  "#####o##########o##########o##",
+  "#oooooooooooooooooooooooooooo#",
+  "#o|oooo|oooo|oooooo|oooo|ooo|#",
+  "#oooooooooooooooooooooooooooo#",
+  "#oooooooooooooSoooooooooooooo#",
+  "#o|oooo|oooooooooooo|oooo|ooo#",
+  "#oooooooooooooooooooooooooooo#",
+  "#oooooooooooooooooooooooooooo#",
+  "#oooooooooooooooooooooooooooo#",
+  "##############D###############",
+]
+
+[[map.warp]]
+x = 14
+y = 11
+to = "field_mountain"
+tx = 23
+ty = 1
+dir = "down"
+
+[[map.warp]]
+x = 5
+y = 1
+to = "trial_1"
+tx = 9
+ty = 6
+dir = "up"
+
+[[map.warp]]
+x = 16
+y = 1
+to = "trial_2"
+tx = 9
+ty = 6
+dir = "up"
+
+[[map.warp]]
+x = 27
+y = 1
+to = "trial_3"
+tx = 9
+ty = 6
+dir = "up"
+
+[[map.event]]
+x = 14
+y = 10
+trigger = "auto"
+label = "ch3_temple"
+when = "flag.ch3_lost and !flag.ch3_temple_met"
+
+[[map.event]]
+x = 14
+y = 6
+trigger = "check"
+label = "ch3_altar_talk"
+
+[[map.event]]
+x = 5
+y = 2
+trigger = "touch"
+label = "ch3_trial_door"
+when = "!flag.ch3_temple_met"
+
+[[map.event]]
+x = 16
+y = 2
+trigger = "touch"
+label = "ch3_trial_door"
+when = "!flag.ch3_temple_met"
+
+[[map.event]]
+x = 27
+y = 2
+trigger = "touch"
+label = "ch3_trial_door"
+when = "!flag.ch3_temple_met"
+
+[[map.npc]]
+id = "ord"
+glyph = "司"
+color = "bright_white"
+x = 14
+y = 5
+talk = "ch3_ord_talk"
+
+[[map.npc]]
+id = "acolyte"
+glyph = "僧"
+color = "white"
+x = 4
+y = 8
+move = "random"
+talk = "ch3_acolyte_talk"
+
+[[map]]
+id = "trial_1"
+name = "勇気の間"
+tileset = "default"
+indoor = true
+rows = [
+  "####################",
+  "#oooooooo+ooooooooo#",
+  "#oooooooooooooooooo#",
+  "#o|oooooooooooooo|o#",
+  "#oooooooooooooooooo#",
+  "#o|oooooooooooooo|o#",
+  "#oooooooooooooooooo#",
+  "#########D##########",
+]
+
+[[map.warp]]
+x = 9
+y = 7
+to = "temple_kazami"
+tx = 5
+ty = 2
+dir = "down"
+
+[[map.event]]
+x = 9
+y = 1
+trigger = "check"
+label = "ch3_trial_1"
+
+[[map]]
+id = "trial_2"
+name = "慈愛の間"
+tileset = "default"
+indoor = true
+rows = [
+  "####################",
+  "#oooooooooooooooooo#",
+  "#oooooooooooooooooo#",
+  "#o|oooooooooooooo|o#",
+  "#oooooooooooooooooo#",
+  "#o|oooooooooooooo|o#",
+  "#oooooooooooooooooo#",
+  "#########D##########",
+]
+
+[[map.warp]]
+x = 9
+y = 7
+to = "temple_kazami"
+tx = 16
+ty = 2
+dir = "down"
+
+[[map.event]]
+x = 9
+y = 2
+trigger = "touch"
+label = "ch3_trial_2"
+when = "!flag.trial2_done"
+
+[[map.npc]]
+id = "pup"
+glyph = "仔"
+color = "yellow"
+x = 9
+y = 1
+when = "!flag.trial2_done"
+
+[[map]]
+id = "trial_3"
+name = "絆の間"
+tileset = "default"
+indoor = true
+rows = [
+  "####################",
+  "#oooooooo+ooooooooo#",
+  "#oooooooooooooooooo#",
+  "#o|oooooooooooooo|o#",
+  "#oooooooooooooooooo#",
+  "#o|oooooooooooooo|o#",
+  "#oooooooooooooooooo#",
+  "#########D##########",
+]
+
+[[map.warp]]
+x = 9
+y = 7
+to = "temple_kazami"
+tx = 27
+ty = 2
+dir = "down"
+
+[[map.event]]
+x = 9
+y = 1
+trigger = "check"
+label = "ch3_trial_3"

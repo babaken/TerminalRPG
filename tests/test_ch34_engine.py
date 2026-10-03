@@ -18,19 +18,6 @@ from trpg.script.parser import parse_script
 from trpg.world.growth import skills_of
 from trpg.world.state import Member, format_text
 
-SHADOW = '''
-[[enemy]]
-id = "shadow_hero"
-name = "影の{hero}"
-aa = "aa/slime.txt"
-stats = { hp = 1 }
-copy = "hero"
-
-[[group]]
-id = "shadow"
-members = ["shadow_hero"]
-'''
-
 SCRIPT = '''
 *leave_test
 @party leave #2 keep=injured
@@ -69,8 +56,7 @@ SCRIPT = '''
 
 @pytest.fixture
 def game(sample_dir):
-    (sample_dir / "Enemy.data").write_text((sample_dir / "Enemy.data").read_text(encoding="utf-8") + SHADOW,
-                                           encoding="utf-8")
+    assert 'id = "shadow_hero"' in (sample_dir / "Enemy.data").read_text(encoding="utf-8")   # 影の{hero}（3 章の試練）
     sco = sample_dir / "scenario.sco"
     sco.write_text(sco.read_text(encoding="utf-8") + SCRIPT, encoding="utf-8")
     g = load_game(sample_dir)

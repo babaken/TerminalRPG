@@ -539,6 +539,11 @@
 # ---- ロードしたとき（つづきから・全滅からの「セーブから」） ----
 # 1章の最後のセーブは 2 章を始める前に保存されるので、そこから再開したら 2 章を始める
 *on_load
+# 3 章でガルザに敗れたあとなら、洞穴前の東の落石はどけてある（古い版で医務室の場面を通ったセーブのため）
+@if flag.ch3_lost
+  @tile 27 8 . map=field_blackrock
+  @tile 29 8 = map=field_blackrock
+@endif
 @if flag.ch1_done and !flag.ch2_rumor
   @goto *ch2_start
 @endif

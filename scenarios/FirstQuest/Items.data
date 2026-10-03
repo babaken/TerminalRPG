@@ -305,3 +305,91 @@ target = "enemy_all"
 kind = "magic"
 power = 18
 anim = "flash:white,shake:3"
+
+[[item]]
+id = "awakening_sword"
+name = "目覚めかけた剣"
+type = "equipment"
+slot = "weapon"
+category = "sword"
+price = 0
+desc = "試練で錆が少し落ちた封剣。刀身の奥で、かすかな光が脈打っている。"
+stats = { atk = 22 }
+
+[[skill]]
+id = "frost"
+name = "フロスト"
+mp = 5
+target = "enemy_one"
+kind = "magic"
+element = "ice"
+power = 18
+anim = "flash:bright_cyan"
+
+[[skill]]
+id = "fuukouzan"
+name = "封光斬"
+mp = 6
+target = "enemy_one"
+kind = "physical"
+element = "holy"
+power = 28
+anim = "flash:bright_yellow,shake:2"
+
+# 試練のあとに覚える、職業ごとの上位スキル（@skill add）
+[[skill]]
+id = "whirlwind"
+name = "旋風斬"
+mp = 6
+target = "enemy_all"
+kind = "physical"
+power = 12
+anim = "shake:2"
+
+[[skill]]
+id = "flame_storm"
+name = "フレイムストーム"
+mp = 10
+target = "enemy_all"
+kind = "magic"
+element = "fire"
+power = 26
+anim = "flash:red,shake:2"
+
+[[skill]]
+id = "heal_all"
+name = "ハイヒール"
+mp = 10
+target = "ally_all"
+kind = "heal"
+power = 40
+anim = "flash:bright_green"
+
+[[skill]]
+id = "jackpot"
+name = "ジャックポット"
+mp = 6
+target = "enemy_all"
+kind = "physical"
+power = 16
+anim = "flash:yellow"
+
+[[skill]]
+id = "fierce_strike"
+name = "猛攻"
+mp = 5
+target = "enemy_one"
+kind = "physical"
+power = 30
+anim = "shake:3"
+
+[[skill]]
+id = "beast_call"
+name = "群れの咆哮"
+mp = 6
+target = "enemy_all"
+kind = "physical"
+power = 10
+status = "poison"
+status_rate = 0.3
+anim = "shake:2"

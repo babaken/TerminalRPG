@@ -155,7 +155,10 @@
 
 # ---- 協会長ドルガン（地図の報告のあとは協会にいる。マップでは「会」）
 *ch2_dorgan_talk
-@if flag.ch3_lost
+@if flag.ch3_done
+  協会長ドルガン「戻ったか。……その剣、前とは顔つきが違うな」
+  （第4章は制作中です）
+@elif flag.ch3_lost
   協会長ドルガン「風見の神殿は北東の山の上だ。……{away.injured}のことは任せておけ」
 @elif flag.ch3_started
   協会長ドルガン「B11F の東の壁の奥だ。……生きて戻れよ」
