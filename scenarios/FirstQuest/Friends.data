@@ -7,6 +7,7 @@ name = "勇者"
 growth = { hp = 7, mp = 2, atk = 2, def = 2, mag = 1, agi = 2, luk = 1 }
 equip = ["sword", "light_armor", "shield", "accessory"]
 skills = [ { lv = 4, skill = "power_slash" } ]
+sp = { base = 8, growth = 2 }       # 技に使う SP（Lv1 の最大と、Lv ごとの増え方）
 
 [[job]]
 id = "warrior"
@@ -14,6 +15,7 @@ name = "戦士"
 growth = { hp = 9, mp = 0, atk = 3, def = 3, mag = 0, agi = 1, luk = 1 }
 equip = ["sword", "axe", "light_armor", "heavy_armor", "shield", "accessory"]
 skills = [ { lv = 3, skill = "power_slash" } ]
+sp = { base = 10, growth = 3 }       # 技に使う SP（Lv1 の最大と、Lv ごとの増え方）
 
 [[job]]
 id = "mage"
@@ -35,6 +37,7 @@ name = "遊び人"
 growth = { hp = 6, mp = 2, atk = 2, def = 1, mag = 1, agi = 3, luk = 4 }
 equip = ["dagger", "light_armor", "accessory"]
 skills = [ { lv = 1, skill = "gamble" } ]
+sp = { base = 8, growth = 2 }       # 技に使う SP（Lv1 の最大と、Lv ごとの増え方）
 
 [[job]]
 id = "amazon"
@@ -42,6 +45,7 @@ name = "アマゾネス"
 growth = { hp = 8, mp = 1, atk = 3, def = 2, mag = 0, agi = 2, luk = 1 }
 equip = ["axe", "sword", "light_armor", "shield", "accessory"]
 skills = [ { lv = 1, skill = "war_cry" }, { lv = 5, skill = "power_slash" } ]
+sp = { base = 10, growth = 3 }       # 技に使う SP（Lv1 の最大と、Lv ごとの増え方）
 
 [[job]]
 id = "tamer"
@@ -49,6 +53,7 @@ name = "テイマー"
 growth = { hp = 6, mp = 3, atk = 2, def = 2, mag = 2, agi = 2, luk = 2 }
 equip = ["whip", "light_armor", "robe", "accessory"]
 skills = [ { lv = 1, skill = "tame" } ]
+sp = { base = 6, growth = 2 }       # 技に使う SP（Lv1 の最大と、Lv ごとの増え方）
 
 # ===== キャラクター =====
 

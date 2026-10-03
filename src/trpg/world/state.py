@@ -22,6 +22,19 @@ class Member:
     equip: dict[str, str] = field(default_factory=dict)
     status: list[str] = field(default_factory=list)
     extra_skills: list[str] = field(default_factory=list)   # @skill add で覚えたスキル（職業の習得表とは別）
+    sp: int = -1              # 技に使う SP（いまの値）。-1 は「最大まで」（古いセーブ・加入直後）
+
+    def max_sp(self, gd: GameData) -> int:
+        job = gd.jobs.get(self.job)
+        return job.sp_base + job.sp_growth * (self.lv - 1) if job else 0
+
+    def fill_sp(self, gd: GameData) -> None:
+        self.sp = self.max_sp(gd)
+
+    def fix_sp(self, gd: GameData) -> None:
+        """古いセーブ（SP がない）なら最大に、最大を超えていれば最大にそろえる。"""
+        if self.sp < 0 or self.sp > self.max_sp(gd):
+            self.fill_sp(gd)
 
     @property
     def max_hp(self) -> int:
@@ -62,6 +75,7 @@ class Member:
         # 途中加入のキャラはそのレベルに見合う累計経験値から始める（growth.exp_for_next と同じ式）
         m.exp = round(10 * (c.lv - 1) ** 2.2) if c.lv > 1 else 0
         m.hp, m.mp = m.max_hp, m.max_mp
+        m.fill_sp(gd)
         return m
 
 

@@ -29,6 +29,8 @@ def level_up(m: Member, gd: GameData, rng: Optional[random.Random] = None) -> li
     job = gd.jobs.get(m.job)
     before = set(skills_of(m, gd))
     m.lv += 1
+    if m.sp >= 0 and job:
+        m.sp += job.sp_growth                    # 最大 SP が増えた分だけ今の SP も増える
     gains = []
     for k in STAT_KEYS:
         g = job.growth.get(k, 0) if job else 0
@@ -72,6 +74,7 @@ def raise_to_level(m: Member, gd: GameData, target: Optional[int], rng: Optional
             level_up(m, gd, rng)
         m.exp = max(m.exp, exp_for_next(m.lv - 1) if m.lv > 1 else 0)
     m.hp, m.mp = m.stat("hp", gd), m.stat("mp", gd)
+    m.fill_sp(gd)
 
 
 def gain_exp(st: GameState, gd: GameData, total: int, rng: Optional[random.Random] = None) -> list[str]:

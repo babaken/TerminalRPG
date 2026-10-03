@@ -42,7 +42,7 @@ def default_dir() -> Path:
 def _member_to_dict(m: Member) -> dict:
     return {"id": m.id, "name": m.name, "job": m.job, "lv": m.lv, "base": dict(m.base),
             "hp": m.hp, "mp": m.mp, "exp": m.exp, "equip": dict(m.equip), "status": list(m.status),
-            "extra_skills": list(m.extra_skills)}
+            "extra_skills": list(m.extra_skills), "sp": m.sp}
 
 
 def _member_from_dict(md: dict) -> Member:
@@ -50,7 +50,7 @@ def _member_from_dict(md: dict) -> Member:
         id=md["id"], name=md["name"], job=md["job"], lv=int(md["lv"]), base=dict(md["base"]),
         hp=int(md.get("hp", 0)), mp=int(md.get("mp", 0)), exp=int(md.get("exp", 0)),
         equip=dict(md.get("equip", {})), status=list(md.get("status", [])),
-        extra_skills=list(md.get("extra_skills", [])),
+        extra_skills=list(md.get("extra_skills", [])), sp=int(md.get("sp", -1)),
     )
 
 

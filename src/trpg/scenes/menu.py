@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING, Callable, Optional
 from ..data.models import EQUIP_SLOTS
 from ..term import Action, Buffer, KeyEvent, Rect, Style, pad, text_width
 from ..term.buffer import BOX_SINGLE
+from ..ui.points import cost_text, points_text
 from ..ui.widgets import DIM_TEXT, FRAME, TEXT
 from ..world import items as I
 from ..world import quests as Q
@@ -83,11 +84,15 @@ class MenuScene(Overlay):
                 v.on_ok(v.list.index)
 
     # ================================================================ 共通：仲間を選ぶ
+    def _mpsp(self, m: Member) -> str:
+        msp = m.max_sp(self.gd)
+        return f"MP {m.mp}/{m.max_mp}" + (f"   SP {max(0, m.sp)}/{msp}" if msp else "")
+
     def _member_rows(self) -> list[tuple[str, str, bool]]:
         rows = []
         for m in self.st.party:
             hp = f"HP {m.hp:>3}/{m.max_hp:<3}" if m.alive else "たおれている"
-            rows.append((pad(m.name, 10), f"{hp} MP {m.mp:>3}/{m.max_mp:<3}", True))
+            rows.append((pad(m.name, 10), f"{hp} {points_text(m.mp, m.max_mp, max(0, m.sp), m.max_sp(self.gd))}", True))
         return rows
 
     def _pick_member(self, title: str, cb: Callable[[Member], None]) -> None:
@@ -98,7 +103,7 @@ class MenuScene(Overlay):
         job = self.gd.jobs.get(m.job)
         st_names = "・".join(self.gd.statuses[s].name for s in m.status if s in self.gd.statuses)
         lines = [(f"{job.name if job else m.job}  Lv {m.lv}", HEAD_ST),
-                 (f"HP {m.hp}/{m.max_hp}   MP {m.mp}/{m.max_mp}", TEXT)]
+                 (f"HP {m.hp}/{m.max_hp}   {self._mpsp(m)}", TEXT)]
         if st_names:
             lines.append((f"状態：{st_names}", Style.of("bright_magenta")))
         return lines
@@ -221,7 +226,7 @@ class MenuScene(Overlay):
         if not all_sk:
             self.say(f"{m.name}はスキルを覚えていない。")
             return
-        rows = [(sk.name, f"MP {sk.mp}", sk in sks and m.mp >= sk.mp and m.alive) for sk in all_sk]
+        rows = [(sk.name, cost_text(sk), sk in sks and m.mp >= sk.mp and m.alive) for sk in all_sk]
 
         def ok(i: int) -> None:
             sk = all_sk[i]
@@ -230,7 +235,7 @@ class MenuScene(Overlay):
                 res = I.use_skill(self.gd, m, sk, t, self.st.party)
                 self._back_to(3)
                 v = self.views[-1]
-                v.list.rows = [(s.name, f"MP {s.mp}", s in sks and m.mp >= s.mp) for s in all_sk]
+                v.list.rows = [(s.name, cost_text(s), s in sks and m.mp >= s.mp) for s in all_sk]
                 self.say(res.messages)
             if sk.target == "ally_one":
                 self._pick_member(f"だれに{sk.name}を使う？", apply)
@@ -306,7 +311,7 @@ class MenuScene(Overlay):
         if not short:
             nxt = exp_for_next(m.lv)
             lines.append((f"経験値 {m.exp}（次の Lv まで {max(0, nxt - m.exp)}）", TEXT))
-        lines.append((f"HP {m.hp}/{m.max_hp}   MP {m.mp}/{m.max_mp}", TEXT))
+        lines.append((f"HP {m.hp}/{m.max_hp}   {self._mpsp(m)}", TEXT))
         for k in ("atk", "def", "mag", "agi", "luk"):
             bonus = m.equip_bonus(k, self.gd)
             extra = f"（+{bonus}）" if bonus > 0 else (f"（{bonus}）" if bonus < 0 else "")
@@ -402,6 +407,6 @@ class MenuScene(Overlay):
                     Style.of("bright_white", bold=True), clip=inner)
             hp_st = Style.of("bright_red") if m.hp * 4 <= m.max_hp else TEXT
             st_names = "・".join(self.gd.statuses[s].name for s in m.status if s in self.gd.statuses)
-            buf.put(inner.x + 2, y + 1, f"HP {m.hp:>3}/{m.max_hp:<3}  MP {m.mp:>3}/{m.max_mp:<3}  {st_names}",
+            buf.put(inner.x + 2, y + 1, f"HP {m.hp:>3}/{m.max_hp:<3}  {points_text(m.mp, m.max_mp, max(0, m.sp), m.max_sp(self.gd))}  {st_names}",
                     hp_st, clip=inner)
             y += 3

@@ -344,7 +344,7 @@ class InnScene(Overlay):
 
     def _all_rested(self) -> bool:
         gd = self.gd
-        return all(m.hp >= m.stat("hp", gd) and m.mp >= m.stat("mp", gd) and not m.status
+        return all(m.hp >= m.stat("hp", gd) and m.mp >= m.stat("mp", gd) and m.sp >= m.max_sp(gd) and not m.status
                    for m in self.st.party)
 
     def _done(self, i: int) -> None:
@@ -359,6 +359,7 @@ class InnScene(Overlay):
         def rest() -> None:
             for m in self.st.party:
                 m.hp, m.mp = m.stat("hp", self.gd), m.stat("mp", self.gd)
+                m.fill_sp(self.gd)
                 m.status.clear()
             self.effect("fade_in", 600, lambda: self.say(
                 ["おはようございます。", "ゆっくり休んで、体力と魔力が回復した！"], then=self.close))

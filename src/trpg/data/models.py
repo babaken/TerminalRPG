@@ -43,6 +43,9 @@ class Job:
     growth: Stats = field(default_factory=dict)
     equip: list[str] = field(default_factory=list)          # 装備可能カテゴリ
     skills: list[tuple[int, str]] = field(default_factory=list)  # (習得Lv, スキルID)
+    sp_base: int = 0          # Lv1 の最大 SP（技に使う。魔法は MP）
+    sp_growth: int = 0        # Lv が 1 上がるごとに増える最大 SP
+    sp_regen: int = 3         # 戦闘中、毎ターンの終わりに回復する SP
 
 
 @dataclass
@@ -116,6 +119,7 @@ class Skill:
     id: str
     name: str
     mp: int = 0
+    sp: int = 0               # 技に使う SP（MP と両方は書かない）
     target: str = "enemy_one"
     kind: str = "physical"
     element: str = ""

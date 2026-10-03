@@ -15,6 +15,7 @@ from ..term import Action, Buffer, Key, KeyEvent, Rect, Style, pad, truncate, wr
 from ..term.buffer import BOX_SINGLE
 from ..ui import markup
 from ..ui.aa import draw_aa
+from ..ui.points import points_text
 from ..ui.widgets import FRAME, ChoiceWindow, MessageWindow
 from ..world import quests as Q
 from ..world import traps as T
@@ -91,6 +92,8 @@ class FieldScene(Scene):
         self._when_cache: dict[str, object] = {}
         self._npc_timer: dict[str, float] = {}
         self.enc_left = 0
+        for m in state.party + list(state.away.values()):
+            m.fix_sp(self.gd)                  # 古いセーブには SP がない → 最大から
         self.map: Optional[GameMap] = None
         self.banner = ""                       # ダンジョンの階に入ったときに出すマップ名
         self.banner_left = 0.0
@@ -879,7 +882,8 @@ class FieldScene(Scene):
             buf.put(area.x + 1, y, f"{pad(mem.name, 10)}{pad(job.name if job else '', 8)}Lv{mem.lv:>3}",
                     Style.of("bright_white", bold=True), clip=area)
             hp_st = Style.of("bright_red") if mem.hp * 4 <= mem.max_hp else Style.of("white")
-            buf.put(area.x + 2, y + 1, f"HP {mem.hp:>3}/{mem.max_hp:>3}  MP {mem.mp:>3}/{mem.max_mp:>3}", hp_st, clip=area)
+            buf.put(area.x + 2, y + 1, f"HP {mem.hp:>3}/{mem.max_hp:>3}  {points_text(mem.mp, mem.max_mp, max(0, mem.sp), mem.max_sp(self.gd))}",
+                    hp_st, clip=area)
             y += 3
         pet = self.gd.enemies.get(self.st.pet) if self.st.pet else None
         info = ([f"ペット {pet.name}"] if pet else []) + [f"G {self.st.gold:>8}"]
