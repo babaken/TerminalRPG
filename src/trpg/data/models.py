@@ -195,6 +195,22 @@ class Npc:
 ROUTE_STEPS = ("up", "down", "left", "right", "wait")
 
 
+TRAP_TARGETS = ("one", "all")
+
+
+@dataclass
+class Trap:
+    """見えない罠の種類（Map.data の [[trap]]）。踏むまで見えず、踏むと glyph が見えるようになる。"""
+    id: str
+    name: str
+    glyph: str                 # 見えるようになったときの文字（表示幅 2）
+    color: str = ""
+    target: str = "one"        # one：仲間 1 人（ランダム）/ all：全員
+    damage_rate: float = 0.1   # 最大 HP に対するダメージの割合（HP は 1 より下がらない）
+    status: str = ""           # かかる状態異常（例 poison）
+    message: str = ""          # 踏んだときの文
+
+
 @dataclass
 class GameMap:
     id: str
@@ -205,6 +221,8 @@ class GameMap:
     dark: bool = False
     indoor: bool = False      # 屋内：雨・雪を表示しない（天気の状態は保ったまま）
     dungeon: bool = False     # ダンジョンの階：入ったときに名前を表示。条件式 map.dungeon が真になる
+    traps: tuple[int, int] = (0, 0)      # 見えない罠の数（最小, 最大）。初めて入ったときにランダムに置く
+    trap_kinds: list[str] = field(default_factory=list)   # 置く罠の種類（空ならすべての [[trap]]）
     events: list[MapEvent] = field(default_factory=list)
     warps: list[Warp] = field(default_factory=list)
     npcs: list[Npc] = field(default_factory=list)
@@ -247,6 +265,7 @@ class GameData:
     statuses: dict[str, StatusDef] = field(default_factory=dict)
     shops: dict[str, Shop] = field(default_factory=dict)
     tilesets: dict[str, TileSet] = field(default_factory=dict)
+    traps: dict[str, Trap] = field(default_factory=dict)
     maps: dict[str, GameMap] = field(default_factory=dict)
     quests: dict[str, Quest] = field(default_factory=dict)
     aa: dict[str, list[str]] = field(default_factory=dict)  # AA ファイル（パス → 行）

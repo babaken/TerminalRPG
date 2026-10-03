@@ -87,7 +87,8 @@ class GameState:
     last_choice: int = 0
     pet: str = ""            # テイマーが手なずけた魔物（敵 ID）
     tiles: dict[str, dict[str, str]] = field(default_factory=dict)   # @tile で変えたタイル：マップ → {"x,y": 文字}
-    away: dict[str, "Member"] = field(default_factory=dict)  # @party leave keep= で一時的に抜けた仲間（名前 → Member）
+    away: dict[str, "Member"] = field(default_factory=dict)
+    traps: dict[str, list[list]] = field(default_factory=dict)  # 見えない罠：マップ → [[x, y, 種類, 見えたか], ...]  # @party leave keep= で一時的に抜けた仲間（名前 → Member）
     current_map: Any = field(default=None, repr=False, compare=False)  # 今いるマップ（GameMap。セーブしない）
 
     # ------------------------------------------------------------ 生成

@@ -30,6 +30,37 @@ id = "default"
 "F" = { glyph = "炎", pass = false, color = "red",          name = "黒い炎" }
 "Z" = { glyph = "寝", pass = false, color = "white",        name = "寝台" }
 
+# ===== 見えない罠 =====
+# 踏むまで見えない。踏むと作動して文字が見えるようになる（見えたあとも踏めば作動する）
+# マップの traps = [最小, 最大] の数だけ、初めて入ったときにランダムな床に置く
+[[trap]]
+id = "poison_needle"
+name = "毒の針"
+glyph = "毒"
+color = "bright_magenta"
+target = "one"
+damage_rate = 0.05
+status = "poison"
+message = "足元から毒の針が飛び出した！"
+
+[[trap]]
+id = "arrow"
+name = "矢の罠"
+glyph = "矢"
+color = "bright_yellow"
+target = "one"
+damage_rate = 0.2
+message = "壁から矢が飛んできた！"
+
+[[trap]]
+id = "bomb"
+name = "爆発の罠"
+glyph = "爆"
+color = "bright_red"
+target = "all"
+damage_rate = 0.12
+message = "足元で爆発が起きた！"
+
 # ===== マップ =====
 
 [[map]]
@@ -870,6 +901,7 @@ when = "!flag.ch2_guard_done"
 
 [[map]]
 id = "dungeon_b01"
+traps = [1, 1]
 name = "黒岩の洞穴 B1F"
 tileset = "default"
 encounter = "cave_upper"
@@ -928,6 +960,7 @@ once = true
 
 [[map]]
 id = "dungeon_b02"
+traps = [1, 1]
 name = "黒岩の洞穴 B2F"
 tileset = "default"
 encounter = "cave_upper"
@@ -972,6 +1005,7 @@ dir = "down"
 
 [[map]]
 id = "dungeon_b03"
+traps = [1, 1]
 name = "黒岩の洞穴 B3F"
 tileset = "default"
 encounter = "cave_upper"
@@ -1023,6 +1057,7 @@ once = true
 
 [[map]]
 id = "dungeon_b04"
+traps = [1, 1]
 name = "黒岩の洞穴 B4F"
 tileset = "default"
 encounter = "cave_upper"
@@ -1067,6 +1102,7 @@ dir = "down"
 
 [[map]]
 id = "dungeon_b05"
+traps = [1, 1]
 name = "黒岩の洞穴 B5F"
 tileset = "default"
 encounter = "cave_mid"
@@ -1117,6 +1153,7 @@ label = "ch2_b05_spring"
 
 [[map]]
 id = "dungeon_b06"
+traps = [2, 3]
 name = "黒岩の洞穴 B6F"
 tileset = "default"
 encounter = "cave_mid"
@@ -1168,6 +1205,7 @@ once = true
 
 [[map]]
 id = "dungeon_b07"
+traps = [2, 3]
 name = "黒岩の洞穴 B7F"
 tileset = "default"
 encounter = "cave_mid"
@@ -1212,6 +1250,7 @@ dir = "down"
 
 [[map]]
 id = "dungeon_b08"
+traps = [2, 3]
 name = "黒岩の洞穴 B8F"
 tileset = "default"
 encounter = "cave_mid"
@@ -1270,6 +1309,7 @@ when = "!flag.ch2_ogre_done"
 
 [[map]]
 id = "dungeon_b09"
+traps = [2, 3]
 name = "黒岩の洞穴 B9F"
 tileset = "default"
 encounter = "cave_deep"
@@ -1314,6 +1354,7 @@ dir = "down"
 
 [[map]]
 id = "dungeon_b10"
+traps = [2, 3]
 name = "黒岩の洞穴 B10F"
 tileset = "default"
 encounter = "cave_deep"
@@ -1364,6 +1405,7 @@ label = "ch2_b10_circle"
 
 [[map]]
 id = "dungeon_b11"
+traps = [2, 3]
 name = "黒岩の洞穴 B11F"
 tileset = "default"
 encounter = "cave_deep"
@@ -1414,6 +1456,7 @@ dir = "down"
 
 [[map]]
 id = "dungeon_b12"
+traps = [4, 5]
 name = "黒岩の洞穴 B12F"
 tileset = "default"
 encounter = "cave_abyss"
@@ -1464,6 +1507,7 @@ label = "ch3_b12_wall"
 
 [[map]]
 id = "dungeon_b13"
+traps = [4, 5]
 name = "黒岩の洞穴 B13F"
 tileset = "default"
 encounter = "cave_abyss"
@@ -1523,6 +1567,7 @@ label = "ch2_b05_spring"
 
 [[map]]
 id = "dungeon_b14"
+traps = [4, 5]
 name = "黒岩の洞穴 B14F"
 tileset = "default"
 encounter = "cave_abyss"
@@ -1573,6 +1618,7 @@ label = "ch3_b14_door"
 
 [[map]]
 id = "dungeon_b15"
+traps = [4, 5]
 name = "黒岩の洞穴 B15F"
 tileset = "default"
 encounter = "cave_abyss"

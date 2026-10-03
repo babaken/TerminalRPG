@@ -6,7 +6,7 @@ from typing import Callable, Optional
 
 from ..app import Scene
 from ..data.models import GameMap, MapEvent, Npc
-from ..effects import Effect, EffectManager, Fade
+from ..effects import Effect, EffectManager, Fade, Flash
 from ..game import Game
 from ..script.expr import ExprError, evaluate, parse_expr
 from ..script.parser import Instr
@@ -17,6 +17,7 @@ from ..ui import markup
 from ..ui.aa import draw_aa
 from ..ui.widgets import FRAME, ChoiceWindow, MessageWindow
 from ..world import quests as Q
+from ..world import traps as T
 from ..world.state import GameState, format_text
 
 DIR_VEC = {"up": (0, -1), "down": (0, 1), "left": (-1, 0), "right": (1, 0)}
@@ -439,6 +440,7 @@ class FieldScene(Scene):
         self.map = self.gd.maps[map_id]
         self.st.map_id = map_id
         self.st.current_map = self.map
+        T.generate(self.st, self.gd, self.map)     # 見えない罠（初めて入ったときにランダムに置く）
         if self.map.dungeon and changed:
             self.banner = format_text(self.map.name, self.st, self.gd)
             self.banner_left = BANNER_SECONDS
@@ -554,6 +556,13 @@ class FieldScene(Scene):
             if ev.trigger == "touch" and (ev.x, ev.y) == (nx, ny) and self._event_ready(ev):
                 self.run_event(ev)
                 return
+        trap = T.trap_at(self.st, self.map.id, nx, ny)
+        if trap is not None:
+            msgs = T.trigger(self.st, self.gd, trap)
+            if msgs:
+                self.effects.active.append(Flash("red", 1, 120))
+                self._handle(MessageReq([("", m) for m in msgs]))
+            return
         self._step_encounter()
 
     def _poison_step(self) -> None:
@@ -843,6 +852,10 @@ class FieldScene(Scene):
                     continue
                 st = Style.of(tile.color) if tile.color else Style()
                 buf.put(px + tx * 2, py + ty, tile.glyph, st, clip=area)
+        for tx_, ty_, kind, shown in self.st.traps.get(m.id, []):     # 見えるようになった罠
+            tr = self.gd.traps.get(kind)
+            if shown and tr and ox <= tx_ < ox + cols and oy <= ty_ < oy + rows and visible(tx_, ty_):
+                buf.put(px + (tx_ - ox) * 2, py + (ty_ - oy), tr.glyph, Style.of(tr.color or "bright_red"), clip=area)
         for n in m.npcs:
             if not self.npc_visible(n) or self.effects.hidden(n.id):
                 continue
