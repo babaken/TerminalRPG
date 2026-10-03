@@ -83,3 +83,7 @@ python -m trpg.tools.pack scenarios/MyQuest         # zip にして配る
 ## 開発
 
 リポジトリは https://github.com/babaken/TRPG です。テストは `python -m pytest`、CI は Windows / Linux × Python 3.11 / 3.14。詳しくは [開発者向けガイド](docs/development.md)。
+
+## ライセンス
+
+[MIT License](LICENSE)。エンジン・ツール・ドキュメント・サンプルシナリオ FirstQuest のすべてに適用します。

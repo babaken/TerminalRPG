@@ -18,5 +18,8 @@ TRPG（コンソール RPG エンジン）Windows 版
   シナリオの zip を TRPG.exe と同じフォルダか、そこに作った scenarios フォルダに置くと、
   起動したときに選べます。
 
+■ ライセンス
+  MIT License（LICENSE.txt）
+
 ■ セーブデータ
   TRPG.exe と同じフォルダ（起動したフォルダ）の saves フォルダに保存されます。
