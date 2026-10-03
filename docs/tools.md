@@ -11,7 +11,7 @@ TRPG エンジンに付いているコマンドとツールの使い方です。
 | 画像から AA を作る | `python -m trpg.tools.aa_convert 画像` |
 | マップを編集する | `python -m trpg.tools.map_editor シナリオのフォルダ` |
 
-> 手動で `python -m …` を使うときは `PYTHONPATH=src`（Windows の PowerShell なら `$env:PYTHONPATH="src"`）を設定し、仮想環境の Python（`.venv/bin/python` / `.venv\Scripts\python`）を使います。`pip install -e .` すると `trpg` `trpg-pack` `trpg-aa` `trpg-mapedit` のコマンドでも起動できます。
+> 手動で `python -m …` を使うときは `PYTHONPATH=src`（Windows の PowerShell なら `$env:PYTHONPATH="src"`）を設定し、仮想環境の Python（`.venv/bin/python` / `.venv\Scripts\python`）を使います。`pip install -e .`（またはリリースの wheel を `pip install`）すると `trpg` `trpg-pack` `trpg-aa` `trpg-mapedit` のコマンドでも起動できます。Windows の `TRPG.exe` は `python -m trpg` と同じオプションを受け付けます（ツールは入っていません）。
 
 ---
 

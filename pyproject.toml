@@ -6,6 +6,8 @@ build-backend = "setuptools.build_meta"
 name = "trpg"
 version = "0.9.0"
 description = "ASCII アートで表現するコンソール RPG エンジン"
+readme = "README.md"
+authors = [{ name = "bbk" }]
 requires-python = ">=3.11"
 dependencies = ["cryptography>=42"]   # セーブデータの暗号化（AES-256-GCM）
 
@@ -19,8 +21,23 @@ trpg-pack = "trpg.tools.pack:main"
 trpg-aa = "trpg.tools.aa_convert:main"
 trpg-mapedit = "trpg.tools.map_editor:main"
 
-[tool.setuptools.packages.find]
-where = ["src"]
+[tool.setuptools]
+# エンジンのパッケージ（新しいサブパッケージを作ったらここにも足す。tests/test_distribution.py が確認する）
+packages = [
+  "trpg", "trpg.battle", "trpg.data", "trpg.effects", "trpg.i18n", "trpg.package", "trpg.save",
+  "trpg.scenes", "trpg.script", "trpg.term", "trpg.tools", "trpg.ui", "trpg.world",
+  # 同梱のサンプルシナリオ（pip で入れると trpg/bundled/FirstQuest/ に入り、どこからでも遊べる）
+  "trpg.bundled.FirstQuest", "trpg.bundled.FirstQuest.aa",
+]
+
+[tool.setuptools.package-dir]
+"" = "src"
+"trpg.bundled.FirstQuest" = "scenarios/FirstQuest"
+"trpg.bundled.FirstQuest.aa" = "scenarios/FirstQuest/aa"
+
+[tool.setuptools.package-data]
+"trpg.bundled.FirstQuest" = ["*"]
+"trpg.bundled.FirstQuest.aa" = ["*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

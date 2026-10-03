@@ -36,8 +36,8 @@ def cmd_check(path: str) -> int:
 
 
 def cmd_list() -> int:
-    from .package import discover
-    cands = discover([Path.cwd(), Path.cwd() / "scenarios"])
+    from .package import find_scenarios
+    cands = find_scenarios()
     if not cands:
         print("シナリオパッケージが見つかりません（起動フォルダか scenarios/ に置いてください）")
         return 1
@@ -104,12 +104,12 @@ def _first_scene(args):
     """起動するシナリオを決めて最初の画面を返す。端末を初期化する前にエラーを表示するため、ここで読み込む。"""
     from .data import DataError
     from .game import load_game
-    from .package import PackageError, discover
+    from .package import PackageError, find_scenarios
     from .scenes.title import SelectScene, TitleScene
 
     path = args.scenario
     if path is None:
-        cands = discover([Path.cwd(), Path.cwd() / "scenarios"])
+        cands = find_scenarios()
         if not cands:
             print("シナリオが見つかりません。起動フォルダか scenarios/ にシナリオの zip を置いてください。", file=sys.stderr)
             return None
