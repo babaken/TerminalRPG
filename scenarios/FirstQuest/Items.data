@@ -393,3 +393,50 @@ power = 10
 status = "poison"
 status_rate = 0.3
 anim = "shake:2"
+
+# ===== 4 章 =====
+[[item]]
+id = "elixir"
+name = "万能薬"
+type = "consumable"
+price = 0
+desc = "HP をすべて回復する。協会から支給された貴重な薬。"
+use = { field = true, battle = true, target = "ally_one", effect = "heal", power = 9999 }
+
+[[item]]
+id = "astra"
+name = "封剣アストラ"
+type = "equipment"
+slot = "weapon"
+category = "sword"
+price = 0
+desc = "目覚めた封剣。三百年前、勇者レオンが蝕王を封じた剣。まばゆい刃が光を放つ。"
+stats = { atk = 45, luk = 5 }
+
+[[skill]]
+id = "seal_light"
+name = "封印の光"
+sp = 20
+target = "enemy_one"
+kind = "physical"
+element = "holy"
+power = 70
+anim = "flash:bright_white,shake:3"
+
+[[skill]]
+id = "dark_flare"
+name = "ダークフレア"
+target = "enemy_all"
+kind = "magic"
+element = "dark"
+power = 16
+anim = "flash:magenta"
+
+[[skill]]
+id = "eclipse"
+name = "蝕"
+target = "enemy_all"
+kind = "magic"
+element = "dark"
+power = 24
+anim = "flash:black,shake:3"

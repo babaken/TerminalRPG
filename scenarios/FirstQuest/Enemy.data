@@ -456,3 +456,75 @@ table = [
   { group = "ice_spirit_2", weight = 2 },
   { group = "wolf_spirit", weight = 2 },
 ]
+
+# ===== 4 章：儀式の間 =====
+[[enemy]]
+id = "garza_2"
+name = "灰のガルザ"
+aa = "aa/garza.txt"
+stats = { hp = 1100, mp = 99, atk = 40, def = 28, mag = 30, agi = 22, luk = 8 }
+exp = 600
+gold = 500
+weak = ["holy"]
+immune_status = ["poison"]
+ai = "pattern"
+[[enemy.actions]]
+skill = "attack"
+weight = 3
+[[enemy.actions]]
+skill = "ash_wave"
+weight = 1
+[[enemy.actions]]
+skill = "smash"
+weight = 2
+when = "self.hp_rate < 0.5"
+
+[[enemy]]
+id = "verm_1"
+name = "蝕王ヴェルム（不完全体）"
+aa = "aa/verm.txt"
+stats = { hp = 1000, mp = 999, atk = 38, def = 28, mag = 32, agi = 18, luk = 10 }
+exp = 0
+gold = 0
+weak = ["holy"]
+immune_status = ["poison"]
+ai = "pattern"
+[[enemy.actions]]
+skill = "attack"
+weight = 2
+[[enemy.actions]]
+skill = "dark_flare"
+weight = 2
+
+[[enemy]]
+id = "verm_2"
+name = "蝕王ヴェルム"
+aa = "aa/verm.txt"
+stats = { hp = 1300, mp = 999, atk = 40, def = 28, mag = 32, agi = 22, luk = 12 }
+exp = 2000
+gold = 0
+weak = ["holy"]
+immune_status = ["poison"]
+ai = "pattern"
+[[enemy.actions]]
+skill = "attack"
+weight = 2
+[[enemy.actions]]
+skill = "dark_flare"
+weight = 2
+[[enemy.actions]]
+skill = "eclipse"
+weight = 1
+when = "self.hp_rate < 0.6"
+
+[[group]]
+id = "garza_2"
+members = ["garza_2"]
+
+[[group]]
+id = "verm_1"
+members = ["verm_1"]
+
+[[group]]
+id = "verm_2"
+members = ["verm_2"]
