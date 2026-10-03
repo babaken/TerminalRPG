@@ -346,8 +346,9 @@ talk = "ch1_mother_talk"   # scenario.sco のラベル
 
 ---
 
-### 10.4 追加シナリオ「FirstQuest+」（保留）
+### 10.4 追加シナリオ「FirstQuest+」
 - 案C「主人公の正体」をベースにした別パッケージ。1・2章は FirstQuest と共通骨格＋伏線追加、3・4章を差し替え。
+- **[v1.2]** FirstQuest 完成後（v1.0.0）に実装すると決定（開発計画 M8、v1.1.0）。
 - 現時点の成果物はシナリオテキスト（`docs/scenario/FirstQuestPlus_story.md`）のみ。データ・スクリプト化は未着手。
 
 ## 11. 決定事項一覧
