@@ -101,8 +101,12 @@ def _load_friends(f: _File, gd: GameData) -> None:
         for st in t.table_list("skills", []):
             skills.append((st.int("lv", min=1), st.str("skill")))
             st.done()
+        sp = t.sub("sp", {})
         job = Job(id=t.id(), name=t.str("name"), growth=_stats(t, "growth"),
-                  equip=t.strlist("equip", []), skills=skills)
+                  equip=t.strlist("equip", []), skills=skills,
+                  sp_base=sp.int("base", 0, min=0), sp_growth=sp.int("growth", 0, min=0),
+                  sp_regen=sp.int("regen", 3, min=0))
+        sp.done()
         t.done()
         _register(gd.jobs, job, t, "職業")
     for t in f.entries("character"):
@@ -224,7 +228,7 @@ def _load_items(f: _File, gd: GameData) -> None:
         _register(gd.items, it, t, "アイテム")
         it._line = t.line  # type: ignore[attr-defined]
     for t in f.entries("skill"):
-        sk = Skill(id=t.id(), name=t.str("name"), mp=t.int("mp", 0, min=0),
+        sk = Skill(id=t.id(), name=t.str("name"), mp=t.int("mp", 0, min=0), sp=t.int("sp", 0, min=0),
                    target=t.str("target", "enemy_one", choices=TARGETS),
                    kind=t.str("kind", "physical", choices=SKILL_KINDS),
                    element=t.str("element", "", choices=ELEMENTS + ("",)),
@@ -424,6 +428,13 @@ def _cross_check(gd: GameData, manifest, rep: Report) -> None:
             rep.error(file, line, f"{where}: {kind}「{ident}」が定義されていません")
 
     skills_all = set(gd.skills) | set(BUILTIN_SKILLS)
+
+    for j in gd.jobs.values():                    # SP を使う技を覚えるのに、最大 SP が 0 の職業
+        if j.sp_base == 0 and j.sp_growth == 0:
+            for lv, s in j.skills:
+                sk = gd.skills.get(s)
+                if sk is not None and sk.sp:
+                    rep.warning(FRIENDS, ln(j), f"職業 {j.id}: スキル {s} は SP {sk.sp} を使いますが、最大 SP が 0 です（sp = {{ base = …, growth = … }}）")
 
     for j in gd.jobs.values():
         for lv, s in j.skills:

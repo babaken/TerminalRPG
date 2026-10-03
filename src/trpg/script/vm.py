@@ -263,6 +263,7 @@ class VM:
         elif name == "heal":
             for m in st.party:
                 m.hp, m.mp = m.max_hp, m.max_mp
+                m.fill_sp(self.gd)
                 m.status.clear()
         elif name == "quest":
             st.quests[pos[1]] = {"give": "active", "done": "done", "fail": "failed"}[pos[0]]

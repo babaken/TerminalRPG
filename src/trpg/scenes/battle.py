@@ -9,6 +9,7 @@ from ..data.models import Skill
 from ..term import Action, Buffer, KeyEvent, Rect, Style, pad, text_width, truncate
 from ..term.buffer import BOX_SINGLE
 from ..ui.aa import draw_aa
+from ..ui.points import cost_text, points_text
 from ..ui.widgets import CURSOR, DIM_TEXT, FRAME, TEXT
 
 if TYPE_CHECKING:
@@ -231,7 +232,8 @@ class BattleScene(Scene):
                     self._choose_target(Command("attack"), "enemy")
                 elif label == "スキル":
                     self.list_kind = "skill"
-                    self.list_items = [(sk.name, f"MP {sk.mp}", self.actor.mp >= sk.mp, sk) for sk in self.actor.skills()]
+                    a = self.actor
+                    self.list_items = [(sk.name, cost_text(sk), a.mp >= sk.mp and a.sp >= sk.sp, sk) for sk in a.skills()]
                     self.list_i = 0
                     self.mode = "list"
                 elif label == "どうぐ":
@@ -397,7 +399,7 @@ class BattleScene(Scene):
             hp_st = Style.of("bright_red") if b.hp * 4 <= b.max_hp else (Style.of("yellow") if b.hp * 2 <= b.max_hp else TEXT)
             buf.put(inner.x, inner.y + 1, f"HP {b.hp:>3}/{b.max_hp:<3}", hp_st, clip=inner)
             st_names = "".join(self.gd.statuses[s].name[:1] for s in b.status if s in self.gd.statuses)
-            mp_text = f"MP {b.mp:>3}/{b.max_mp:<3}" + (f" {st_names}" if st_names else "")
+            mp_text = points_text(b.mp, b.max_mp, b.sp, b.max_sp) + (f" {st_names}" if st_names else "")
             buf.put(inner.x, inner.y + 2 if inner.h > 2 else inner.y + 1, mp_text,
                     Style.of("bright_magenta") if st_names else TEXT, clip=inner)
 

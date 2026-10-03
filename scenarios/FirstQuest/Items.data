@@ -123,7 +123,7 @@ desc = "宿屋「旅鳥亭」に届ける荷物。"
 [[skill]]
 id = "power_slash"
 name = "強撃"
-mp = 2
+sp = 6
 target = "enemy_one"
 kind = "physical"
 power = 8
@@ -276,7 +276,7 @@ stats = { atk = 7 }
 [[skill]]
 id = "gamble"
 name = "大博打"
-mp = 3
+sp = 8
 target = "enemy_one"
 kind = "physical"
 power = 14
@@ -285,7 +285,7 @@ anim = "flash:yellow"
 [[skill]]
 id = "war_cry"
 name = "雄たけび"
-mp = 3
+sp = 5
 target = "self"
 kind = "buff"
 power = 6
@@ -329,7 +329,7 @@ anim = "flash:bright_cyan"
 [[skill]]
 id = "fuukouzan"
 name = "封光斬"
-mp = 6
+sp = 12
 target = "enemy_one"
 kind = "physical"
 element = "holy"
@@ -340,7 +340,7 @@ anim = "flash:bright_yellow,shake:2"
 [[skill]]
 id = "whirlwind"
 name = "旋風斬"
-mp = 6
+sp = 10
 target = "enemy_all"
 kind = "physical"
 power = 12
@@ -368,7 +368,7 @@ anim = "flash:bright_green"
 [[skill]]
 id = "jackpot"
 name = "ジャックポット"
-mp = 6
+sp = 12
 target = "enemy_all"
 kind = "physical"
 power = 16
@@ -377,7 +377,7 @@ anim = "flash:yellow"
 [[skill]]
 id = "fierce_strike"
 name = "猛攻"
-mp = 5
+sp = 10
 target = "enemy_one"
 kind = "physical"
 power = 30
@@ -386,7 +386,7 @@ anim = "shake:3"
 [[skill]]
 id = "beast_call"
 name = "群れの咆哮"
-mp = 6
+sp = 10
 target = "enemy_all"
 kind = "physical"
 power = 10

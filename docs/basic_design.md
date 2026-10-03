@@ -221,6 +221,7 @@ name = "戦士"
 growth = { hp = 9, mp = 0, atk = 3, def = 3, mag = 0, agi = 1, luk = 1 }   # Lv アップ時の平均上昇量
 equip = ["sword", "axe", "light_armor", "heavy_armor", "shield", "accessory"]  # 装備できる category
 skills = [ { lv = 3, skill = "power_slash" } ]
+sp = { base = 10, growth = 3, regen = 3 }   # 技に使う SP【済】：最大 SP = base + growth ×（Lv − 1）、戦闘中は毎ターン regen 回復（既定 3）
 
 [[character]]
 id = "hero"
@@ -233,6 +234,7 @@ equip = { armor = "cloth" }  # weapon / armor / shield / accessory
 face = "aa/face_hero.txt"    # 顔 AA（@face hero で表示）
 recruit_text = "…"           # 仲間選択画面の紹介文
 ```
+- SP【済】：技（物理・強化など）は SP、魔法・回復魔法は MP を使う。スキルに `sp = 6` か `mp = 4` を書く。SP は戦闘のあとも持ち越し、宿屋・`@heal all`（回復の泉・祭壇）・加入・レベルアップで回復する。最大 SP が 0 の職業が SP の技を覚えると --check で警告。SP のない古いセーブは最大 SP から始まる。
 - 職業の `equip` が空なら何でも装備できる。装飾品も category（例 `accessory`）で判定する【変更】。
 - 途中加入のキャラは、その Lv に見合う累計経験値から始まる（14 章の式）。
 - `@party add` の `lv=avg`（平均 Lv に合わせる）は【済】。

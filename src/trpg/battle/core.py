@@ -79,6 +79,19 @@ class Battler:
             self._mp = v
 
     @property
+    def sp(self) -> int:
+        return max(0, self.member.sp) if self.member else 0
+
+    @sp.setter
+    def sp(self, v: int) -> None:
+        if self.member:
+            self.member.sp = max(0, min(self.max_sp, v))
+
+    @property
+    def max_sp(self) -> int:
+        return self.member.max_sp(self.gd) if self.member else 0
+
+    @property
     def max_hp(self) -> int:
         return self.member.stat("hp", self.gd) if self.member else self.enemy.stats.get("hp", 1)
 
@@ -448,11 +461,13 @@ class Battle:
         sk = self.gd.skills.get(c.skill)
         if sk is None:
             return
-        if a.mp < sk.mp:
+        if a.mp < sk.mp or (a.member is not None and a.sp < sk.sp):
             yield ("msg", f"{a.name}は{sk.name}をつかおうとした！")
-            yield ("msg", "しかし MP が足りない！")
+            yield ("msg", f"しかし {'MP' if a.mp < sk.mp else 'SP'} が足りない！")
             return
         a.mp -= sk.mp
+        if a.member is not None:
+            a.sp -= sk.sp
         verb = "をとなえた！" if sk.kind in ("magic", "heal", "buff", "debuff") else "！"
         yield ("msg", f"{a.name}の{sk.name}{verb}" if verb == "！" else f"{a.name}は{sk.name}{verb}")
         if sk.kind == "tame":
@@ -578,6 +593,10 @@ class Battle:
 
     def _end_of_round(self) -> Iterator[Event]:
         cleared = False
+        for b in self.party:                         # 味方は毎ターン SP が少し回復する
+            job = self.gd.jobs.get(b.member.job)
+            if b.alive and job and job.sp_regen:
+                b.sp += job.sp_regen
         for b in self.allies + self.enemies:
             if not b.alive:
                 continue
