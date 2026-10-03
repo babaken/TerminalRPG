@@ -89,6 +89,18 @@ on_complete = "quest_done"           # 報告のあとに実行するラベル
 ```
 受付の人の `talk` で `@guild` を開けば、受注・報告ができます。物語の依頼は `@quest give ID` で直接渡し、`goal = { type = "flag", flag = … }` にすると、フラグを立てた時点で報告できるようになります。
 
+**ランダムの依頼**：`random = true` を付けると、掲示板の枠（manifest の `[rules] random_quests`、既定 3）にランダムに貼られ、受けると別の依頼が補充されます（何度でも受けられる）。エリアごとに `when` とランクを上げておくと、行ける中でいちばん新しいエリアの依頼が必ず 1 つ出ます。
+```toml
+[[quest]]
+id = "qr_mole"
+name = "カブラ村のモグラ退治"
+rank = "E"                            # 街道（F）より新しいエリア
+goal = { type = "defeat", group = "mole", count = 4 }
+reward = { gold = 100, exp = 45 }
+random = true
+when = "flag.ch2_rumor"               # カブラ村に行けるようになったら
+```
+
 ## 仲間を選んで加える
 
 ```

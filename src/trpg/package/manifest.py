@@ -30,6 +30,7 @@ class Manifest:
     gameover: str = "choose"
     save: str = "anywhere"
     party_max: int = PARTY_LIMIT
+    random_quests: int = 3          # 掲示板に貼るランダムの依頼の数
     start_label: str = "start"
     start_party: list[str] = field(default_factory=list)
     start_gold: int = 0
@@ -91,6 +92,7 @@ def parse_manifest(text: str, report: Report) -> Manifest:
     m.save = rules.str("save", "anywhere", choices=SAVE_MODES)
     m.party_max = rules.int("party_max", PARTY_LIMIT, min=1, max=PARTY_LIMIT)
     m.start_label = rules.str("start_label", "start")
+    m.random_quests = rules.int("random_quests", 3, min=0, max=10)
     rules.done()
 
     start = root.sub("start", {})

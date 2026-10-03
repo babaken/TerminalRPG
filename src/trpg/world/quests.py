@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from ..i18n import tr
 
+import random
 from dataclasses import dataclass, field
 from typing import Callable, Optional
 
@@ -16,16 +17,56 @@ def status(st: GameState, qid: str) -> str:
     return st.quests.get(qid, "none")
 
 
-def available(st: GameState, gd: GameData, cond: CondFn, giver: str = "guild") -> list[Quest]:
-    """掲示板に出ている（受注できる）依頼。"""
-    out = []
-    for q in gd.quests.values():
-        if q.giver != giver or not cond(q.when):
-            continue
-        s = status(st, q.id)
-        if s == "none" or (s == "done" and q.repeatable):
-            out.append(q)
-    return out
+RANKS = "FEDCBAS"          # ランクの低い順（ランダムの依頼の「いちばん新しいエリア」を決めるのに使う）
+
+
+def _open(st: GameState, q: Quest, cond: CondFn) -> bool:
+    """いま受けられる状態か（条件を満たし、受けていない。達成済みは何度でも受けられるものだけ）。"""
+    if not cond(q.when):
+        return False
+    s = status(st, q.id)
+    return s == "none" or (s == "done" and (q.repeatable or q.random))
+
+
+def _rank(q: Quest) -> int:
+    return RANKS.find(q.rank) if q.rank in RANKS else -1
+
+
+def refresh_board(st: GameState, gd: GameData, cond: CondFn, slots: int, giver: str = "guild",
+                  rng: Optional[random.Random] = None) -> None:
+    """ランダムの依頼を掲示板の枠（slots）まで補充する。
+
+    受けた・条件を満たさなくなった依頼は外す。補充するとき、受けられる中でいちばんランクの高い
+    （＝いちばん新しいエリアの）依頼が 1 つもなければ、まずそれを 1 つ貼る。
+    """
+    rng = rng or random
+    pool = [q for q in gd.quests.values() if q.random and q.giver == giver]
+    st.board = [qid for qid in st.board
+                if qid in gd.quests and gd.quests[qid].giver == giver and _open(st, gd.quests[qid], cond)] + \
+               [qid for qid in st.board if qid in gd.quests and gd.quests[qid].giver != giver]
+    mine = [qid for qid in st.board if gd.quests[qid].giver == giver]
+    cands = [q for q in pool if q.id not in mine and _open(st, q, cond)]
+    if not cands or len(mine) >= slots:
+        return
+    top = max(_rank(q) for q in cands + [gd.quests[qid] for qid in mine])
+    if not any(_rank(gd.quests[qid]) == top for qid in mine):
+        newest = [q for q in cands if _rank(q) == top]
+        pick = rng.choice(newest)
+        st.board.append(pick.id)
+        mine.append(pick.id)
+        cands.remove(pick)
+    while len(mine) < slots and cands:
+        pick = rng.choice(cands)
+        st.board.append(pick.id)
+        mine.append(pick.id)
+        cands.remove(pick)
+
+
+def available(st: GameState, gd: GameData, cond: CondFn, giver: str = "guild", slots: int = 3) -> list[Quest]:
+    """掲示板に出ている（受注できる）依頼。いつもの依頼のあとに、ランダムの依頼（掲示板の枠のぶん）。"""
+    out = [q for q in gd.quests.values() if q.giver == giver and not q.random and _open(st, q, cond)]
+    refresh_board(st, gd, cond, slots, giver)
+    return out + [gd.quests[qid] for qid in st.board if gd.quests[qid].giver == giver]
 
 
 def active(st: GameState, gd: GameData) -> list[Quest]:

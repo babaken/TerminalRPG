@@ -88,6 +88,7 @@ class GameState:
     vars: dict[str, int] = field(default_factory=dict)
     quests: dict[str, str] = field(default_factory=dict)      # none / active / done / failed
     quest_progress: dict[str, int] = field(default_factory=dict)  # 討伐数など（受注時に 0）
+    board: list[str] = field(default_factory=list)              # 掲示板に貼ってあるランダムの依頼
     chapter: int = 0
     chapter_title: str = ""
     map_id: str = ""

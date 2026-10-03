@@ -66,6 +66,7 @@ def state_to_dict(st: GameState) -> dict:
         "vars": dict(st.vars),
         "quests": dict(st.quests),
         "quest_progress": dict(st.quest_progress),
+        "board": list(st.board),
         "chapter": st.chapter,
         "chapter_title": st.chapter_title,
         "map_id": st.map_id, "x": st.x, "y": st.y, "dir": st.dir,
@@ -91,6 +92,7 @@ def state_from_dict(d: dict) -> GameState:
     st.vars = {k: int(v) for k, v in d.get("vars", {}).items()}
     st.quests = dict(d.get("quests", {}))
     st.quest_progress = {k: int(v) for k, v in d.get("quest_progress", {}).items()}
+    st.board = [str(q) for q in d.get("board", [])]
     st.chapter = int(d.get("chapter", 0))
     st.chapter_title = d.get("chapter_title", "")
     st.map_id = d.get("map_id", "")

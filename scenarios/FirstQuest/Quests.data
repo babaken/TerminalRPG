@@ -72,3 +72,161 @@ desc = "B11F より先へ進み、魔物たちの『目的』を突き止める�
 goal = { type = "flag", flag = "ch4_done" }
 reward = { gold = 1000, exp = 300 }
 when = "flag.ch3_started"
+
+# ===== ランダムの依頼（random = true）=====
+# 掲示板に manifest の random_quests 個（3 個）までランダムに貼られる。受けると別の依頼が補充され、何度でも受けられる。
+# 行けるエリアが増えると、そのエリアの討伐依頼が候補に加わる（ランクの高い＝新しいエリアの依頼が必ず 1 つ出る）
+#   F：街道  E：カブラ村  D：黒岩の洞穴（上の階）  C：洞穴の深い階（オーガのあと）  B：洞穴の最深部・風見の山道
+
+[[quest]]
+id = "qr_slime"
+name = "スライムの群れ"
+rank = "F"
+desc = "街道のスライムがまた増えてきました。6 体退治してください。"
+goal = { type = "defeat", group = "slime", count = 6 }
+reward = { gold = 45, exp = 12 }
+random = true
+when = "flag.guild_registered"
+on_complete = "ch1_quest_done"
+
+[[quest]]
+id = "qr_rabbit"
+name = "ツノウサギの駆除"
+rank = "F"
+desc = "街道でツノウサギに突かれる旅人が出ています。4 体退治してください。"
+goal = { type = "defeat", group = "rabbit", count = 4 }
+reward = { gold = 40, exp = 15 }
+random = true
+when = "flag.guild_registered"
+on_complete = "ch1_quest_done"
+
+[[quest]]
+id = "qr_mushroom"
+name = "ドクキノコの始末"
+rank = "F"
+desc = "街道わきのドクキノコが胞子をまいています。3 体退治してください。"
+goal = { type = "defeat", group = "mushroom", count = 3 }
+reward = { gold = 35, exp = 12 }
+random = true
+when = "flag.guild_registered"
+on_complete = "ch1_quest_done"
+
+[[quest]]
+id = "qr_mole"
+name = "カブラ村のモグラ退治"
+rank = "E"
+desc = "カブラ村の畑に、またハタケモグラが出ています。4 体退治してください。"
+goal = { type = "defeat", group = "mole", count = 4 }
+reward = { gold = 100, exp = 45 }
+random = true
+when = "flag.ch2_rumor"
+
+[[quest]]
+id = "qr_mole_big"
+name = "畑の大掃除"
+rank = "E"
+desc = "カブラ村から追加の依頼です。畑のハタケモグラを 8 体退治してください。"
+goal = { type = "defeat", group = "mole", count = 8 }
+reward = { gold = 180, exp = 80 }
+random = true
+when = "flag.ch2_rumor"
+
+[[quest]]
+id = "qr_goblin"
+name = "洞穴のゴブリン討伐"
+rank = "D"
+desc = "黒岩の洞穴の上の階で、ゴブリンが群れています。6 体退治してください。"
+goal = { type = "defeat", group = "goblin", count = 6 }
+reward = { gold = 150, exp = 80 }
+random = true
+when = "flag.ch2_map_reported"
+
+[[quest]]
+id = "qr_bat"
+name = "コウモリの巣"
+rank = "D"
+desc = "洞穴のコウモリが街道まで出てくるようになりました。6 体退治してください。"
+goal = { type = "defeat", group = "bat", count = 6 }
+reward = { gold = 70, exp = 35 }
+random = true
+when = "flag.ch2_map_reported"
+
+[[quest]]
+id = "qr_lizard"
+name = "イワトカゲの甲羅集め"
+rank = "D"
+desc = "武具屋がイワトカゲの甲羅を欲しがっています。4 体退治してください。"
+goal = { type = "defeat", group = "rock_lizard", count = 4 }
+reward = { gold = 140, exp = 90 }
+random = true
+when = "flag.ch2_map_reported"
+
+[[quest]]
+id = "qr_captain"
+name = "ゴブリン隊長の首"
+rank = "C"
+desc = "洞穴の奥でゴブリンを率いる隊長を 2 体倒してください。"
+goal = { type = "defeat", group = "goblin_captain", count = 2 }
+reward = { gold = 220, exp = 120 }
+random = true
+when = "flag.ch2_ogre_done"
+
+[[quest]]
+id = "qr_lizard_big"
+name = "イワトカゲの大群"
+rank = "C"
+desc = "洞穴の深い階にイワトカゲが増えています。8 体退治してください。"
+goal = { type = "defeat", group = "rock_lizard", count = 8 }
+reward = { gold = 260, exp = 160 }
+random = true
+when = "flag.ch2_ogre_done"
+
+[[quest]]
+id = "qr_ash"
+name = "灰の兵士の掃討"
+rank = "B"
+desc = "洞穴の最深部をうろつく灰の兵士を 3 体倒してください。"
+goal = { type = "defeat", group = "ash_soldier", count = 3 }
+reward = { gold = 360, exp = 300 }
+random = true
+when = "flag.ch3_started"
+
+[[quest]]
+id = "qr_hound"
+name = "灰の魔犬狩り"
+rank = "B"
+desc = "洞穴の最深部の魔犬が、上の階まで上がってきています。4 体倒してください。"
+goal = { type = "defeat", group = "ash_hound", count = 4 }
+reward = { gold = 320, exp = 260 }
+random = true
+when = "flag.ch3_started"
+
+[[quest]]
+id = "qr_knight"
+name = "シャドウナイト討伐"
+rank = "B"
+desc = "最深部に現れる黒い騎士を 2 体倒してください。腕の立つ者だけに頼む依頼です。"
+goal = { type = "defeat", group = "shadow_knight", count = 2 }
+reward = { gold = 450, exp = 380 }
+random = true
+when = "flag.ch3_started"
+
+[[quest]]
+id = "qr_snowwolf"
+name = "山道の雪狼"
+rank = "B"
+desc = "風見の山道で雪狼が旅人を襲っています。4 体退治してください。"
+goal = { type = "defeat", group = "snow_wolf", count = 4 }
+reward = { gold = 320, exp = 260 }
+random = true
+when = "flag.ch3_lost"
+
+[[quest]]
+id = "qr_ice"
+name = "氷の精を鎮める"
+rank = "B"
+desc = "山道に氷の精が増え、神殿への道が凍りついています。3 体鎮めてください。"
+goal = { type = "defeat", group = "ice_spirit", count = 3 }
+reward = { gold = 300, exp = 240 }
+random = true
+when = "flag.ch3_lost"
