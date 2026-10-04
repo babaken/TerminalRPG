@@ -220,3 +220,16 @@ def test_lint_missing_label_from_data(sample_dir):
         lint_script(sc, gd, rep, pkg)
     [err] = rep.errors
     assert err.file == "Map.data" and "*ch1_chief_talk" in err.message
+
+
+def test_speaker_name_is_formatted():
+    """話し手の名前の {hero} なども置き換える（「影の{hero}「……」」の名前欄）。"""
+    st = GameState(party=[])
+    from trpg.world.state import Member
+    st.party.append(Member(id="hero", name="アキ", job="hero", lv=1, base={}))
+    sc, rep = parse("*start\n影の{hero}「出直してこい」\n@end\n")
+    assert rep.ok
+    vm = VM(sc, st, None, FakeHost())
+    vm.start("start")
+    req = vm.step()
+    assert req.lines == [("影のアキ", "影のアキ「出直してこい」")]
