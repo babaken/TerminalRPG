@@ -2,6 +2,8 @@
 from __future__ import annotations
 
 import tomllib
+
+import pytest
 from pathlib import Path
 
 from trpg import package as pkg
@@ -22,14 +24,22 @@ def test_pyproject_lists_all_engine_packages():
     assert actual - listed == set()
 
 
-def test_pyproject_bundles_firstquest():
+SCENARIOS = sorted(p.name for p in (ROOT / "scenarios").iterdir() if (p / "manifest.toml").is_file())
+
+
+def test_scenarios_dir_has_both():
+    assert SCENARIOS == ["FirstQuest", "FirstQuestPlus"]
+
+
+@pytest.mark.parametrize("name", SCENARIOS)
+def test_pyproject_bundles_scenario(name):
+    """scenarios/ のシナリオは全部 wheel に入る（サブフォルダも packages に）。"""
     cfg = _pyproject()["tool"]["setuptools"]
     dirs = cfg["package-dir"]
-    assert dirs["trpg.bundled.FirstQuest"] == "scenarios/FirstQuest"
-    assert (ROOT / dirs["trpg.bundled.FirstQuest"] / "manifest.toml").is_file()
-    # FirstQuest のサブフォルダもすべて packages に入っている
-    sub = {"trpg.bundled.FirstQuest." + p.name for p in (ROOT / "scenarios/FirstQuest").iterdir() if p.is_dir()}
-    assert sub <= set(cfg["packages"])
+    assert dirs[f"trpg.bundled.{name}"] == f"scenarios/{name}"
+    assert cfg["package-data"][f"trpg.bundled.{name}"] == ["*"]
+    sub = {f"trpg.bundled.{name}." + p.name for p in (ROOT / "scenarios" / name).iterdir() if p.is_dir()}
+    assert sub | {f"trpg.bundled.{name}"} <= set(cfg["packages"])
 
 
 def test_find_scenarios_falls_back_to_bundled(tmp_path, monkeypatch):
@@ -47,6 +57,6 @@ def test_find_scenarios_prefers_local_copy(tmp_path, monkeypatch):
     assert found[0].path.parent == tmp_path / "scenarios"
 
 
-def test_spec_bundles_firstquest():
+def test_spec_bundles_scenarios():
     spec = (ROOT / "packaging/trpg.spec").read_text(encoding="utf-8")
-    assert "scenarios/FirstQuest" in spec
+    assert all(f'"{name}"' in spec for name in SCENARIOS)

@@ -8,7 +8,7 @@ ROOT = os.path.abspath(os.path.join(SPECPATH, ".."))
 a = Analysis(
     [os.path.join(ROOT, "packaging", "trpg_exe.py")],
     pathex=[os.path.join(ROOT, "src")],
-    datas=[(os.path.join(ROOT, "scenarios", "FirstQuest"), "scenarios/FirstQuest")],
+    datas=[(os.path.join(ROOT, "scenarios", name), f"scenarios/{name}") for name in ("FirstQuest", "FirstQuestPlus")],
     hiddenimports=["trpg.i18n.en", "trpg.term.input_win", "trpg.term.input_posix"],
     excludes=["tkinter", "PIL", "pytest"],
 )
