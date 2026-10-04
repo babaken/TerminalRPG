@@ -101,7 +101,7 @@
 # ---- 老婆テラ（村の東の小屋。15年前、森で赤子の{hero}を見つけた）
 *p1_tera_talk
 @if flag.p3_tera_done
-  テラ「森の祠、村の丘、ベルンの協会。……一人で行くんだよ」
+  テラ「森の祠、村の丘、ベルンの協会の隅の机。……一人で行くんだよ」
   @end
 @endif
 @if flag.p_family_accept
@@ -143,8 +143,8 @@
 *ch1_forest_enter
 カイ「うわー、やっぱ森は気持ちいいな！」
 カイ「よし、どっちが先に祠を見つけるか競争だ！」
-@npc kai move 0 -6
-@npc kai hide
+@npc kai_forest move 0 -6
+@npc kai_forest hide
 ……カイの足音が遠ざかっていく。
 
 @effect tint night
@@ -189,8 +189,8 @@
 @end
 
 *ch1_reunion
-@npc kai show
-@npc kai move 4 -4
+@npc kai_forest show
+@npc kai_forest move 4 -4
 @face kai
 カイ「{hero}！！　よかった、どこ行ってたんだよ！」
 カイ「途中で振り返ったらいなくてさ…マジで焦ったんだぞ！」
@@ -214,6 +214,7 @@
 # ---- 家族団らん ----
 *ch1_family
 @effect fade_out 600
+@npc kai_forest hide
 @effect tint night
 @map house_hero 5 3 dir=up
 @effect fade_in 600

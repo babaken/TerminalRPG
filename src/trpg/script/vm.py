@@ -132,7 +132,8 @@ class VM:
             self.pc += 1
             op = ins.op
             if op == "msg":
-                return MessageReq([(sp, format_text(t, self.state, self.gd)) for sp, t in ins.args["lines"]])
+                return MessageReq([(format_text(sp, self.state, self.gd), format_text(t, self.state, self.gd))
+                                   for sp, t in ins.args["lines"]])
             if op == "choice":
                 conds = ins.args.get("conds", {})
                 self._shown = [i for i in range(len(ins.args["options"]))

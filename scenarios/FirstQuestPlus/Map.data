@@ -232,6 +232,15 @@ y = 16
 talk = "ch1_kai_gate_talk"
 when = "flag.ch1_farewell and !flag.ch1_left_village"
 
+[[map.npc]]           # 3 章：里帰りのあとのカイ（カイの家の前。村人が隠れていても、カイだけは出てくる）
+id = "kai_p3"
+glyph = "友"
+color = "cyan"
+x = 8
+y = 13
+talk = "p3_kai_talk"
+when = "flag.p_family_accept and !flag.p4_done"   # 古いセーブ（カイの出迎えより前の版）でも出る
+
 [[map.event]]         # 3 章：里帰り（村の人は家に隠れている）
 x = 15
 y = 16
@@ -441,8 +450,8 @@ label = "ch1_find_sword"
 once = true
 when = "flag.lost_friend and !flag.found_sword"   # 3 章の「記憶の場所」と同じマス
 
-[[map.npc]]
-id = "kai"
+[[map.npc]]           # 森のカイ（1 章だけ。村のカイとは別の ID：古いセーブに残った「表示」の命令を引き継がないように）
+id = "kai_forest"
 glyph = "友"
 color = "cyan"
 x = 16

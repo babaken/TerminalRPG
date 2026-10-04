@@ -197,7 +197,7 @@ def test_chapter1_opening_playthrough(game):
     talk = d.settle()
     assert "lost_friend" in f.st.flags
     assert f.st.effects.get("tint") == "night"
-    assert not f.npc_visible(f._find_npc("kai"))
+    assert not f.npc_visible(f._find_npc("kai_forest"))
 
     # 祠を調べる → 剣 → 再会 → 家族団らん
     d.walk_to(20, 2)
@@ -300,8 +300,8 @@ def test_scripted_move_avoids_trees(game):
     f = d.field
     f.change_map("forest_1", 20, 2, "up")
     f.pending_auto = False
-    f.st.npc("forest_1", "kai").update(hidden=True, x=16, y=7)   # 森に入ったあと走り去った位置
-    kai = f._find_npc("kai")
+    f.st.npc("forest_1", "kai_forest").update(hidden=True, x=16, y=7)   # 森に入ったあと走り去った位置
+    kai = f._find_npc("kai_forest")
     f.start_script("ch1_reunion")
     seen = []
     for _ in range(200):
