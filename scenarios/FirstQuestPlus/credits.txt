@@ -11,8 +11,8 @@ FirstQuest+
 村長 ゴードン
 薬師 テラ
 
-ガロ　　ミア　　リナ
-ジャック　　ザラ　　ノア
+{name.garo}　　{name.mia}　　{name.rina}
+{name.jack}　　{name.zara}　　{name.noa}
 
 受付 セラ
 協会長 ドルガン

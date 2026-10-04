@@ -580,10 +580,13 @@ class RecruitScene(Overlay):
                 self.cands.remove(cid)
                 self.left -= 1
                 self._refresh()
-                if self.left <= 0 or not self.cands:
-                    self.say(tr('{0}が仲間になった！', c.name), then=self.close)
-                else:
-                    self.say([tr('{0}が仲間になった！', c.name), tr('あと {0} 人選んでください。', self.left)])
+
+                def joined() -> None:                    # 名前を付けたあと（name_input の仲間）
+                    if self.left <= 0 or not self.cands:
+                        self.say(tr('{0}が仲間になった！', m.name), then=self.close)
+                    else:
+                        self.say([tr('{0}が仲間になった！', m.name), tr('あと {0} 人選んでください。', self.left)])
+                self.field.ask_member_name(m, joined)
             self.ask(tr('{0}を仲間にしますか？', c.name), [tr('はい'), tr('いいえ')], yes, cancel_index=1)
 
     def draw_ui(self, buf: Buffer) -> None:

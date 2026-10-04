@@ -28,18 +28,18 @@
 *ch3_b12_wall
 壁一面に、見たことのない文字が刻まれている。
 @if party.has(mia)
-  ミア「魔族の文字……少しだけ読めるわ。『……封……剣……贄……』」
+  {name.mia}「魔族の文字……少しだけ読めるわ。『……封……剣……贄……』」
 @elif party.has(noa)
-  ノア「ピピが怖がってる……この字、『……封……剣……贄……』って書いてあるみたい」
+  {name.noa}「ピピが怖がってる……この字、『……封……剣……贄……』って書いてあるみたい」
 @else
   誰にも読めない。だが、ひどく嫌な感じがする。
 @endif
 @if party.has(garo)
-  ガロ「贄……生贄ってことか。冒険者たちは、そのために……」
+  {name.garo}「贄……生贄ってことか。冒険者たちは、そのために……」
 @elif party.has(rina)
-  リナ「贄……まさか、さらわれた人たちは……」
+  {name.rina}「贄……まさか、さらわれた人たちは……」
 @elif party.has(zara)
-  ザラ「贄、ね。……胸くその悪い話だ」
+  {name.zara}「贄、ね。……胸くその悪い話だ」
 @endif
 @end
 
@@ -50,7 +50,7 @@
 冒険者ロッド「奴らは……人を集めて……奥に……運んでいった……」
 冒険者ロッド「俺は途中で逃げ出して……ここで捕まって……」
 @if party.has(rina)
-  リナ「傷を癒やします。……もう大丈夫ですよ」
+  {name.rina}「傷を癒やします。……もう大丈夫ですよ」
 @endif
 {hero}は{item.return_scroll}を広げ、ロッドを地上へ送り出した。
 @effect flash white count=2
@@ -112,22 +112,22 @@
 協会長ドルガン「洞穴の入口で倒れていたお前たちを、外で待機させていた部隊が見つけた」
 協会長ドルガン「{away.injured}は……命は取り留めた。だが、しばらくは動けん」
 @if party.has(garo)
-  ガロ「……俺がもっと前に出ていれば」
+  {name.garo}「……俺がもっと前に出ていれば」
 @endif
 @if party.has(mia)
-  ミア「魔法が……ひとつも通じなかった」
+  {name.mia}「魔法が……ひとつも通じなかった」
 @endif
 @if party.has(rina)
-  リナ「祈りが……届かなかった……」
+  {name.rina}「祈りが……届かなかった……」
 @endif
 @if party.has(jack)
-  ジャック「ツキがなかった、じゃ済まないよな」
+  {name.jack}「ツキがなかった、じゃ済まないよな」
 @endif
 @if party.has(zara)
-  ザラ「……悔しい」
+  {name.zara}「……悔しい」
 @endif
 @if party.has(noa)
-  ノア「ピピがずっと震えてる……」
+  {name.noa}「ピピがずっと震えてる……」
 @endif
 @choice
   - ……もう一度、行く
@@ -303,41 +303,41 @@
 @effect snow off
 神殿の扉が開き、見覚えのある顔が入ってくる。
 @if away.injured == garo
-  ガロ「……待たせたな」
-  ガロ「寝てる間、ずっと考えてた。次は、絶対に負けない」
+  {name.garo}「……待たせたな」
+  {name.garo}「寝てる間、ずっと考えてた。次は、絶対に負けない」
 @elif away.injured == mia
-  ミア「……待たせちゃったね」
-  ミア「寝てる間、ずっと考えてた。次は、絶対に負けない」
+  {name.mia}「……待たせちゃったね」
+  {name.mia}「寝てる間、ずっと考えてた。次は、絶対に負けない」
 @elif away.injured == rina
-  リナ「……お待たせしました」
-  リナ「眠っている間、ずっと考えていました。次は、絶対に負けません」
+  {name.rina}「……お待たせしました」
+  {name.rina}「眠っている間、ずっと考えていました。次は、絶対に負けません」
 @endif
 @party return injured
 {hero}たちは、ふたたび全員そろった！
 仲間たちも、神殿の別室での修行で新しい技を身につけた。
 @if party.has(garo)
   @skill add garo whirlwind
-  ガロは「旋風斬」を覚えた！
+  {name.garo}は「旋風斬」を覚えた！
 @endif
 @if party.has(mia)
   @skill add mia flame_storm
-  ミアは「フレイムストーム」を覚えた！
+  {name.mia}は「フレイムストーム」を覚えた！
 @endif
 @if party.has(rina)
   @skill add rina heal_all
-  リナは「ハイヒール」を覚えた！
+  {name.rina}は「ハイヒール」を覚えた！
 @endif
 @if party.has(jack)
   @skill add jack jackpot
-  ジャックは「ジャックポット」を覚えた！
+  {name.jack}は「ジャックポット」を覚えた！
 @endif
 @if party.has(zara)
   @skill add zara fierce_strike
-  ザラは「猛攻」を覚えた！
+  {name.zara}は「猛攻」を覚えた！
 @endif
 @if party.has(noa)
   @skill add noa beast_call
-  ノアは「群れの咆哮」を覚えた！
+  {name.noa}は「群れの咆哮」を覚えた！
 @endif
 @goto *ch3_legend
 

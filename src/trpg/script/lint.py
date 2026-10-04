@@ -62,6 +62,18 @@ def lint_script(script: Script, gd: GameData, rep: Report, pkg: Optional["Packag
         if ident not in store:
             rep.error(ins.file, ins.line, f"{kind}「{ident}」が定義されていません")
 
+    def placeholder_errors(text: str) -> list[str]:
+        """本文の {name.ID} {item.ID} が定義されているか。"""
+        from ..world.state import _PLACEHOLDER
+        errs = []
+        for m in _PLACEHOLDER.finditer(text):
+            parts = m.group(1).split(".")
+            if len(parts) == 2 and parts[0] == "name" and parts[1] not in gd.characters:
+                errs.append(f"{{name.{parts[1]}}}：キャラクター「{parts[1]}」が定義されていません")
+            elif len(parts) == 2 and parts[0] == "item" and parts[1] not in gd.items:
+                errs.append(f"{{item.{parts[1]}}}：アイテム「{parts[1]}」が定義されていません")
+        return errs
+
     for ins in script.instrs:
         a = ins.args
         if ins.op in ("goto", "call"):
@@ -72,11 +84,11 @@ def lint_script(script: Script, gd: GameData, rep: Report, pkg: Optional["Packag
             for text, label, line in a["options"]:
                 if label:
                     label_ref(label, ins.file, line)
-                for err in markup.check(text):
+                for err in markup.check(text) + placeholder_errors(text):
                     rep.error(ins.file, line, err)
         elif ins.op == "msg":
             for i, (_, text) in enumerate(a["lines"]):
-                for err in markup.check(text):
+                for err in markup.check(text) + placeholder_errors(text):
                     rep.error(ins.file, ins.line + i, err)
         elif ins.op == "jif":
             collect_flags(a["cond"], ins.file, ins.line)

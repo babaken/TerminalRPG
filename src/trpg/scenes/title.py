@@ -172,9 +172,13 @@ def start_field(app, game: Game, state: GameState, new_game: bool = False) -> No
 class NameInputScene(Scene):
     accepts_text = True
 
-    def __init__(self, default: str, on_done: Callable[[str], None]):
+    def __init__(self, default: str, on_done: Callable[[str], None], prompt: str = "",
+                 on_cancel: Optional[Callable[[], None]] = None):
         self.name = default
+        self.default = default
         self.on_done = on_done
+        self.prompt = prompt                   # 空なら「主人公の名前を入力してください」
+        self.on_cancel = on_cancel             # None なら Esc で前の画面へ戻る（主人公）
         self.warn = ""
 
     def on_key(self, ev: KeyEvent, actions: frozenset[Action]) -> None:
@@ -186,7 +190,10 @@ class NameInputScene(Scene):
                 return
             self.on_done(name)
         elif ev.key is Key.ESC:
-            self.app.pop()
+            if self.on_cancel is not None:
+                self.on_cancel()
+            else:
+                self.app.pop()
         elif ev.key is Key.BACKSPACE:
             self.name = self.name[:-1]
         elif ev.key is Key.CHAR:
@@ -202,13 +209,14 @@ class NameInputScene(Scene):
         w, h = 64, 11
         rect = Rect((buf.width - w) // 2, (buf.height - h) // 2, w, h)
         inner = buf.box(rect, FRAME, title=tr('なまえ'), chars=BOX_SINGLE)
-        buf.put(inner.x + 2, inner.y + 1, tr('主人公の名前を入力してください'), TEXT)
+        buf.put(inner.x + 2, inner.y + 1, self.prompt or tr('主人公の名前を入力してください'), TEXT)
         field = Style.of("bright_white", bold=True)
         end_x = buf.put(inner.x + 4, inner.y + 3, tr('［ ') + self.name, field)
         buf.put(inner.x + 4 + 2 + NAME_MAX_WIDTH + 2, inner.y + 3, tr('］'), field)
         # 端末カーソルを入力位置に出す → 日本語入力の変換中の文字がここに表示される
         buf.cursor = (end_x, inner.y + 3)
-        buf.put(inner.x + 2, inner.y + 5, tr('Enter: 決定  BackSpace: 削除  Esc: 戻る'), DIM_TEXT)
+        buf.put(inner.x + 2, inner.y + 5, tr('Enter: 決定  BackSpace: 削除  Esc: 戻る') if self.on_cancel is None
+                else tr('Enter: 決定  BackSpace: 削除  Esc: 元の名前（{0}）のまま', self.default), DIM_TEXT)
         buf.put(inner.x + 2, inner.y + 6, tr('日本語は Enter で変換を確定してから、もう一度 Enter'), Style.of("cyan"))
         buf.put(inner.x + 2, inner.y + 7, tr('決定したら［半角/全角］で日本語入力をオフにしてください'), Style.of("cyan"))
         if self.warn:

@@ -43,6 +43,12 @@ class ChoiceReq:
 
 
 @dataclass
+class NameReq:
+    """仲間が初めて加わった：名前を入力してもらう（Friends.data の name_input）。"""
+    cid: str
+
+
+@dataclass
 class WaitReq:
     seconds: float
 
@@ -229,6 +235,8 @@ class VM:
                     m = Member.from_data(self.gd, cid)
                     raise_to_level(m, self.gd, target)
                     st.party.append(m)
+                    if self.gd.characters[cid].name_input and cid not in st.named:
+                        return NameReq(cid)
             elif pos[0] == "remove":
                 st.party = [m for m in st.party if m.id != cid]
             elif pos[0] == "leave":

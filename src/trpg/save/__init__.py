@@ -75,6 +75,8 @@ def state_to_dict(st: GameState) -> dict:
         "effects": dict(st.effects),
         "playtime": st.playtime,
         "pet": st.pet,
+        "pet_name": st.pet_name,
+        "named": sorted(st.named),
         "tiles": {k: dict(v) for k, v in st.tiles.items()},
         "traps": {k: [list(t) for t in v] for k, v in st.traps.items()},
     }
@@ -103,6 +105,8 @@ def state_from_dict(d: dict) -> GameState:
     st.effects = dict(d.get("effects", {}))
     st.playtime = float(d.get("playtime", 0.0))
     st.pet = d.get("pet", "")
+    st.pet_name = d.get("pet_name", "")
+    st.named = set(d.get("named", []))
     st.tiles = {k: {p: str(c) for p, c in v.items()} for k, v in d.get("tiles", {}).items()}
     st.traps = {k: [[int(t[0]), int(t[1]), str(t[2]), bool(t[3])] for t in v] for k, v in d.get("traps", {}).items()}
     return st

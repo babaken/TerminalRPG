@@ -152,7 +152,9 @@ def run(game, text, st):
     assert rep.ok, rep.format()
     vm = VM(sc, st, game.data, None)
     vm.start("t")
-    assert vm.step() is None
+    from trpg.script.vm import NameReq
+    while (req := vm.step()) is not None:            # 名前を付ける仲間（name_input）はここでは元の名前のまま
+        assert isinstance(req, NameReq)
 
 
 def test_party_add_lv_avg_and_number(game):
