@@ -12,7 +12,7 @@ from ..effects import Effect, EffectManager, Fade, Flash
 from ..game import Game
 from ..script.expr import ExprError, evaluate, parse_expr
 from ..script.parser import Instr
-from ..script.vm import VM, ChoiceReq, KeyWaitReq, MessageReq, ScriptError, WaitReq
+from ..script.vm import VM, ChoiceReq, KeyWaitReq, MessageReq, NameReq, ScriptError, WaitReq
 from ..term import Action, Buffer, Key, KeyEvent, Rect, Style, pad, truncate, wrap, text_width
 from ..term.buffer import BOX_SINGLE
 from ..ui import markup
@@ -21,7 +21,7 @@ from ..ui.points import points_text
 from ..ui.widgets import FRAME, ChoiceWindow, MessageWindow
 from ..world import quests as Q
 from ..world import traps as T
-from ..world.state import GameState, format_text
+from ..world.state import GameState, format_text, pet_name
 
 DIR_VEC = {"up": (0, -1), "down": (0, 1), "left": (-1, 0), "right": (1, 0)}
 ACTION_DIR = {Action.UP: "up", Action.DOWN: "down", Action.LEFT: "left", Action.RIGHT: "right"}
@@ -113,6 +113,38 @@ class FieldScene(Scene):
             return
         self._advance()
 
+    # ------------------------------------------------------------ 名前を付ける（仲間の加入・ペット）
+    def ask_member_name(self, m, then: Callable[[], None]) -> None:
+        """Friends.data で name_input の仲間が初めて加わったとき、名前を入力してもらう。"""
+        ch = self.gd.characters.get(m.id)
+        if ch is None or not ch.name_input or m.id in self.st.named:
+            then()
+            return
+        self.st.named.add(m.id)
+        from .title import NameInputScene
+
+        def done(name: str) -> None:
+            m.name = name
+            self.app.pop()
+            then()
+        self.app.push(NameInputScene(m.name, done, prompt=tr('{0}の名前を入力してください', ch.name),
+                                     on_cancel=lambda: done(m.name)))
+
+    def ask_pet_name(self, then: Callable[[], None]) -> None:
+        """手なずけた魔物に名前を付ける。"""
+        e = self.gd.enemies.get(self.st.pet)
+        if e is None:
+            then()
+            return
+        from .title import NameInputScene
+
+        def done(name: str) -> None:
+            self.st.pet_name = "" if name == e.name else name
+            self.app.pop()
+            then()
+        self.app.push(NameInputScene(e.name, done, prompt=tr('{0}の名前を入力してください', e.name),
+                                     on_cancel=lambda: done(e.name)))
+
     def _advance(self) -> None:
         try:
             req = self.vm.step()
@@ -136,6 +168,12 @@ class FieldScene(Scene):
                 self.msg.shown = 10 ** 6   # 質問文は全部表示しておく
         elif isinstance(req, WaitReq):
             self.wait_left = req.seconds
+        elif isinstance(req, NameReq):
+            m = self.st.member(req.cid)
+            if m is None:
+                self._advance()
+            else:
+                self.ask_member_name(m, self._advance)
 
     def _show_gameover(self, mode: str) -> None:
         from .gameover import GameOverScene
@@ -245,6 +283,12 @@ class FieldScene(Scene):
 
     def _after_battle(self, b) -> None:
         """戦闘画面が閉じたあと。負けたら負けイベントへ、またはゲームオーバー。"""
+        if b.battle.tamed and b.battle.result != "lose":
+            self.ask_pet_name(lambda: self._after_battle_main(b))
+            return
+        self._after_battle_main(b)
+
+    def _after_battle_main(self, b) -> None:
         result = b.battle.result
         if result == "timeout":
             # turns= のターン数がたった：負けイベントがあればそこへ、なければスクリプトの続きへ
@@ -891,7 +935,7 @@ class FieldScene(Scene):
         pet = self.gd.enemies.get(self.st.pet) if self.st.pet else None
         fams = [self.gd.enemies[c.familiar].name for m in self.st.party
                 if (c := self.gd.characters.get(m.id)) and c.familiar in self.gd.enemies]
-        info = [tr('使い魔 {0}', n) for n in fams] + ([tr('ペット {0}', pet.name)] if pet else []) + [f"G {self.st.gold:>8}"]
+        info = [tr('使い魔 {0}', n) for n in fams] + ([tr('ペット {0}', pet_name(self.st, self.gd))] if pet else []) + [f"G {self.st.gold:>8}"]
         if self.st.chapter:
             info.append(tr('第{0}章 {1}', self.st.chapter, self.st.chapter_title))
         t = int(self.st.playtime)

@@ -101,6 +101,8 @@ class GameState:
     playtime: float = 0.0
     last_choice: int = 0
     pet: str = ""            # テイマーが手なずけた魔物（敵 ID）
+    pet_name: str = ""       # ペットに付けた名前（空なら魔物の名前）
+    named: set[str] = field(default_factory=set)   # 名前を入力したキャラクター ID（加入のたびに聞かない）
     tiles: dict[str, dict[str, str]] = field(default_factory=dict)   # @tile で変えたタイル：マップ → {"x,y": 文字}
     away: dict[str, "Member"] = field(default_factory=dict)
     traps: dict[str, list[list]] = field(default_factory=dict)  # 見えない罠：マップ → [[x, y, 種類, 見えたか], ...]  # @party leave keep= で一時的に抜けた仲間（名前 → Member）
@@ -114,6 +116,7 @@ class GameState:
             st.party.append(Member.from_data(gd, cid, hero_name if i == 0 else None))
         for iid in manifest.start_items:
             st.add_item(iid)
+        st.named.update(m.id for m in st.party)       # 最初からいる仲間は加入時に名前を聞かない
         return st
 
     # ------------------------------------------------------------ 操作
@@ -209,9 +212,19 @@ class GameState:
 _PLACEHOLDER = re.compile(r"\{([A-Za-z_][A-Za-z0-9_.]*)\}")
 
 
+def pet_name(st: GameState, gd: Optional[GameData] = None) -> str:
+    """ペットの名前（付けた名前、なければ魔物の名前）。ペットがいなければ空。"""
+    if not st.pet:
+        return ""
+    if st.pet_name:
+        return st.pet_name
+    return gd.enemies[st.pet].name if gd is not None and st.pet in gd.enemies else st.pet
+
+
 def format_text(text: str, st: GameState, gd: Optional[GameData] = None) -> str:
-    """本文中の {hero} {party.2} {var.x} {item.id} {gold} を置き換える。未知のものはそのまま。"""
-    def rep(m: re.Match) -> str:
+    """本文中の {hero} {name.ID} {party.2} {away.X} {pet} {var.x} {item.id} {gold} を置き換える。未知のものはそのまま。"""
+    def rep(m_: re.Match) -> str:
+        m = m_
         key = m.group(1)
         parts = key.split(".")
         if key == "hero":
@@ -224,6 +237,16 @@ def format_text(text: str, st: GameState, gd: Optional[GameData] = None) -> str:
         if parts[0] == "away" and len(parts) == 2:
             m = st.away.get(parts[1])
             return m.name if m else ""
+        if parts[0] == "name" and len(parts) == 2:
+            # キャラクターの名前（パーティ・一時離脱中なら付けた名前、いなければ Friends.data の名前）
+            m = st.member(parts[1]) or next((a for a in st.away.values() if a.id == parts[1]), None)
+            if m is not None:
+                return m.name
+            if gd is not None and parts[1] in gd.characters:
+                return gd.characters[parts[1]].name
+            return m_.group(0)
+        if key == "pet":
+            return pet_name(st, gd)
         if parts[0] == "var" and len(parts) == 2:
             return str(st.vars.get(parts[1], 0))
         if parts[0] == "item" and len(parts) == 2 and gd is not None and parts[1] in gd.items:

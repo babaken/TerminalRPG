@@ -21,11 +21,11 @@
 協会長ドルガン「十五年前、成功例が一体だけあったと書いてある」
 協会長ドルガン「その成功例は、北の森で行方不明になったそうだ」
 @if party.has(garo)
-  ガロ「北の森って……」
+  {name.garo}「北の森って……」
 @elif party.has(mia)
-  ミア「北の森って……」
+  {name.mia}「北の森って……」
 @elif party.has(rina)
-  リナ「北の森、ですか……」
+  {name.rina}「北の森、ですか……」
 @endif
 ……{hero}の生まれた村は、北の森のそばにある。
 協会長ドルガン「……黒岩の洞穴の最深部を調べろ。全部、そこにあるはずだ」
@@ -46,11 +46,11 @@
 「やはり、王が選んだ器でなければ」
 「――十五年前の器は、生きている。王の声が、それを告げている」
 @if party.has(mia)
-  ミア「器……。人間を、入れ物みたいに……」
+  {name.mia}「器……。人間を、入れ物みたいに……」
 @elif party.has(garo)
-  ガロ「人を入れ物扱いか。……胸くその悪い話だ」
+  {name.garo}「人を入れ物扱いか。……胸くその悪い話だ」
 @elif party.has(rina)
-  リナ「人を、入れ物のように……。なんて酷い……」
+  {name.rina}「人を、入れ物のように……。なんて酷い……」
 @endif
 @flag set p3_note
 @end
@@ -147,51 +147,51 @@ B10F で見た壁画の、続きだ。
 @effect fade_in 800
 洞穴の入口。外は、冷たい雨が降っていた。
 @if party.has(garo) and flag.ch2_had_garo
-  ガロ「……{hero}、知ってたのか？」
+  {name.garo}「……{hero}、知ってたのか？」
 @elif party.has(mia) and flag.ch2_had_mia
-  ミア「……{hero}、知ってたの？」
+  {name.mia}「……{hero}、知ってたの？」
 @elif party.has(rina) and flag.ch2_had_rina
-  リナ「……{hero}さん、ご存じだったのですか？」
+  {name.rina}「……{hero}さん、ご存じだったのですか？」
 @endif
 「知らなかった」
 誰も、それ以上は何も言わなかった。
 ……ひとりが、少し離れた岩の陰で立ち止まっている。
 誰と話す？
 @choice
-  - ガロ → *p3_leave_garo @if party.has(garo) and !flag.ch2_had_garo
-  - ミア → *p3_leave_mia @if party.has(mia) and !flag.ch2_had_mia
-  - リナ → *p3_leave_rina @if party.has(rina) and !flag.ch2_had_rina
-  - ジャック → *p3_leave_jack @if party.has(jack)
-  - ザラ → *p3_leave_zara @if party.has(zara)
-  - ノア → *p3_leave_noa @if party.has(noa)
+  - {name.garo} → *p3_leave_garo @if party.has(garo) and !flag.ch2_had_garo
+  - {name.mia} → *p3_leave_mia @if party.has(mia) and !flag.ch2_had_mia
+  - {name.rina} → *p3_leave_rina @if party.has(rina) and !flag.ch2_had_rina
+  - {name.jack} → *p3_leave_jack @if party.has(jack)
+  - {name.zara} → *p3_leave_zara @if party.has(zara)
+  - {name.noa} → *p3_leave_noa @if party.has(noa)
 
 *p3_leave_garo
-ガロ「……前に立つと決めた相手が、敵の王だったなんてな。少し、頭を冷やさせてくれ」
+{name.garo}「……前に立つと決めた相手が、敵の王だったなんてな。少し、頭を冷やさせてくれ」
 @party leave garo keep=left
 @goto *p3_split_end
 
 *p3_leave_mia
-ミア「研究者としては興味深いわ。……でも、友達としては、今は顔を見られない」
+{name.mia}「研究者としては興味深いわ。……でも、友達としては、今は顔を見られない」
 @party leave mia keep=left
 @goto *p3_split_end
 
 *p3_leave_rina
-リナ「神は……私に何を試しているのでしょう。祈る時間をください」
+{name.rina}「神は……私に何を試しているのでしょう。祈る時間をください」
 @party leave rina keep=left
 @goto *p3_split_end
 
 *p3_leave_jack
-ジャック「悪い、{hero}。今回ばかりは、賭ける度胸がない」
+{name.jack}「悪い、{hero}。今回ばかりは、賭ける度胸がない」
 @party leave jack keep=left
 @goto *p3_split_end
 
 *p3_leave_zara
-ザラ「強い奴には興味がある。だが、魔物の王になる奴と組む気はない」
+{name.zara}「強い奴には興味がある。だが、魔物の王になる奴と組む気はない」
 @party leave zara keep=left
 @goto *p3_split_end
 
 *p3_leave_noa
-ノア「魔物とだって話せばわかるって言ったのは僕なのに……ごめん、怖いんだ」
+{name.noa}「魔物とだって話せばわかるって言ったのは僕なのに……ごめん、怖いんだ」
 @party leave noa keep=left
 @goto *p3_split_end
 
@@ -326,11 +326,11 @@ B10F で見た壁画の、続きだ。
 @effect tint sepia
 受付セラ「{hero}さん、ちょうど、パーティを探している冒険者がいるんです」
 @if flag.ch2_had_garo
-  ガロ「よろしく頼む。…その剣、錆びてるがいい剣だな」
+  {name.garo}「よろしく頼む。…その剣、錆びてるがいい剣だな」
 @elif flag.ch2_had_mia
-  ミア「よろしくね。その剣の紋章…どこかで見た気がするのよね」
+  {name.mia}「よろしくね。その剣の紋章…どこかで見た気がするのよね」
 @else
-  リナ「神のお導きに感謝します。…不思議な気配のする剣ですね」
+  {name.rina}「神のお導きに感謝します。…不思議な気配のする剣ですね」
 @endif
 @effect tint none
 机の向こうに、初めての依頼で戦った魔物たちの幻が立っている。
@@ -372,17 +372,17 @@ B10F で見た壁画の、続きだ。
 {away.left}が、協会の入口に立っていた。
 {away.left}「……ずっと考えてた」
 @if away.left == garo
-  ガロ「お前の前に立つと決めたのは俺だ。相手が誰でも、それは変わらん」
+  {name.garo}「お前の前に立つと決めたのは俺だ。相手が誰でも、それは変わらん」
 @elif away.left == mia
-  ミア「器が満ちていれば王は入れない――テラさんの仮説、研究させてもらうわ。そばでね」
+  {name.mia}「器が満ちていれば王は入れない――テラさんの仮説、研究させてもらうわ。そばでね」
 @elif away.left == rina
-  リナ「祈りの答えがわかりました。あなたを信じることが、私の祈りです」
+  {name.rina}「祈りの答えがわかりました。あなたを信じることが、私の祈りです」
 @elif away.left == jack
-  ジャック「全財産、お前に賭けることにした。……まあ、全財産っつっても 12G だけどな」
+  {name.jack}「全財産、お前に賭けることにした。……まあ、全財産っつっても 12G だけどな」
 @elif away.left == zara
-  ザラ「魔物の王になんか、ならせない。……そのために、そばにいる」
+  {name.zara}「魔物の王になんか、ならせない。……そのために、そばにいる」
 @elif away.left == noa
-  ノア「ピピがね、{hero}は怖くないって。……僕より先にわかってたんだ」
+  {name.noa}「ピピがね、{hero}は怖くないって。……僕より先にわかってたんだ」
 @endif
 @party return left
 @flag set p3_returned
@@ -390,27 +390,27 @@ B10F で見た壁画の、続きだ。
 離れていた間、仲間たちもそれぞれに腕を磨いていた。
 @if party.has(garo)
   @skill add garo whirlwind
-  ガロは「旋風斬」を覚えた！
+  {name.garo}は「旋風斬」を覚えた！
 @endif
 @if party.has(mia)
   @skill add mia flame_storm
-  ミアは「フレイムストーム」を覚えた！
+  {name.mia}は「フレイムストーム」を覚えた！
 @endif
 @if party.has(rina)
   @skill add rina heal_all
-  リナは「ハイヒール」を覚えた！
+  {name.rina}は「ハイヒール」を覚えた！
 @endif
 @if party.has(jack)
   @skill add jack jackpot
-  ジャックは「ジャックポット」を覚えた！
+  {name.jack}は「ジャックポット」を覚えた！
 @endif
 @if party.has(zara)
   @skill add zara fierce_strike
-  ザラは「猛攻」を覚えた！
+  {name.zara}は「猛攻」を覚えた！
 @endif
 @if party.has(noa)
   @skill add noa beast_call
-  ノアは「群れの咆哮」を覚えた！
+  {name.noa}は「群れの咆哮」を覚えた！
 @endif
 @goto *p3_legend
 

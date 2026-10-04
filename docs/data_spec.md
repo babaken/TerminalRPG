@@ -121,7 +121,7 @@
 | `stats` | 能力値 | ○（`hp` 必須） | | その Lv での能力値 |
 | `equip` | 表 | | `{}` | 初期装備：`{ weapon = "…", armor = "…", shield = "…", accessory = "…" }` |
 | `face` | パス | | `""` | 顔 AA（`@face ID` で表示。省略時は `aa/face_ID.txt` を探す） |
-| `name_input` | 真偽 | | `false` | ニューゲームで名前を入力する（本文では `{hero}`） |
+| `name_input` | 真偽 | | `false` | 名前を入力する。主人公はニューゲームで（本文では `{hero}`）、仲間は初めて加わったとき（`@recruit` `@party add`。本文では `{name.ID}`）。Esc で元の名前のまま |
 | `recruit_text` | 文字列 | | `""` | 仲間選択画面の紹介文 |
 | `familiar` | 敵 ID | | `""` | 使い魔。このキャラが戦闘に出ていると一緒に自動で戦う（4.1 の `growth` で主人の Lv に合わせて強くなる） |
 

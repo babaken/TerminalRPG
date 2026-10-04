@@ -21,11 +21,11 @@
 冒険者「またか。今月で 3 組目だぞ。それもベテランばかり」
 冒険者「依頼自体は簡単な調査だったはずなんだがな……」
 @if party.has(garo)
-  ガロ「……物騒な話だな」
+  {name.garo}「……物騒な話だな」
 @elif party.has(rina)
-  リナ「……物騒なお話ですね」
+  {name.rina}「……物騒なお話ですね」
 @elif party.has(mia)
-  ミア「……物騒な話ね」
+  {name.mia}「……物騒な話ね」
 @endif
 @flag set ch2_rumor
 @goto *ch2_take_kabura
@@ -86,11 +86,11 @@
 @effect shake v 3 600
 畑の土が盛り上がり、巨大なモグラが顔を出した！
 @if party.has(garo)
-  ガロ「来るぞ、{hero}！」
+  {name.garo}「来るぞ、{hero}！」
 @elif party.has(rina)
-  リナ「来ます、{hero}さん！」
+  {name.rina}「来ます、{hero}さん！」
 @elif party.has(mia)
-  ミア「来るわよ、{hero}！」
+  {name.mia}「来るわよ、{hero}！」
 @endif
 @battle group=mole_boss escape=false
 @goto *ch2_map_drop
@@ -103,11 +103,11 @@
 地図には、ベルンの東の岩山に印がつけられている。
 印の横に、見たことのない文字が書かれている。
 @if party.has(garo)
-  ガロ「魔物が地図を持ってるなんて……妙だな」
+  {name.garo}「魔物が地図を持ってるなんて……妙だな」
 @elif party.has(rina)
-  リナ「魔物が地図を持っているなんて……おかしいですね」
+  {name.rina}「魔物が地図を持っているなんて……おかしいですね」
 @elif party.has(mia)
-  ミア「魔物が地図を持ってるなんて……おかしくない？」
+  {name.mia}「魔物が地図を持ってるなんて……おかしくない？」
 @endif
 @flag set mole_defeated
 これで依頼は達成だ。冒険者協会に報告しよう。
@@ -195,11 +195,11 @@
 岩山の裂け目に、洞穴の入口が見える。
 入口の前に、武装したゴブリンが立っている。
 @if party.has(garo)
-  ガロ「見張り……？　魔物が見張りを立てるとはな」
+  {name.garo}「見張り……？　魔物が見張りを立てるとはな」
 @elif party.has(rina)
-  リナ「見張り……？　魔物が見張りを立てるなんて……」
+  {name.rina}「見張り……？　魔物が見張りを立てるなんて……」
 @elif party.has(mia)
-  ミア「見張り……？　魔物が見張りを立てるなんて」
+  {name.mia}「見張り……？　魔物が見張りを立てるなんて」
 @endif
 @end
 
@@ -209,11 +209,11 @@
 @flag set ch2_guard_done
 見張りのゴブリンたちを倒した。
 @if party.has(garo)
-  ガロ「統率された魔物か……こいつは何かあるな」
+  {name.garo}「統率された魔物か……こいつは何かあるな」
 @elif party.has(rina)
-  リナ「統率された魔物……やはり何かあるのですね」
+  {name.rina}「統率された魔物……やはり何かあるのですね」
 @elif party.has(mia)
-  ミア「統率された魔物……やっぱり何かあるわね」
+  {name.mia}「統率された魔物……やっぱり何かあるわね」
 @endif
 @end
 
@@ -221,11 +221,11 @@
 *ch2_cave_enter
 洞穴の中は真っ暗だ。手元の明かりで、周りが少しだけ見える。
 @if party.has(garo)
-  ガロ「足元に気をつけろ。……奥から嫌な気配がする」
+  {name.garo}「足元に気をつけろ。……奥から嫌な気配がする」
 @elif party.has(rina)
-  リナ「足元にお気をつけて。……奥から嫌な気配がします」
+  {name.rina}「足元にお気をつけて。……奥から嫌な気配がします」
 @elif party.has(mia)
-  ミア「足元に気をつけて。……奥から嫌な気配がするわ」
+  {name.mia}「足元に気をつけて。……奥から嫌な気配がするわ」
 @endif
 @end
 
@@ -243,11 +243,11 @@
 @item add steel_sword
 {item.steel_sword}を手に入れた！
 @if party.has(garo)
-  ガロ「いい剣だ。……だが、その錆びた剣は手放すなよ。なんとなくだがな」
+  {name.garo}「いい剣だ。……だが、その錆びた剣は手放すなよ。なんとなくだがな」
 @elif party.has(rina)
-  リナ「立派な剣ですね。……でも、その錆びた剣も手放さないほうがいい気がします」
+  {name.rina}「立派な剣ですね。……でも、その錆びた剣も手放さないほうがいい気がします」
 @elif party.has(mia)
-  ミア「いい剣ね。……でも、その錆びた剣も手放さないほうがいい気がするわ」
+  {name.mia}「いい剣ね。……でも、その錆びた剣も手放さないほうがいい気がするわ」
 @endif
 @tile 5 3 b
 @end
@@ -264,11 +264,11 @@
 @flag set found_silverfang
 {item.silverfang_emblem}を手に入れた。
 @if party.has(garo)
-  ガロ「『銀の牙』……噂の、帰ってこなかった連中か」
+  {name.garo}「『銀の牙』……噂の、帰ってこなかった連中か」
 @elif party.has(rina)
-  リナ「『銀の牙』……噂の、帰ってこなかった方々ですね。どうか安らかに……」
+  {name.rina}「『銀の牙』……噂の、帰ってこなかった方々ですね。どうか安らかに……」
 @elif party.has(mia)
-  ミア「『銀の牙』……噂の、帰ってこなかったパーティね」
+  {name.mia}「『銀の牙』……噂の、帰ってこなかったパーティね」
 @endif
 @tile 3 5 _
 @end
@@ -285,11 +285,11 @@
 *ch2_b10_circle
 地面に、何かの模様が描かれている。
 @if party.has(garo)
-  ガロ「……魔法陣の跡か？　何かの儀式をやったらしいな」
+  {name.garo}「……魔法陣の跡か？　何かの儀式をやったらしいな」
 @elif party.has(rina)
-  リナ「……魔法陣の跡ですね。何かの儀式に使われたようです」
+  {name.rina}「……魔法陣の跡ですね。何かの儀式に使われたようです」
 @elif party.has(mia)
-  ミア「……魔法陣の跡ね。何かの儀式に使われたみたい」
+  {name.mia}「……魔法陣の跡ね。何かの儀式に使われたみたい」
 @endif
 古びた地図の写しには、この先の記載はない。
 @end
@@ -305,29 +305,29 @@
 @tile 16 14 b
 {item.return_scroll}を手に入れた！
 @if party.has(garo)
-  ガロ「帰還の巻物か……これがあれば、すぐ街に戻れるな」
+  {name.garo}「帰還の巻物か……これがあれば、すぐ街に戻れるな」
 @elif party.has(rina)
-  リナ「帰還の巻物……これを使えば、すぐ街に戻れます」
+  {name.rina}「帰還の巻物……これを使えば、すぐ街に戻れます」
 @elif party.has(mia)
-  ミア「帰還の巻物……使えば、すぐ街に戻れるわ」
+  {name.mia}「帰還の巻物……使えば、すぐ街に戻れるわ」
 @endif
 @if party.has(garo)
-  ガロ「この先は魔物の気配がずっと濃い。二人じゃ厳しいかもしれん」
+  {name.garo}「この先は魔物の気配がずっと濃い。二人じゃ厳しいかもしれん」
 @elif party.has(rina)
-  リナ「この先は魔物の気配がずっと濃いです。二人では厳しいかもしれません」
+  {name.rina}「この先は魔物の気配がずっと濃いです。二人では厳しいかもしれません」
 @elif party.has(mia)
-  ミア「この先は魔物の気配がずっと濃い。二人じゃ厳しいかもしれない」
+  {name.mia}「この先は魔物の気配がずっと濃い。二人じゃ厳しいかもしれない」
 @endif
 @choice
   - 一度戻って報告しよう
   - もう少し進もう
 @if choice == 2
   @if party.has(garo)
-    ガロ「……{hero}、ドルガンの旦那は『必ず戻って報告しろ』と言ってたろう」
+    {name.garo}「……{hero}、ドルガンの旦那は『必ず戻って報告しろ』と言ってたろう」
   @elif party.has(rina)
-    リナ「……{hero}さん、ドルガンさんは『必ず戻って報告しろ』とおっしゃっていましたよ」
+    {name.rina}「……{hero}さん、ドルガンさんは『必ず戻って報告しろ』とおっしゃっていましたよ」
   @elif party.has(mia)
-    ミア「……{hero}、ドルガンさんは『必ず戻って報告しろ』って言ってたでしょ？」
+    {name.mia}「……{hero}、ドルガンさんは『必ず戻って報告しろ』って言ってたでしょ？」
   @endif
 @endif
 {hero}は{item.return_scroll}を広げた。
@@ -337,11 +337,11 @@
 @effect fade_in 600
 ……気がつくと、冒険者協会の前に立っていた。
 @if party.has(garo)
-  ガロ「セラに報告しに行くぞ」
+  {name.garo}「セラに報告しに行くぞ」
 @elif party.has(rina)
-  リナ「セラさんに報告しましょう」
+  {name.rina}「セラさんに報告しましょう」
 @elif party.has(mia)
-  ミア「セラさんに報告しましょう」
+  {name.mia}「セラさんに報告しましょう」
 @endif
 @end
 
@@ -372,22 +372,22 @@
 @endif
 @recruit garo mia rina jack zara noa pick=2 lv=avg
 @if party.has(jack)
-  ジャック「よろしく！　サイコロの出目が悪いときは、慰めてくれよな」
+  {name.jack}「よろしく！　サイコロの出目が悪いときは、慰めてくれよな」
 @endif
 @if party.has(zara)
-  ザラ「足を引っ張るなよ。……ふん、その剣、悪くない」
+  {name.zara}「足を引っ張るなよ。……ふん、その剣、悪くない」
 @endif
 @if party.has(noa)
-  ノア「この子（使い魔の小鳥ピピ）もよろしくだって！」
+  {name.noa}「この子（使い魔の小鳥ピピ）もよろしくだって！」
 @endif
 @if party.has(garo) and !flag.ch2_had_garo
-  ガロ「今度こそ一緒に行けるな。前は任せろ」
+  {name.garo}「今度こそ一緒に行けるな。前は任せろ」
 @endif
 @if party.has(mia) and !flag.ch2_had_mia
-  ミア「今度こそ一緒に行けるわね。研究費、しっかり稼がせてもらうわよ」
+  {name.mia}「今度こそ一緒に行けるわね。研究費、しっかり稼がせてもらうわよ」
 @endif
 @if party.has(rina) and !flag.ch2_had_rina
-  リナ「今度こそご一緒できますね。皆さんの傷は、私が癒やします」
+  {name.rina}「今度こそご一緒できますね。皆さんの傷は、私が癒やします」
 @endif
 協会長ドルガン「いい顔ぶれだ。……次は、あの洞穴の奥だ。準備ができたら声をかけろ」
 @flag set ch2_done

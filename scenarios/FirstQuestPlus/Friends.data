@@ -69,6 +69,7 @@ equip = { armor = "cloth" }
 [[character]]
 id = "garo"
 name = "ガロ"
+name_input = true          # 加わるときに名前を付けられる（本文では {name.garo}）
 job = "warrior"
 lv = 3
 stats = { hp = 48, mp = 0, atk = 14, def = 11, mag = 0, agi = 5, luk = 4 }
@@ -78,6 +79,7 @@ recruit_text = "力なら任せろ。前に立つのは俺の役目だ。"
 [[character]]
 id = "mia"
 name = "ミア"
+name_input = true          # 加わるときに名前を付けられる（本文では {name.mia}）
 job = "mage"
 lv = 3
 stats = { hp = 24, mp = 22, atk = 5, def = 5, mag = 14, agi = 8, luk = 6 }
@@ -87,6 +89,7 @@ recruit_text = "魔法の研究費を稼ぎたいの。危なくなったら…�
 [[character]]
 id = "rina"
 name = "リナ"
+name_input = true          # 加わるときに名前を付けられる（本文では {name.rina}）
 job = "priest"
 lv = 3
 stats = { hp = 30, mp = 18, atk = 6, def = 7, mag = 11, agi = 6, luk = 9 }
@@ -96,6 +99,7 @@ recruit_text = "傷ついた人を放っておけません。どうか一緒に�
 [[character]]
 id = "jack"
 name = "ジャック"
+name_input = true          # 加わるときに名前を付けられる（本文では {name.jack}）
 job = "gambler"
 lv = 3
 stats = { hp = 34, mp = 10, atk = 10, def = 6, mag = 4, agi = 10, luk = 16 }
@@ -105,6 +109,7 @@ recruit_text = "ツキは俺の味方さ。たぶんね。"
 [[character]]
 id = "zara"
 name = "ザラ"
+name_input = true          # 加わるときに名前を付けられる（本文では {name.zara}）
 job = "amazon"
 lv = 3
 stats = { hp = 44, mp = 6, atk = 15, def = 8, mag = 1, agi = 9, luk = 5 }
@@ -114,6 +119,7 @@ recruit_text = "弱い奴には興味がない。お前は…まあ、見込み�
 [[character]]
 id = "noa"
 name = "ノア"
+name_input = true          # 加わるときに名前を付けられる（本文では {name.noa}）
 job = "tamer"
 lv = 3
 stats = { hp = 32, mp = 12, atk = 9, def = 6, mag = 6, agi = 9, luk = 8 }

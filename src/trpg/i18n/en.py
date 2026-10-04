@@ -323,4 +323,6 @@ EN: dict[str, str] = {
     "一瞬": "Instant",
     "この言語のシナリオの文に誤りがあります。--check で確認してください": "The scenario text for this language has errors. Run --check to see them.",
     "シナリオの文の言語は、タイトル画面にもどると切り替わります。": "The scenario text switches language when you return to the title screen.",
+    "{0}の名前を入力してください": "Enter a name for {0}",
+    "Enter: 決定  BackSpace: 削除  Esc: 元の名前（{0}）のまま": "Enter: OK  BackSpace: Delete  Esc: Keep \"{0}\"",
 }

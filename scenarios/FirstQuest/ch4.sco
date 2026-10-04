@@ -56,22 +56,22 @@
 ヴェルムの体から、闇があふれ出す。
 仲間たち「{hero}！！」
 @if party.has(garo)
-  ガロ「立て、{hero}！　前は俺が守る！」
+  {name.garo}「立て、{hero}！　前は俺が守る！」
 @endif
 @if party.has(mia)
-  ミア「あきらめないで！　あんたの剣、まだ光ってる！」
+  {name.mia}「あきらめないで！　あんたの剣、まだ光ってる！」
 @endif
 @if party.has(rina)
-  リナ「祈りは届きます……今度こそ！」
+  {name.rina}「祈りは届きます……今度こそ！」
 @endif
 @if party.has(jack)
-  ジャック「ここが勝負どころだろ、{hero}！」
+  {name.jack}「ここが勝負どころだろ、{hero}！」
 @endif
 @if party.has(zara)
-  ザラ「見せてみろ。お前の、本当の力を！」
+  {name.zara}「見せてみろ。お前の、本当の力を！」
 @endif
 @if party.has(noa)
-  ノア「ピピが言ってる……その剣、目を覚ますって！」
+  {name.noa}「ピピが言ってる……その剣、目を覚ますって！」
 @endif
 ――剣が、熱い。
 @effect flash white count=5 interval=60
@@ -166,22 +166,22 @@
 @effect fade_in 1000
 その夜、{hero}は仲間たちと村の丘に登った。
 @if party.has(garo)
-  ガロ「次はどこへ行く？　どこだろうと、前は任せろ」
+  {name.garo}「次はどこへ行く？　どこだろうと、前は任せろ」
 @endif
 @if party.has(mia)
-  ミア「嵐王に渇王……研究のしがいがありそうね」
+  {name.mia}「嵐王に渇王……研究のしがいがありそうね」
 @endif
 @if party.has(rina)
-  リナ「傷ついた人がいる限り、私も一緒に行きます」
+  {name.rina}「傷ついた人がいる限り、私も一緒に行きます」
 @endif
 @if party.has(jack)
-  ジャック「ツキはまだまだ続きそうだ。な、{hero}」
+  {name.jack}「ツキはまだまだ続きそうだ。な、{hero}」
 @endif
 @if party.has(zara)
-  ザラ「……悪くない旅だった。次も、悪くないだろう」
+  {name.zara}「……悪くない旅だった。次も、悪くないだろう」
 @endif
 @if party.has(noa)
-  ノア「ピピも、次の旅が楽しみだって！」
+  {name.noa}「ピピも、次の旅が楽しみだって！」
 @endif
 @effect starfall count=10
 空には、いくつもの流れ星が流れていく。

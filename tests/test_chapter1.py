@@ -9,6 +9,7 @@ from trpg.scenes.battle import BattleScene
 from trpg.game import load_game
 from trpg.scenes.facility import Overlay
 from trpg.scenes.field import FieldScene
+from trpg.scenes.title import NameInputScene
 
 
 @pytest.fixture
@@ -25,6 +26,9 @@ class Play(Driver):
         for _ in range(max_presses):
             if isinstance(self.scene, BattleScene):
                 assert self.fight() != "lose", "戦闘に負けた"
+                continue
+            if isinstance(self.scene, NameInputScene):         # 仲間・ペットの名前は元のまま決める
+                self.key("ENTER")
                 continue
             if not isinstance(self.scene, FieldScene):
                 return seen
@@ -60,6 +64,9 @@ class Play(Driver):
         """重ね画面の会話を選択肢が出るか閉じるまで読み進める。"""
         seen = []
         for _ in range(50):
+            if isinstance(self.scene, NameInputScene):         # 仲間の名前は元のまま決める
+                self.key("ENTER")
+                continue
             sc = self.scene
             if not isinstance(sc, Overlay) or sc.choice is not None:
                 return seen

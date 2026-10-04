@@ -63,9 +63,9 @@
 『――余は、虚ろの王ゼノ』
 『器よ。よく育った。よく満ちた。……その中身ごと、余がもらい受ける』
 @if party.has(garo)
-  ガロ「{hero}！　しっかりしろ！」
+  {name.garo}「{hero}！　しっかりしろ！」
 @elif party.has(mia)
-  ミア「{hero}！　聞こえる！？」
+  {name.mia}「{hero}！　聞こえる！？」
 @endif
 仲間の声が、遠くなっていく――
 @goto *p4_inner
@@ -97,22 +97,22 @@
 @effect flash white
 テラ「入れ物がいっぱいなら、王の入る隙間はない」
 @if party.has(garo)
-  ガロ「お前の前に立つのは俺だ。……だから、戻ってこい！」
+  {name.garo}「お前の前に立つのは俺だ。……だから、戻ってこい！」
 @endif
 @if party.has(mia)
-  ミア「あんたはあんたよ。私の研究が、それを証明してあげる！」
+  {name.mia}「あんたはあんたよ。私の研究が、それを証明してあげる！」
 @endif
 @if party.has(rina)
-  リナ「あなたを信じることが、私の祈りです！」
+  {name.rina}「あなたを信じることが、私の祈りです！」
 @endif
 @if party.has(jack)
-  ジャック「全財産賭けてんだ！　負けんなよ、{hero}！」
+  {name.jack}「全財産賭けてんだ！　負けんなよ、{hero}！」
 @endif
 @if party.has(zara)
-  ザラ「魔物の王になんか、ならせないって言っただろ！」
+  {name.zara}「魔物の王になんか、ならせないって言っただろ！」
 @endif
 @if party.has(noa)
-  ノア「ピピも、僕も、ここにいるよ！」
+  {name.noa}「ピピも、僕も、ここにいるよ！」
 @endif
 声が聞こえるたびに、色のない村に、色が戻っていく。
 @effect tint none
@@ -135,9 +135,9 @@
 @effect fade_in 800
 気がつくと、仲間たちが{hero}の名を呼び続けていた。
 @if party.has(garo)
-  ガロ「……{hero}？　本当に、{hero}だよな？」
+  {name.garo}「……{hero}？　本当に、{hero}だよな？」
 @elif party.has(mia)
-  ミア「……{hero}？　本当に、{hero}よね？」
+  {name.mia}「……{hero}？　本当に、{hero}よね？」
 @else
   仲間「……{hero}？　本当に、{hero}なのか？」
 @endif
@@ -217,22 +217,22 @@
 その夜、{hero}は仲間たちと村の丘に登った。
 {hero}の手の甲の紋章は、もう消えていた。
 @if party.has(garo)
-  ガロ「次はどこへ行く？　どこだろうと、前は任せろ」
+  {name.garo}「次はどこへ行く？　どこだろうと、前は任せろ」
 @endif
 @if party.has(mia)
-  ミア「『他の器』……研究のしがいがありそうね」
+  {name.mia}「『他の器』……研究のしがいがありそうね」
 @endif
 @if party.has(rina)
-  リナ「器を探している人たちがいるなら、その人たちも救いたいです」
+  {name.rina}「器を探している人たちがいるなら、その人たちも救いたいです」
 @endif
 @if party.has(jack)
-  ジャック「賭けは俺の勝ちだったな。配当は……まあ、旅の続きでいいや」
+  {name.jack}「賭けは俺の勝ちだったな。配当は……まあ、旅の続きでいいや」
 @endif
 @if party.has(zara)
-  ザラ「次の器が敵になるなら、その前に見つけ出す」
+  {name.zara}「次の器が敵になるなら、その前に見つけ出す」
 @endif
 @if party.has(noa)
-  ノア「ピピがね、南の空がざわざわするって」
+  {name.noa}「ピピがね、南の空がざわざわするって」
 @endif
 @effect starfall count=12
 空を見上げると、流れ星がひとつ、遠い南の空へ落ちていった。

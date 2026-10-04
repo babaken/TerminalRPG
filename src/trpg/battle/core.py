@@ -24,7 +24,7 @@ from ..data.models import BUILTIN_SKILLS, Enemy, GameData, Skill
 from ..script.expr import ExprError, evaluate, parse_expr
 from ..world import quests as Q
 from ..world.growth import gain_exp, skills_of
-from ..world.state import GameState, Member, format_text
+from ..world.state import GameState, Member, format_text, pet_name
 
 Event = tuple[str, Any]
 LETTERS = "ＡＢＣＤＥＦＧＨ"
@@ -172,7 +172,8 @@ class Battle:
         self.party = [Battler(gd, member=m) for m in st.party if not members or m.id in members]
         # テイムした魔物（パーティ枠の外で 1 体）。毎回 HP 満タンで参加し、経験値はもらわない
         pet = gd.enemies.get(st.pet) if st.pet and (not members or "pet" in members) else None
-        self.pet: Optional[Battler] = Battler(gd, enemy=pet, pet=True) if pet else None
+        self.pet: Optional[Battler] = Battler(gd, enemy=pet, pet=True, name=pet_name(st, gd)) if pet else None
+        self.tamed = False                        # この戦闘で魔物を手なずけた（戦闘のあと名前を付ける）
         # 使い魔：主人（Friends.data の familiar）が戦闘に出ていれば一緒に戦う。強さは主人の Lv で決まる
         self.familiars: list[Battler] = []
         for b in self.party:
@@ -617,11 +618,13 @@ class Battle:
         yield ("msg", tr('{0}は{1}に手をさしのべた…', a.name, t.name))
         if self.rng.random() < self.tame_rate(t):
             t.gone = True
-            old = self.gd.enemies.get(self.st.pet) if self.st.pet else None
+            old = pet_name(self.st, self.gd)
             self.st.pet = t.enemy.id
+            self.st.pet_name = ""
+            self.tamed = True
             yield ("msg", tr('{0}はなついた！\u3000仲間になった！', t.name))
-            if old is not None:
-                yield ("msg", tr('いままでの{0}は、野に帰っていった。', old.name))
+            if old:
+                yield ("msg", tr('いままでの{0}は、野に帰っていった。', old))
         else:
             yield ("msg", tr('{0}はそっぽを向いた。', t.name))
 
