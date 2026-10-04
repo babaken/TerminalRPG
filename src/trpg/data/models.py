@@ -258,6 +258,7 @@ class Quest:
     repeatable: bool = False
     on_complete: str = ""
     when: str = ""            # 掲示板に出す条件（条件式）
+    random: bool = False      # ランダムの依頼：掲示板の枠（manifest の random_quests）にランダムに貼られる。何度でも受けられる
 
 
 @dataclass

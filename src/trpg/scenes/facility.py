@@ -466,7 +466,7 @@ class GuildScene(Overlay):
     def _top_done(self, i: int) -> None:
         if i == 0:
             self.mode = "accept"
-            self._quests = Q.available(self.st, self.gd, self.field._cond)
+            self._quests = Q.available(self.st, self.gd, self.field._cond, slots=self.field.game.manifest.random_quests)
             self.list = ListWindow([(f"[{q.rank or '-'}] {q.name}", Q.reward_text(self.gd, q), True) for q in self._quests])
             if self.list.empty:
                 self._top(tr('いまお願いできる依頼はありません。ほかにご用件は？'))

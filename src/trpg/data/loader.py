@@ -380,7 +380,7 @@ def _load_quests(f: _File, gd: GameData) -> None:
         r.done()
         q = Quest(id=t.id(), name=t.str("name"), goal=goal, reward=reward, giver=t.str("giver", "guild"),
                   desc=t.str("desc", ""), rank=t.str("rank", ""), repeatable=t.bool("repeatable", False),
-                  on_complete=t.str("on_complete", ""), when=t.str("when", ""))
+                  on_complete=t.str("on_complete", ""), when=t.str("when", ""), random=t.bool("random", False))
         t.done()
         _register(gd.quests, q, t, "クエスト")
         q._line = t.line  # type: ignore[attr-defined]
