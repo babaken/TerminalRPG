@@ -463,3 +463,47 @@ def test_ending_villagers_appear_after_return(game):
     assert f.npc_visible(f._find_npc("home_mother"))
     talk = " ".join(d.talk(14, 15, "up"))
     assert "うれしそう" in talk
+
+
+# ---------------------------------------------------------------- 森のカイ（1 章のあとに森へ戻っても出ない）
+@pytest.mark.parametrize("scenario", ["FirstQuest", "FirstQuestPlus"])
+def test_forest_kai_gone_after_chapter1(tmp_path, scenario):
+    src = PLUS.parent / scenario
+    shutil.copytree(src, tmp_path / scenario)
+    g = load_game(tmp_path / scenario)
+    try:
+        d = _new_game(g)
+        d.settle()
+        f = d.field
+        f.change_map("forest_1", 20, 2, "up")
+        f.pending_auto = False
+        f.start_script("ch1_pull_sword")              # 剣 → 再会（カイが現れる）→ 夕食
+        d.settle()
+        st = f.st
+        assert st.npc("forest_1", "kai_forest").get("hidden") is True
+        st.npc("forest_1", "kai").update(hidden=False)   # 古い版のセーブに残っている「表示」の命令
+        f.change_map("forest_1", 15, 14, "up")
+        f.pending_auto = False
+        assert not f.npc_visible(f._find_npc("kai_forest"))
+        assert all(n.id != "kai" for n in f.map.npcs)
+    finally:
+        g.close()
+
+
+def test_kai_greets_on_homecoming_and_waits_in_village(game):
+    d = _after_split(game)
+    f = d.field
+    st = f.st
+    f.change_map("field_road", 15, 2, "up")
+    f.pending_auto = False
+    d.walk_to(15, 0)
+    talk = " ".join(d.settle())
+    assert "お前はお前だ" in talk and talk.index("お前はお前だ") < talk.index("家の前で、母が待っていた")
+    d.walk_to(5, 7)
+    assert st.map_id == "village_lito"
+    assert f.npc_visible(f._find_npc("kai_p3"))
+    talk = " ".join(d.talk(8, 14, "up"))
+    assert "テラばあちゃん" in talk
+    st.flags.add("p3_tera_done")
+    talk = " ".join(d.talk(8, 14, "up"))
+    assert "秘密基地" in talk

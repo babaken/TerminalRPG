@@ -387,8 +387,8 @@ label = "ch1_find_sword"
 once = true
 when = "flag.lost_friend"
 
-[[map.npc]]
-id = "kai"
+[[map.npc]]           # 森のカイ（1 章だけ。村のカイとは別の ID：古いセーブに残った「表示」の命令を引き継がないように）
+id = "kai_forest"
 glyph = "友"
 color = "cyan"
 x = 16
