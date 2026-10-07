@@ -1,5 +1,5 @@
 #!/bin/sh
-# TRPG 起動スクリプト（Linux / macOS）
+# TerminalRPG 起動スクリプト（Linux / macOS）
 #
 #   ./run.sh                         ふつうに起動
 #   DEBUG=1 ./run.sh                 デバッグつきで起動（開発モード＋キーログ trpg_debug.log）

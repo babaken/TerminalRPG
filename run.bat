@@ -1,5 +1,5 @@
 @echo off
-rem TRPG 起動スクリプト（Windows）
+rem TerminalRPG 起動スクリプト（Windows）
 rem
 rem   run.bat                      ふつうに起動（ダブルクリックでも可）
 rem   run.bat --scenario A.zip     引数はそのままゲームに渡す

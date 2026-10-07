@@ -1,4 +1,4 @@
-# TRPG — コンソール RPG エンジン
+# TerminalRPG — コンソール RPG エンジン
 
 ASCII アート（文字）で表現する、ターミナルで遊ぶ RPG エンジンです。
 物語・マップ・敵・アイテムは **シナリオパッケージ**（テキストファイルの集まり、または zip）に分かれていて、差し替えると別のゲームになります。
@@ -89,7 +89,7 @@ python -m trpg.tools.pack scenarios/MyQuest         # zip にして配る
 
 ## 開発
 
-リポジトリは https://github.com/babaken/TRPG です。テストは `python -m pytest`、CI は Windows / Linux × Python 3.11 / 3.14。詳しくは [開発者向けガイド](docs/development.md)。
+リポジトリは https://github.com/babaken/TerminalRPG です。テストは `python -m pytest`、CI は Windows / Linux × Python 3.11 / 3.14。詳しくは [開発者向けガイド](docs/development.md)。
 
 ## ライセンス
 

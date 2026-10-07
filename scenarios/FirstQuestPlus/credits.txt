@@ -25,8 +25,8 @@ FirstQuest+
 
 ― 制作 ―
 
-シナリオ・ゲームデザイン　bbk
-エンジン「TRPG」　bbk ＆ Claude
+シナリオ・ゲームデザイン　babaken
+エンジン「TerminalRPG」　babaken ＆ Claude
 
 
 

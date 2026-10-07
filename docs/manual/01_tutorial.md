@@ -9,9 +9,9 @@
 
 ## 0. 準備
 
-- TRPG が動く状態にしておきます（README の「かんたん起動」：Windows は `run.bat`、Linux は `./run.sh`）。
+- TerminalRPG が動く状態にしておきます（README の「かんたん起動」：Windows は `run.bat`、Linux は `./run.sh`）。
 - テキストエディタ（UTF-8 で保存できるもの）。メモ帳・VS Code など。
-- 以下のコマンドは TRPG のフォルダで実行します（`run.sh` / `run.bat` に引数を渡しても同じです）。
+- 以下のコマンドは TerminalRPG のフォルダで実行します（`run.sh` / `run.bat` に引数を渡しても同じです）。
 
 ```sh
 python -m trpg --check scenarios/HelloQuest      # 検証
@@ -332,7 +332,7 @@ python -m trpg --scenario scenarios/HelloQuest --dev   # 右パネルにマッ�
 python -m trpg.tools.pack scenarios/HelloQuest     # → HelloQuest-1.0.0.zip
 ```
 
-できた zip を、遊ぶ人の TRPG フォルダか `scenarios/` に置けば、起動時に選べます。
+できた zip を、遊ぶ人の TerminalRPG フォルダか `scenarios/` に置けば、起動時に選べます。
 
 ---
 

@@ -11,7 +11,7 @@
 
 ### 1.1 リポジトリ構成（現状）
 ```
-TRPG/
+TerminalRPG/
 ├─ pyproject.toml / README.md / .gitignore
 ├─ .github/workflows/test.yml   … CI（Windows・Linux で pytest）
 ├─ docs/                        … 要件・設計・計画・シナリオ本文
@@ -192,7 +192,7 @@ TRPG/
 id = "firstquest"            # 必須。セーブの紐づけに使用
 title = "FirstQuest"         # 必須
 version = "0.1.0"
-author = "bbk"
+author = "babaken"
 engine = ">=1.0"             # 対応エンジンのデータ形式版（>= <= == > < と , 区切り）
 languages = ["ja"]
 
