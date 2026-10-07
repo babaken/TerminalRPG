@@ -142,7 +142,7 @@
 
 | 項目 | 方針 |
 |---|---|
-| リポジトリ | `https://github.com/babaken/TRPG`（private。v0.1.0 登録済み。Claude からは GitHub 連携でブランチ・プルリクエストを作る） |
+| リポジトリ | `https://github.com/babaken/TerminalRPG`（v0.1.0 登録済み。Claude からは GitHub 連携でブランチ・プルリクエストを作る） |
 | ブランチ | `main`（常に動く状態）。作業は `feature/<内容>` ブランチで行い、プルリクエストで main へ |
 | コミット | 1 作業 1 コミットを基本。メッセージは日本語可 |
 | Issue | 本計画の作業番号（1-1 など）ごとに作成し、マイルストーン（M1〜M7）に割り当てる |

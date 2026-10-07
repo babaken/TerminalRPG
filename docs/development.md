@@ -43,7 +43,7 @@ GitHub Actions（`.github/workflows/test.yml`）が、プッシュとプルリ�
 
 ## 作業の流れ
 
-- リポジトリ：https://github.com/babaken/TRPG（private）
+- リポジトリ：https://github.com/babaken/TerminalRPG
 - `main` は常に動く状態に保つ。作業は `feature/<内容>`（ドキュメントは `docs/<内容>`、修正は `fix/<内容>`）のブランチ → プルリクエストで取り込む。
 - マイルストーンごとに `v0.x.0` のタグを付け、GitHub のリリースに FirstQuest・FirstQuest+ の zip（パッケージツールで作成）を添付する。
 - 計画と進み具合は [開発計画](development_plan.md)。

@@ -370,7 +370,7 @@ talk = "ch1_mother_talk"   # scenario.sco のラベル
 | Q13 [v1.1] | Windows のキー入力方式 | ReadConsoleInputW（3 章参照） |
 | Q14 [v1.1] | マップのタイル文字 | 全角文字（East Asian Width が F/W）。曖昧幅（■ ▼ ─ など）は検証で警告 |
 | Q15 [v1.1] | 開発の進め方 | 1 章を先に通して遊べるようにし、セーブは M1 で実装（`development_plan.md`） |
-| Q16 [v1.1] | ソース管理 | GitHub（`babaken/TRPG`）。CI で Windows・Linux のテストを実行 |
+| Q16 [v1.1] | ソース管理 | GitHub（`babaken/TerminalRPG`）。CI で Windows・Linux のテストを実行 |
 | Q17 [v1.1] | 1 章の襲撃戦の難易度 | やくそうなしでも勝率 99% 以上（セーブ実装前に負けると最初からになるため）。前夜の団らんで全回復 |
 
 ## 12. 開発フェーズ [v1.1]
