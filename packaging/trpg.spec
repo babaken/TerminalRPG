@@ -1,4 +1,4 @@
-# PyInstaller の設定：TRPG を 1 つの実行ファイル（Windows では TRPG.exe）にまとめる
+# PyInstaller の設定：TerminalRPG を 1 つの実行ファイル（Windows では TRPG.exe）にまとめる
 #   pyinstaller packaging/trpg.spec   → dist/TRPG（.exe）
 # -*- mode: python -*-
 import os

@@ -1,4 +1,4 @@
-TRPG（コンソール RPG エンジン）Windows 版
+TerminalRPG（コンソール RPG エンジン）Windows 版
 
 ■ 遊び方
   TRPG.exe をダブルクリックします。サンプルシナリオ「FirstQuest」と「FirstQuest+」が入っていて、
